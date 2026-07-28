@@ -39,7 +39,20 @@ if not exist "node_modules\" (
 )
 
 :: ----------------------------------------------------------------------
-:: 3. CHECK LOCAL LLM SERVER (PORT 1234 - LM Studio / PORT 11434 - Ollama)
+:: 3. CHECK PYTHON & AUTO-INSTALL REQUIREMENTS
+:: ----------------------------------------------------------------------
+where python >nul 2>nul
+if %ERRORLEVEL% EQU 0 (
+    if exist "docs\requirements.txt" (
+        echo [INFO] Verifying Python AI dependencies from docs\requirements.txt...
+        python -m pip install -q -r docs\requirements.txt >nul 2>nul
+    )
+) else (
+    echo [NOTICE] Python is not installed in PATH. (Optional for local Whisper server).
+)
+
+:: ----------------------------------------------------------------------
+:: 4. CHECK LOCAL LLM SERVER (PORT 1234 - LM Studio / PORT 11434 - Ollama)
 :: ----------------------------------------------------------------------
 powershell -NoProfile -Command "(New-Object Net.Sockets.TcpClient).Connect('127.0.0.1', 1234)" >nul 2>nul
 if %ERRORLEVEL% EQU 0 (
@@ -57,26 +70,20 @@ if %ERRORLEVEL% EQU 0 (
 echo.
 
 :: ----------------------------------------------------------------------
-:: 4. CHECK & START FASTER-WHISPER-SERVER (PORT 9000)
+:: 5. CHECK & AUTO-START FASTER-WHISPER-SERVER (PORT 9000)
 :: ----------------------------------------------------------------------
 powershell -NoProfile -Command "(New-Object Net.Sockets.TcpClient).Connect('127.0.0.1', 9000)" >nul 2>nul
 if %ERRORLEVEL% EQU 0 (
     echo [OK] Local Whisper Transcription Server detected ^& active on port 9000!
 ) else (
-    where faster-whisper-server >nul 2>nul
-    if %ERRORLEVEL% EQU 0 (
-        echo [INFO] Starting faster-whisper-server in background on port 9000...
-        start "Vocal Muse - Whisper STT Server (Port 9000)" cmd /k "faster-whisper-server --model Systran/faster-whisper-base.en --port 9000"
-    ) else (
-        echo [NOTICE] Voice transcription server (faster-whisper-server) is not installed.
-        echo          * For live voice recording transcription, run:
-        echo            pip install faster-whisper-server
-    )
+    echo [INFO] Launching faster-whisper-server in background on port 9000...
+    start "Vocal Muse - Whisper STT Server (Port 9000)" cmd /k "python -m faster_whisper_server --port 9000 Systran/faster-whisper-base.en"
+    echo [OK] Faster-Whisper server launched!
 )
 echo.
 
 :: ----------------------------------------------------------------------
-:: 5. LAUNCH BROWSER & DEV SERVER
+:: 6. LAUNCH BROWSER & DEV SERVER
 :: ----------------------------------------------------------------------
 echo ======================================================================
 echo [LAUNCHING] Opening Vocal Muse in your browser: http://localhost:8080/
