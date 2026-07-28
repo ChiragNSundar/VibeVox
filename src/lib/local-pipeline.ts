@@ -88,6 +88,28 @@ const CRAFT = `HARD CRAFT RULES FOR ELITE LYRICISM:
 - POCKET & CADENCE: Match syllable count strictly (±1 syllable per bar) and maintain internal multisyllabic rhyme schemes.
 - CONVERSATIONAL FLOW: Write like an authentic lyricist riding a pocket, not an AI writing poetry. Every line must sound natural when spoken/rapped.`;
 
+function languageBlueprint(region?: string): string {
+  if (!region) return "";
+  const reg = region.toLowerCase();
+  if (reg.includes("hinglish")) {
+    return `\n\nLANGUAGE & CULTURAL STYLE GUIDELINES (DESI HIP-HOP / HINGLISH):
+- WRITE IN ROMANIZED HINDI / HINGLISH (Latin script only).
+- RHYTHM & FLOW: Emulate top Desi Hip-Hop artists (Seedhe Maut, Divine, KR$NA, MC Stan, Brodha V). Use punchy internal multisyllabic rhymes and street metaphors.
+- ESSENTIAL VOCABULARY & SLANG: Incorporate authentic Hinglish terms like: malum hai na, bantai, scene, gully, haq se, public, mitaoon, dard-e-jaan, aks, rootha, jaam, zeher, heera-pheri, shamo-sehar, raabta, nasha, baat.
+- AD-LIBS: (skrr), (brrr), (malum hai na), (haq se), (bhaiya), (kyun).
+- AVOID generic English filler poetry. Make every line sound like an authentic, hard-hitting DHH bar.`;
+  }
+  if (reg.includes("kanglish")) {
+    return `\n\nLANGUAGE & CULTURAL STYLE GUIDELINES (KANNADA RAP / KANGLISH):
+- WRITE IN ROMANIZED KANNADA / KANGLISH (Latin script only).
+- RHYTHM & FLOW: Emulate top Kannada Hip-Hop artists (All Ok, Gubbi, Siri, Rahul Dit-O, Brodha V Kannada flows). Blend crisp Kannada rhythmic cadences with modern trap/drill flows.
+- ESSENTIAL VOCABULARY & SLANG: Incorporate authentic Kanglish terms like: macha, magane, yenu, gothilla, guru, sariyaagi, scene-u, bekku, taage, paata, haadu, namma, preeti, kopa, sakkat, dhoolu, kettodhga, oota.
+- AD-LIBS: (macha), (magane), (guru), (sariyaagi), (scene-u), (huu).
+- AVOID generic English filler. Keep the flow tightly cadence-matched and culturally authentic.`;
+  }
+  return "";
+}
+
 function briefBlock(b: LocalBrief | undefined): string {
   if (!b) return "STYLE BRIEF: auto-detect everything from the transcript.";
   const rd = b.rhymeDensity ?? 3;
@@ -95,6 +117,7 @@ function briefBlock(b: LocalBrief | undefined): string {
     ? "\n\n" + fingerprintToConstraints(b.fingerprint) +
       "\nThese reference constraints are HARD targets."
     : "";
+  const langBp = languageBlueprint(b.slangRegion);
   return [
     "STYLE BRIEF:",
     `- Genre: ${b.genre && b.genre !== "auto" ? b.genre : "infer"}`,
@@ -106,7 +129,7 @@ function briefBlock(b: LocalBrief | undefined): string {
     b.avoid ? `- AVOID: ${b.avoid}` : null,
     `- Explicit: ${b.explicit === false ? "no" : "yes"}`,
     b.structuralRules ? `- Structure: ${b.structuralRules}` : null,
-  ].filter(Boolean).join("\n") + fp;
+  ].filter(Boolean).join("\n") + fp + langBp;
 }
 
 // ---------------------------------------------------------------------------

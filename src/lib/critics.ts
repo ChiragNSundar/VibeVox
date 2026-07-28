@@ -42,7 +42,12 @@ function briefBlock(b: StyleBrief | undefined): string {
   if (b.slangRegion && b.slangRegion !== "auto") parts.push(`Slang region: ${b.slangRegion}`);
   if (b.topic) parts.push(`Topic: ${b.topic}`);
   if (b.avoid) parts.push(`Avoid: ${b.avoid}`);
-  const base = parts.length ? `STYLE BRIEF: ${parts.join(" · ")}` : "STYLE BRIEF: infer.";
+  let base = parts.length ? `STYLE BRIEF: ${parts.join(" · ")}` : "STYLE BRIEF: infer.";
+  if (b.slangRegion?.toLowerCase().includes("hinglish")) {
+    base += "\n[LANGUAGE: Romanized Hindi / Hinglish — Evaluate Desi Hip-Hop flow, internal multisyllabic rhymes, and authentic Hinglish street vocabulary.]";
+  } else if (b.slangRegion?.toLowerCase().includes("kanglish")) {
+    base += "\n[LANGUAGE: Romanized Kannada / Kanglish — Evaluate Kannada Rap flow, cadence-matched rimes, and authentic Kanglish street vocabulary.]";
+  }
   return b.fingerprint
     ? base + "\n\n" + fingerprintToConstraints(b.fingerprint)
     : base;
