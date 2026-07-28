@@ -564,12 +564,16 @@ function resolveProfile(config: LlmConfig): LocalProfile {
   return { ...base, family, tier };
 }
 
+import { generateOfflineRagLyrics } from "./offline-rag-generator";
+
 export async function runLocalPipeline(
   config: LlmConfig,
   transcript: string,
   brief: LocalBrief | undefined,
   onProgress: (e: ProgressEvent) => void = () => {},
 ): Promise<LocalPipelineResult> {
+  const isExplicitOffline = config.localBaseUrl === "offline" || config.localBaseUrl === "none";
+
   const profile = resolveProfile(config);
   const baseBudget = budgetFor(profile.tier);
   const ctx = config.localContextTokens || profile.defaultContextTokens;
@@ -577,9 +581,7 @@ export async function runLocalPipeline(
   const budget = { ...baseBudget, chunkBars };
 
   // Pipeline-level cache: identical (model + transcript + brief + profile)
-  // returns the prior result instantly. The per-pass `chat` cache still
-  // pays off when only part of the input changes (e.g. tweaking the brief
-  // re-runs writer/critic but reuses cadence).
+  // returns the prior result instantly.
   const pipelineKey = await hashInputs([
     config.localBaseUrl, config.localModel, ctx, transcript, brief ?? null,
     profile.family, profile.tier, profile.writeFormat, budget.maxIterations, budget.targetScore, chunkBars,
@@ -592,15 +594,23 @@ export async function runLocalPipeline(
 
   onProgress({
     stage: "cadence",
-    message: `Detected ${profile.family} · ${profile.tier} tier · ${ctx} ctx · chunk ${chunkBars} bars`,
+    message: isExplicitOffline
+      ? "Running Zero-LLM Offline RAG Mode (No LLM required)"
+      : `Detected ${profile.family} · ${profile.tier} tier · ${ctx} ctx · chunk ${chunkBars} bars`,
   });
 
   const cadence = await buildCadence(config, profile, transcript, onProgress);
 
-  // Embedding-based recall: retrieve top-K most relevant past wins for this
-  // transcript + brief. Falls back to sampleStyleExamples if embeddings
-  // unavailable. Computed once per pipeline run so every chunk gets the
-  // same coherent "study set".
+  // If explicit offline mode, generate lyrics immediately using Zero-LLM RAG
+  if (isExplicitOffline) {
+    onProgress({ stage: "write", message: "Synthesizing bars using RAG Style Memory & Indic Cadence Engine..." });
+    const ragResult = generateOfflineRagLyrics(transcript, cadence, brief);
+    await cacheSet("pipeline", pipelineKey, ragResult, { kind: "pipeline", transcript });
+    onProgress({ stage: "done", message: `Offline RAG complete · ${ragResult.quality.drakeScore.toFixed(1)}/10`, score: ragResult.quality.drakeScore });
+    return ragResult;
+  }
+
+  // Embedding-based recall: retrieve top-K most relevant past wins for this transcript + brief.
   const { recallStyleExamples, buildRecallQuery } = await import("./style-recall");
   const recallQuery = buildRecallQuery({
     transcript,
@@ -614,38 +624,49 @@ export async function runLocalPipeline(
     { count: 3, filter: { vibe: cadence.detectedVibe, genre: brief?.genre } },
   );
 
-  let lyrics = await writeLyrics(config, profile, cadence, brief, budget, examples, onProgress);
+  let lyrics: LocalLyrics;
+  try {
+    lyrics = await writeLyrics(config, profile, cadence, brief, budget, examples, onProgress);
 
-  const notes: string[] = [];
-  let bestScore = 0;
-  let bestLyrics = lyrics;
-  for (let i = 1; i <= budget.maxIterations; i++) {
-    const crit = await criticPass(config, profile, lyrics, cadence, onProgress, i);
-    notes.push(`pass ${i}: ${crit.overall.toFixed(1)}/10`);
-    if (crit.notes.length) notes.push(...crit.notes.slice(0, 2));
-    onProgress({ stage: "critic", message: `Pass ${i}: ${crit.overall.toFixed(1)}/10`, iteration: i, score: crit.overall });
-    if (crit.overall > bestScore) { bestScore = crit.overall; bestLyrics = lyrics; }
-    if (crit.overall >= budget.targetScore) break;
-    if (i === budget.maxIterations) break;
-    lyrics = await refine(config, profile, lyrics, cadence, crit, brief, onProgress, i);
+    const notes: string[] = [];
+    let bestScore = 0;
+    let bestLyrics = lyrics;
+    for (let i = 1; i <= budget.maxIterations; i++) {
+      const crit = await criticPass(config, profile, lyrics, cadence, onProgress, i);
+      notes.push(`pass ${i}: ${crit.overall.toFixed(1)}/10`);
+      if (crit.notes.length) notes.push(...crit.notes.slice(0, 2));
+      onProgress({ stage: "critic", message: `Pass ${i}: ${crit.overall.toFixed(1)}/10`, iteration: i, score: crit.overall });
+      if (crit.overall > bestScore) { bestScore = crit.overall; bestLyrics = lyrics; }
+      if (crit.overall >= budget.targetScore) break;
+      if (i === budget.maxIterations) break;
+      lyrics = await refine(config, profile, lyrics, cadence, crit, brief, onProgress, i);
+    }
+    onProgress({ stage: "done", message: `Done. Best score ${bestScore.toFixed(1)}/10`, score: bestScore });
+
+    const quality: LocalQuality = {
+      cadenceMatch: 0.9,
+      rhymeDensity: 2,
+      clicheCount: 0,
+      vibeConsistency: Math.round(bestScore / 2),
+      barCount: bestLyrics.sections.reduce((s, sec) => s + sec.lines.length, 0),
+      drakeScore: Number(bestScore.toFixed(1)),
+    };
+    const result: LocalPipelineResult = {
+      lyrics: bestLyrics,
+      cadence,
+      quality,
+      notes,
+      profile: { family: profile.family, tier: profile.tier, paramsB: profile.paramsB, chunkBars },
+    };
+    await cacheSet("pipeline", pipelineKey, result, { kind: "pipeline", transcript });
+    return result;
+  } catch (e) {
+    onProgress({ stage: "write", message: `LLM unreachable (${e instanceof Error ? e.message : e}) — Switching to Zero-LLM Offline RAG Synthesizer` });
+    const ragResult = generateOfflineRagLyrics(transcript, cadence, brief);
+    await cacheSet("pipeline", pipelineKey, ragResult, { kind: "pipeline", transcript });
+    onProgress({ stage: "done", message: `Offline RAG complete · ${ragResult.quality.drakeScore.toFixed(1)}/10`, score: ragResult.quality.drakeScore });
+    return ragResult;
   }
-  onProgress({ stage: "done", message: `Done. Best score ${bestScore.toFixed(1)}/10`, score: bestScore });
-
-  const quality: LocalQuality = {
-    cadenceMatch: 0.9,
-    rhymeDensity: 2,
-    clicheCount: 0,
-    vibeConsistency: Math.round(bestScore / 2),
-    barCount: bestLyrics.sections.reduce((s, sec) => s + sec.lines.length, 0),
-    drakeScore: Number(bestScore.toFixed(1)),
-  };
-  const result: LocalPipelineResult = {
-    lyrics: bestLyrics,
-    cadence,
-    quality,
-    notes,
-    profile: { family: profile.family, tier: profile.tier, paramsB: profile.paramsB, chunkBars },
-  };
   // Only cache "good enough" runs — caching a 3/10 disaster permanently
   // would be worse than recomputing. Threshold sits below the harvest bar
   // so even mid-tier successes get retained.

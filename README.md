@@ -24,7 +24,7 @@ While cloud-based tools rely on remote APIs and subscription credits, **Vocal Mu
 ## ✨ Features
 
 - 🎙️ **Live Punch-In Studio**: Real-time voice capture with latency-compensated bar slicing, Web Audio oscilloscope waveform, and metronome pulse ring.
-- 🧠 **Ghostwriter & Style Memory**: Multi-pass cadence matching, anti-cliché burned-phrase filter, and semantic embedding recall.
+- 🧠 **Ghostwriter & Zero-LLM RAG Engine**: Multi-pass cadence matching, anti-cliché burned-phrase filter, and semantic embedding recall. Works seamlessly with local LLMs (**LM Studio**, **Ollama**) or **100% Zero-LLM Offline RAG Mode** (cadence assembly via style memory + Indic phonetic rimes) when no LLM is connected.
 - 🔒 **100% Offline & Private**: Zero API keys or cloud subscriptions required. Runs on local LLMs (**LM Studio**, **Ollama**) and local STT (**faster-whisper-server**).
 - 💾 **Local-First Storage**: Audio takes save to **OPFS** (Origin Private File System); tracks and style memories save to **IndexedDB**. Includes 1-click JSON bundle import/export.
 - 🎵 **Rhymes & Multilingual Intelligence**: Native support for **Romanized Hindi (Hinglish)** and **Romanized Kannada (Kanglish)** with DHH & Kannada Rap vocabulary blueprints, Indic phonetic rime matching, offline CMUdict, keyless Datamuse API, and [RhymeWave](https://www.rhymewave.com/) deep-linking.
