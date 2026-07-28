@@ -51,6 +51,21 @@ type Lyrics = { title: string; sections: { type: string; lines: string[] }[] };
 export const Route = createFileRoute("/_app/track/$id")({
   head: () => ({ meta: [{ title: "Track · VoxScript" }] }),
   component: TrackPage,
+  errorComponent: ({ error }) => {
+    console.error("Track page error:", error);
+    return (
+      <div className="max-w-md mx-auto text-center space-y-4 py-16">
+        <Card className="p-8 space-y-4 border-dashed">
+          <div className="text-4xl">🎵</div>
+          <h2 className="text-xl font-bold">Track Not Found</h2>
+          <p className="text-sm text-muted-foreground">
+            This track could not be loaded from studio memory.
+          </p>
+          <Button onClick={() => window.location.href = "/library"}>Return to Track Library</Button>
+        </Card>
+      </div>
+    );
+  },
 });
 
 function Meter({ label, value, max, suffix, tone }: {
@@ -201,7 +216,11 @@ function TrackPage() {
     queryKey: ["track", id],
     queryFn: async () => {
       try {
-        const localTrack = await getLocalTrack(id);
+        let localTrack = await getLocalTrack(id);
+        if (!localTrack) {
+          await new Promise((r) => setTimeout(r, 150));
+          localTrack = await getLocalTrack(id);
+        }
         if (localTrack) {
           return { ...localTrack, isLocal: true };
         }

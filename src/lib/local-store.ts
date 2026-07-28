@@ -113,8 +113,16 @@ export async function putTrack(t: LocalTrack): Promise<void> {
 }
 
 export async function getTrack(id: string): Promise<LocalTrack | null> {
-  try { return (await tx("tracks", "readonly", (s) => req(s.get(id) as IDBRequest<LocalTrack>))) ?? null; }
-  catch { return null; }
+  try {
+    let track = await tx("tracks", "readonly", (s) => req(s.get(id) as IDBRequest<LocalTrack>));
+    if (!track) {
+      await new Promise((r) => setTimeout(r, 100));
+      track = await tx("tracks", "readonly", (s) => req(s.get(id) as IDBRequest<LocalTrack>));
+    }
+    return track ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function listTracks(deviceId?: string): Promise<LocalTrack[]> {
