@@ -144,8 +144,13 @@ export async function putTrack(t: LocalTrack): Promise<void> {
 
 export async function getTrack(id: string): Promise<LocalTrack | null> {
   try {
+    const cleanId = String(id).trim();
     for (let attempt = 0; attempt < 4; attempt++) {
-      const track = await tx("tracks", "readonly", (s) => req(s.get(id) as IDBRequest<LocalTrack>));
+      let track = await tx("tracks", "readonly", (s) => req(s.get(cleanId) as IDBRequest<LocalTrack>));
+      if (!track) {
+        const all = await tx<LocalTrack[]>("tracks", "readonly", (s) => req(s.getAll() as IDBRequest<LocalTrack[]>));
+        track = all.find((t) => t.id === cleanId || String(t.id).trim() === cleanId) || null;
+      }
       if (track) return track;
       if (attempt < 3) await new Promise((r) => setTimeout(r, 100 * (attempt + 1)));
     }
