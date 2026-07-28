@@ -1037,9 +1037,9 @@ function TrackPage() {
           </CollapsibleContent>
         </Collapsible>
 
-        {data.status === "error" && (
+        {(trackData as any)?.status === "error" && (
           <Card className="p-4 border-destructive/40 bg-destructive/5 text-sm text-destructive">
-            {data.error || "Unknown error"}
+            {(trackData as any)?.error || "Unknown error"}
           </Card>
         )}
 
