@@ -27,7 +27,7 @@ While cloud-based tools rely on remote APIs and subscription credits, **Vocal Mu
 - 🧠 **Ghostwriter & Style Memory**: Multi-pass cadence matching, anti-cliché burned-phrase filter, and semantic embedding recall.
 - 🔒 **100% Offline & Private**: Zero API keys or cloud subscriptions required. Runs on local LLMs (**LM Studio**, **Ollama**) and local STT (**faster-whisper-server**).
 - 💾 **Local-First Storage**: Audio takes save to **OPFS** (Origin Private File System); tracks and style memories save to **IndexedDB**. Includes 1-click JSON bundle import/export.
-- 🎵 **Rhymes & Language Intelligence**: Offline CMUdict phonetic dictionary, keyless Datamuse API, and deep-linking into [RhymeWave](https://www.rhymewave.com/) for phonetic exploration.
+- 🎵 **Rhymes & Multilingual Intelligence**: Native support for **Romanized Hindi (Hinglish)** and **Romanized Kannada (Kanglish)** with DHH & Kannada Rap vocabulary blueprints, Indic phonetic rime matching, offline CMUdict, keyless Datamuse API, and [RhymeWave](https://www.rhymewave.com/) deep-linking.
 - ⌨️ **Keyboard Shortcuts & Sound FX**: Integrated shortcut system (`?` overlay) and synthesized Web Audio sound FX cues.
 - 🕸️ **Knowledge Graph Enabled**: Complete codebase AST indexed with [Graphify](https://github.com/sponsors/safishamsi) for interactive architectural exploration.
 
