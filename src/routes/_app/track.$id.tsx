@@ -980,13 +980,15 @@ function TrackPage() {
                 <div className="flex-1 space-y-2 text-xs">
                   <div className="uppercase tracking-wider text-muted-foreground">Critic council</div>
                   {(() => {
-                    const sorted = Object.entries(quality.councilByRole).sort((a, b) => a[1] - b[1]);
-                    const [weakRole, weakScore] = sorted[0];
+                    const sorted = Object.entries(quality.councilByRole).sort((a: any, b: any) => Number(a[1]) - Number(b[1]));
+                    const [weakRole, weakScoreRaw] = sorted[0];
+                    const weakScore = Number(weakScoreRaw);
+                    const strongScore = Number(sorted[sorted.length - 1][1]);
                     return (
                       <>
                         <p className="text-foreground">
                           Weakest axis: <b className="capitalize">{weakRole}</b> ({weakScore.toFixed(1)}/10).
-                          Strongest: <b className="capitalize">{sorted[sorted.length - 1][0]}</b> ({sorted[sorted.length - 1][1].toFixed(1)}/10).
+                          Strongest: <b className="capitalize">{sorted[sorted.length - 1][0]}</b> ({strongScore.toFixed(1)}/10).
                         </p>
                         <Button
                           size="sm" variant="outline"
