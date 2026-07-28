@@ -893,6 +893,59 @@ function TrackPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flatLines, local, selectMode, bulkOpts, doUndo, doRedo]);
 
+  // --- All hooks called above. Conditional rendering below. ---
+  if (isLoading) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6" aria-busy="true" aria-label="Loading track">
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 space-y-2 flex-1">
+            <Skeleton className="h-9 w-2/3" />
+            <Skeleton className="h-4 w-1/3" />
+          </div>
+          <div className="flex gap-2 shrink-0">
+            <Skeleton className="h-9 w-28" />
+            <Skeleton className="h-9 w-9" />
+          </div>
+        </div>
+        <Card className="p-4"><Skeleton className="h-12 w-full" /></Card>
+        <Card className="p-4 space-y-3">
+          <Skeleton className="h-3 w-32" />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="space-y-2">
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="h-1.5 w-full" />
+              </div>
+            ))}
+          </div>
+        </Card>
+        <Card className="p-6 space-y-4">
+          <Skeleton className="h-5 w-24" />
+          <div className="space-y-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <Skeleton key={i} className="h-6" style={{ width: `${60 + ((i * 13) % 35)}%` }} />
+            ))}
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!trackData) {
+    return (
+      <div className="max-w-md mx-auto text-center space-y-4 py-16">
+        <Card className="p-8 space-y-4 border-dashed">
+          <div className="text-4xl">🎵</div>
+          <h2 className="text-xl font-bold">Track Not Found</h2>
+          <p className="text-sm text-muted-foreground">
+            This track was not found in your local studio memory.
+          </p>
+          <Button onClick={() => navigate({ to: "/library" })}>Go to Track Library</Button>
+        </Card>
+      </div>
+    );
+  }
+
   let cursor = 0;
 
   return (
