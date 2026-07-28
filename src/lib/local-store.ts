@@ -81,33 +81,55 @@ function openDb(): Promise<IDBDatabase> {
         db.createObjectStore("meta", { keyPath: "key" });
       }
     };
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    req.onsuccess = () => {
+      const db = req.result;
+      db.onclose = () => { dbPromise = null; };
+      db.onversionchange = () => { db.close(); dbPromise = null; };
+      resolve(db);
+    };
+    req.onerror = () => {
+      dbPromise = null;
+      reject(req.error);
+    };
   });
   return dbPromise;
 }
 
 function tx<T>(name: Store, mode: IDBTransactionMode, fn: (s: IDBObjectStore) => Promise<T> | T): Promise<T> {
-  return openDb().then((db) =>
-    new Promise<T>((resolve, reject) => {
-      const t = db.transaction(name, mode);
-      let resultVal: T;
-      t.oncomplete = () => resolve(resultVal);
-      t.onerror = () => reject(t.error);
-      t.onabort = () => reject(t.error);
-      const store = t.objectStore(name);
-      Promise.resolve(fn(store)).then(
-        (v) => {
-          resultVal = v;
-          if (mode === "readonly") resolve(v);
-        },
-        (e) => {
-          try { t.abort(); } catch { /* ignore */ }
-          reject(e);
-        },
+  return openDb().then((db) => {
+    try {
+      return new Promise<T>((resolve, reject) => {
+        const t = db.transaction(name, mode);
+        t.onerror = () => reject(t.error);
+        t.onabort = () => reject(t.error);
+        const store = t.objectStore(name);
+        Promise.resolve(fn(store)).then(
+          (v) => resolve(v),
+          (e) => {
+            try { t.abort(); } catch { /* ignore */ }
+            reject(e);
+          },
+        );
+      });
+    } catch {
+      dbPromise = null;
+      return openDb().then((db2) =>
+        new Promise<T>((resolve, reject) => {
+          const t = db2.transaction(name, mode);
+          t.onerror = () => reject(t.error);
+          t.onabort = () => reject(t.error);
+          const store = t.objectStore(name);
+          Promise.resolve(fn(store)).then(
+            (v) => resolve(v),
+            (e) => {
+              try { t.abort(); } catch { /* ignore */ }
+              reject(e);
+            },
+          );
+        }),
       );
-    }),
-  );
+    }
+  });
 }
 
 function req<T>(r: IDBRequest<T>): Promise<T> {

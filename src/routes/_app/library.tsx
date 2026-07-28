@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listTracks, deleteTrack } from "@/lib/tracks.functions";
 import { getDeviceId } from "@/lib/device-id";
@@ -21,6 +21,21 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_app/library")({
   head: () => ({ meta: [{ title: "Your library · VoxScript" }] }),
   component: LibraryPage,
+  errorComponent: ({ error }) => {
+    console.error("Library page error:", error);
+    return (
+      <div className="max-w-md mx-auto text-center space-y-4 py-16">
+        <Card className="p-8 space-y-4 border-dashed">
+          <div className="text-4xl">🎵</div>
+          <h2 className="text-xl font-bold">Library Error</h2>
+          <p className="text-sm text-muted-foreground">
+            {error instanceof Error ? error.message : "Could not load library"}
+          </p>
+          <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+        </Card>
+      </div>
+    );
+  },
 });
 
 type SortKey = "newest" | "oldest" | "title-az" | "title-za" | "status";
@@ -37,9 +52,16 @@ function LibraryPage() {
   const [sortBy, setSortBy] = useState<SortKey>("newest");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
-  const { data, isLoading } = useQuery({
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => { setIsClient(true); }, []);
+
+  const { data: rawData, isLoading: isQueryLoading } = useQuery({
     queryKey: ["tracks"],
+    enabled: isClient,
+    staleTime: 0,
+    refetchOnMount: "always",
     queryFn: async () => {
+      if (typeof window === "undefined") return [];
       try {
         const localTracks = await listLocalTracks();
         if (localTracks.length > 0 || localMode) {
@@ -51,10 +73,13 @@ function LibraryPage() {
       }
     },
     refetchInterval: (q) => {
-      const rows = q.state.data as { status: string }[] | undefined;
-      return rows?.some((r) => r.status !== "done" && r.status !== "error") ? 3000 : false;
+      const rows = q.state.data as { status?: string }[] | undefined;
+      return rows?.some((r) => r?.status !== "done" && r?.status !== "error") ? 3000 : false;
     },
   });
+
+  const isLoading = !isClient || isQueryLoading;
+  const data = rawData ?? [];
 
   const handleDeleteTrack = async (e: React.MouseEvent, trackId: string) => {
     e.preventDefault();
@@ -82,28 +107,32 @@ function LibraryPage() {
     // Search
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      items = items.filter((t) => t.title.toLowerCase().includes(q));
+      items = items.filter((t) => (t?.title || "").toLowerCase().includes(q));
     }
 
     // Status filter
     if (statusFilter !== "all") {
       if (statusFilter === "processing") {
-        items = items.filter((t) => t.status !== "done" && t.status !== "error");
+        items = items.filter((t) => (t?.status || "") !== "done" && (t?.status || "") !== "error");
       } else {
-        items = items.filter((t) => t.status === statusFilter);
+        items = items.filter((t) => (t?.status || "") === statusFilter);
       }
     }
 
     // Sort
     items.sort((a, b) => {
-      const dateA = new Date("createdAt" in a ? a.createdAt : a.created_at).getTime();
-      const dateB = new Date("createdAt" in b ? b.createdAt : b.created_at).getTime();
+      const dateA = new Date('createdAt' in a ? (a as any).createdAt : (a as any).created_at).getTime() || 0;
+      const dateB = new Date('createdAt' in b ? (b as any).createdAt : (b as any).created_at).getTime() || 0;
+      const titleA = a?.title || "";
+      const titleB = b?.title || "";
+      const statusA = a?.status || "";
+      const statusB = b?.status || "";
       switch (sortBy) {
         case "newest": return dateB - dateA;
         case "oldest": return dateA - dateB;
-        case "title-az": return a.title.localeCompare(b.title);
-        case "title-za": return b.title.localeCompare(a.title);
-        case "status": return a.status.localeCompare(b.status);
+        case "title-az": return titleA.localeCompare(titleB);
+        case "title-za": return titleB.localeCompare(titleA);
+        case "status": return statusA.localeCompare(statusB);
         default: return 0;
       }
     });

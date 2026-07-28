@@ -211,18 +211,22 @@ function TrackPage() {
     saveBulk(id, { selectMode, selectedBars: Array.from(selectedBars), bulkOpts });
   }, [id, selectMode, selectedBars, bulkOpts]);
 
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => { setIsClient(true); }, []);
+
   // Load track from local store first, then fall back to server
-  const { data: trackData, isLoading } = useQuery({
+  const { data: trackData, isLoading: isQueryLoading } = useQuery({
     queryKey: ["track", id],
+    enabled: isClient,
+    staleTime: 0,
+    refetchOnMount: "always",
     queryFn: async () => {
+      if (typeof window === "undefined") return null;
       try {
-        let localTrack = await getLocalTrack(id);
-        if (!localTrack) {
-          await new Promise((r) => setTimeout(r, 150));
-          localTrack = await getLocalTrack(id);
-        }
-        if (localTrack) {
-          return { ...localTrack, isLocal: true };
+        for (let i = 0; i < 10; i++) {
+          const localTrack = await getLocalTrack(id);
+          if (localTrack) return { ...localTrack, isLocal: true };
+          await new Promise((r) => setTimeout(r, 200));
         }
         if (!isLocalOnly()) {
           const cloud = await fetchTrack({ data: { deviceId: getDeviceId(), id } }).catch(() => null);
@@ -238,6 +242,8 @@ function TrackPage() {
       return t && t.status !== "done" && t.status !== "error" ? 2500 : false;
     },
   });
+
+  const isLoading = !isClient || isQueryLoading;
 
   const isLocalTrack = Boolean(trackData?.isLocal);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
