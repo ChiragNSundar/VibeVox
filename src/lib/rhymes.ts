@@ -123,42 +123,23 @@ async function cmudictLookup(word: string): Promise<RhymeHit[]> {
   }));
 }
 
-// ---------- Indic local provider ----------
-
-const INDIC_RHYME_DICTIONARY: Record<string, string[]> = {
-  // -aoon / -ain / -aan family (Hinglish)
-  "aoon": ["mitaoon", "bataoon", "jitaoon", "sataoon", "bulaoon", "chalaoon", "lataoon"],
-  "ain": ["main", "hain", "chain", "rain", "nain", "jaane-man"],
-  "aan": ["jaan", "shaan", "maan", "bhaan", "aasmaan", "armaan", "pachaan"],
-  "eeb": ["naseeb", "kareeb", "hareeb", "khateeb"],
-  "ehra": ["chehra", "gehra", "pehra", "sehra"],
-  "ene": ["scene", "vibe", "haseen", "jabeen"],
-  // -acha / -othu / -agi family (Kanglish)
-  "acha": ["macha", "locha", "pacha", "bacha", "socha"],
-  "othu": ["gothu", "mattu", "kattu", "hottu", "suttu"],
-  "ugi": ["hudugi", "magane", "sariyaagi", "sakkat", "dhoolu"],
-  "uga": ["huduga", "magga", "jaga", "daga"],
-};
+import { findRhymesWithPos } from "./indic-dictionary";
 
 export function lookupIndicRhymes(word: string): RhymeHit[] {
   const w = word.toLowerCase().trim().replace(/[^a-z]/g, "");
   if (!w) return [];
   const hits: RhymeHit[] = [];
 
-  for (const [pattern, words] of Object.entries(INDIC_RHYME_DICTIONARY)) {
-    if (w.endsWith(pattern) || words.includes(w)) {
-      for (const target of words) {
-        if (target !== w && !hits.some((h) => h.word === target)) {
-          hits.push({
-            word: target,
-            score: 100,
-            syllables: target.length > 5 ? 3 : 2,
-            kind: "perfect",
-          });
-        }
-      }
-    }
+  const matches = findRhymesWithPos(w, "auto");
+  for (const m of matches) {
+    hits.push({
+      word: `${m.word} (${m.pos}: ${m.definition})`,
+      score: m.score,
+      syllables: m.syllables,
+      kind: m.score >= 90 ? "perfect" : "near",
+    });
   }
+
   return hits;
 }
 

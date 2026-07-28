@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License MIT" />
 </p>
 
-An open-source, local-first studio workspace for vocalists, songwriters, and producers. **Vocal Muse** turns mumble freestyles into Drake/Kendrick-tier polished lyrics, maps audio cadences in real-time, and builds a personalized style memory—all running **100% offline** on your local machine with zero cloud lock-in.
+An open-source, local-first studio workspace for vocalists, songwriters, and producers. **Vocal Muse** turns mumble freestyles into Drake/Kendrick/Seedhe Maut/Brodha V-tier polished lyrics, maps audio cadences in real-time, and builds a personalized style memory—all running **100% offline** on your local machine with zero cloud lock-in.
 
 ---
 
@@ -21,15 +21,74 @@ While cloud-based tools rely on remote APIs and subscription credits, **Vocal Mu
 
 ---
 
-## ✨ Features
+## ✨ Features & Multilingual Intelligence
 
 - 🎙️ **Live Punch-In Studio**: Real-time voice capture with latency-compensated bar slicing, Web Audio oscilloscope waveform, and metronome pulse ring.
-- 🧠 **Ghostwriter & Zero-LLM RAG Engine**: Multi-pass cadence matching, anti-cliché burned-phrase filter, and semantic embedding recall. Works seamlessly with local LLMs (**LM Studio**, **Ollama**) or **100% Zero-LLM Offline RAG Mode** (cadence assembly via style memory + Indic phonetic rimes) when no LLM is connected.
+- 🧠 **Ghostwriter & Zero-LLM RAG Engine**: Multi-pass cadence matching, anti-cliché burned-phrase filter, and Reciprocal Rank Fusion ($RRF$) hybrid vector recall. Works seamlessly with local LLMs (**LM Studio**, **Ollama**) or **100% Zero-LLM Offline RAG Mode** (POS-grammar cadence assembly via style memory + Indic phonetic rimes) when no LLM is connected.
+- 🎨 **Metaphor & Imagery Synthesizer**: Pre-generation sensory domain mapping (tactile textures, visual settings, luxury vs street contrasts, and double-entendre wordplay blueprints).
+- 🎵 **Pre-Generation Rhyme Ladder Planner**: Pre-plans 2-syllable and 3-syllable multisyllabic rime clusters across 4-bar blocks (AABB, ABAB, AAAA) using custom Indic and English phonetic rime engines.
+- 📚 **Multilingual Dictionary Datasets**: Native support for **Romanized Hindi (Hinglish)** and **Romanized Kannada (Kanglish)** with complete 31,021-entry **KEED 2018** Kannada-English dictionary ingestion (`public/data/kannada_lyric_dictionary.json`), Desi Hip-Hop vocabulary blueprints, parts-of-speech annotations, and English meanings.
 - 🔒 **100% Offline & Private**: Zero API keys or cloud subscriptions required. Runs on local LLMs (**LM Studio**, **Ollama**) and local STT (**faster-whisper-server**).
 - 💾 **Local-First Storage**: Audio takes save to **OPFS** (Origin Private File System); tracks and style memories save to **IndexedDB**. Includes 1-click JSON bundle import/export.
-- 🎵 **Rhymes & Multilingual Intelligence**: Native support for **Romanized Hindi (Hinglish)** and **Romanized Kannada (Kanglish)** with DHH & Kannada Rap vocabulary blueprints, Indic phonetic rime matching, offline CMUdict, keyless Datamuse API, and [RhymeWave](https://www.rhymewave.com/) deep-linking.
 - ⌨️ **Keyboard Shortcuts & Sound FX**: Integrated shortcut system (`?` overlay) and synthesized Web Audio sound FX cues.
 - 🕸️ **Knowledge Graph Enabled**: Complete codebase AST indexed with [Graphify](https://github.com/sponsors/safishamsi) for interactive architectural exploration.
+
+---
+
+## 🏗️ End-to-End System Architecture
+
+```mermaid
+flowchart TD
+    subgraph Client["Client UI (Browser / Local Workspace)"]
+        LiveStudio["🎙️ Live Punch-In Studio\n(Web Audio & Oscilloscope)"]
+        StyleBrief["🎛️ Style Brief Form\n(Genre, Slang Region, Topic)"]
+        LyricEditor["📝 Pocket Grid Lyric Editor\n(Syllable & Rhyme Inspector)"]
+    end
+
+    subgraph AudioEngine["Audio & Speech Layer"]
+        MicCapture["Mic Capture & OPFS Storage"]
+        LocalWhisper["🗣️ faster-whisper-server\n(Port 9000 STT)"]
+        CadenceSlicer["⏱️ Latency Slicer & Cadence Map"]
+    end
+
+    subgraph IntelligenceEngine["Lyric Intelligence & RAG Core"]
+        HybridRAG["🧠 Multi-Level Hybrid RAG\n(Semantic + Cadence + POS RRF)"]
+        MetaphorSynth["🎨 Metaphor & Imagery Synthesizer"]
+        RhymePlanner["🎵 Rhyme Ladder Planner\n(2-3 Syl Rimes)"]
+        DictEngine["📚 Indic Dictionary Service\n(31k+ KEED 2018 Entries & POS)"]
+    end
+
+    subgraph PipelineExecution["Ghostwriter Execution Modes"]
+        LocalLLM["🤖 Local LLM Server\n(Ollama / LM Studio / WebLLM)"]
+        ZeroLLMRAG["⚡ Zero-LLM Offline RAG Engine\n(POS Grammar Assembly)"]
+        CriticCouncil["⚖️ Critic Council\n(Pocket, Wordplay, Authenticity)"]
+    end
+
+    subgraph StorageLayer["Local-First Persistence"]
+        IndexedDB[("💾 IndexedDB\n(Tracks, Bars, Style Memory)")]
+        OPFS[("📂 OPFS\n(Audio Takes)")]
+    end
+
+    LiveStudio --> MicCapture
+    MicCapture --> LocalWhisper
+    LocalWhisper --> CadenceSlicer
+    CadenceSlicer --> HybridRAG
+    StyleBrief --> HybridRAG
+
+    DictEngine --> HybridRAG
+    DictEngine --> RhymePlanner
+    HybridRAG --> MetaphorSynth
+    MetaphorSynth --> RhymePlanner
+
+    RhymePlanner --> LocalLLM
+    RhymePlanner --> ZeroLLMRAG
+    LocalLLM --> CriticCouncil
+    CriticCouncil --> LyricEditor
+    ZeroLLMRAG --> LyricEditor
+
+    LyricEditor --> IndexedDB
+    MicCapture --> OPFS
+```
 
 ---
 
@@ -79,6 +138,63 @@ Explore the core studios and modules of **Vocal Muse**:
 
 ---
 
+## 📁 Codebase Directory Structure
+
+```
+Vocal Muse
+├── data/                               # Dictionary raw assets & PDFs
+│   └── KEED_2018-29-971.pdf            # KEED 2018 Kannada-English Dictionary source PDF
+├── public/
+│   ├── data/                           # Ingested JSON datasets
+│   │   ├── kannada_lyric_dictionary.json # 31,021-entry Romanized Kannada dictionary (POS + definitions + rimes)
+│   │   └── hindi_lyric_dictionary.json   # Romanized Hindi (Hinglish) rap vocabulary dataset
+│   └── screenshots/                    # Interface showcase image assets
+├── scripts/
+│   └── build_dictionary_datasets.py    # Python ingestion pipeline for KEED 2018 PDF & Hinglish dataset
+├── src/
+│   ├── components/                     # UI components (PocketGrid, StyleBriefForm, CriticCard, etc.)
+│   ├── hooks/                          # Custom React hooks (use-shortcuts, use-live-capture, etc.)
+│   ├── lib/                            # Core intelligence & persistence layer
+│   │   ├── data/                       # Pre-compiled TypeScript dictionary modules
+│   │   │   ├── kannada-dict.ts         # Fast-lookup Kannada dictionary subset
+│   │   │   └── hindi-dict.ts           # Fast-lookup Hinglish dictionary subset
+│   │   ├── __tests__/                  # Vitest unit test suite (51/51 tests passing)
+│   │   │   ├── artistic-ghostwriter.test.ts
+│   │   │   ├── indic-phonetics.test.ts
+│   │   │   ├── offline-rag.test.ts
+│   │   │   ├── phonemes.test.ts
+│   │   │   ├── style-memory.merge.test.ts
+│   │   │   ├── cache.test.ts
+│   │   │   └── style-recall.test.ts
+│   │   ├── critics.ts                  # Multi-critic council (Pocket, Wordplay, Authenticity)
+│   │   ├── indic-dictionary.ts         # Unified Indic POS & dictionary lookup service
+│   │   ├── live-capture.ts             # Web Audio real-time recording & metronome engine
+│   │   ├── local-pipeline.ts           # Ghostwriter generation & refinement pipeline
+│   │   ├── local-store.ts              # IndexedDB & OPFS local storage manager
+│   │   ├── metaphor-synthesizer.ts     # Pre-generation sensory domain & metaphor mapper
+│   │   ├── offline-rag-generator.ts    # Zero-LLM Offline POS-Grammar Cadence Engine
+│   │   ├── phonetics.ts                # Indic & English syllable counter and rime engine
+│   │   ├── rhyme-planner.ts            # Multisyllabic rhyme ladder planner (2-3 syl)
+│   │   ├── rhymes.ts                   # Pluggable rhyme providers (Datamuse, CMUdict, Indic)
+│   │   ├── style-hybrid-rag.ts         # Reciprocal Rank Fusion (RRF) Multi-Level Hybrid RAG
+│   │   └── style-recall.ts             # TF-IDF / Embedding style memory recall
+│   └── routes/                         # TanStack Start file-based route handlers
+│       ├── __root.tsx
+│       ├── _app/                       # Authenticated application surface
+│       │   ├── index.tsx
+│       │   ├── live.tsx                # Live Punch-In studio page
+│       │   ├── new.tsx                 # New track studio page
+│       │   ├── library.tsx             # Track library dashboard
+│       │   ├── references.tsx          # Reference fingerprints page
+│       │   └── settings.tsx            # Settings & LLM configuration
+│       └── onboarding.tsx
+├── graphify-out/                       # Graphify AST Knowledge Graph index
+├── start-local.bat                     # Windows 1-click launcher script
+└── README.md
+```
+
+---
+
 ## 🚀 Quickstart
 
 ### Option A: Windows 1-Click Launcher (Recommended)
@@ -118,44 +234,8 @@ faster-whisper-server --model Systran/faster-whisper-base.en --port 9000
 
 ---
 
-## 🛠️ Architecture & Tech Stack
-
-```
-Vocal Muse Architecture
-├── src/routes/             # TanStack Start file-based routing (_app/live, _app/onboarding, etc.)
-├── src/lib/local-pipeline  # Multi-pass cadence matching & ghostwriter refinement pipeline
-├── src/lib/local-store     # IndexedDB (tracks, bars) & OPFS (audio takes) local persistence
-├── src/lib/style-memory    # Few-shot vector recall & anti-cliché phrase burner
-├── src/lib/rhymes          # Phonetic lookup engine & RhymeWave deep-link integration
-└── graphify-out/          # Persistent AST Knowledge Graph (graph.html & GRAPH_REPORT.md)
-```
-
----
-
-## 🤝 Contributing
-
-We welcome contributions from developers, musicians, sound engineers, and AI enthusiasts!
-
-### How to Contribute:
-1. **Fork & Clone**:
-   ```bash
-   git clone https://github.com/ChiragNSundar/Vocal-Muse.git
-   cd Vocal-Muse
-   ```
-2. **Install & Run Tests**:
-   ```bash
-   bun install
-   bun test       # Vitest unit test suite (40/40 tests)
-   ```
-3. **Submit a Pull Request**:
-   - Create a feature branch (`git checkout -b feature/awesome-feature`).
-   - Ensure all tests pass (`bun test` or `npm test`).
-   - Open a PR with a clear description of your changes.
-
----
-
 ## 📄 License & Acknowledgments
 
 - **License**: Released under the **MIT License**.
 - **Special Thanks**: Inspired by **[VoxSketch AI](https://voxsketch.com/)** for pioneering AI vocal mumble transcription.
-- **Phonetics**: Powered by CMUdict, Datamuse, and RhymeWave.
+- **Dictionaries & Phonetics**: Powered by KEED 2018 Kannada-English Dictionary, Hinglish DHH dataset, CMUdict, Datamuse, and RhymeWave.

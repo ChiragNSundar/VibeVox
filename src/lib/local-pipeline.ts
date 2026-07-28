@@ -94,17 +94,23 @@ function languageBlueprint(region?: string): string {
   if (reg.includes("hinglish")) {
     return `\n\nLANGUAGE & CULTURAL STYLE GUIDELINES (DESI HIP-HOP / HINGLISH):
 - WRITE IN ROMANIZED HINDI / HINGLISH (Latin script only).
-- RHYTHM & FLOW: Emulate top Desi Hip-Hop artists (Seedhe Maut, Divine, KR$NA, MC Stan, Brodha V). Use punchy internal multisyllabic rhymes and street metaphors.
-- ESSENTIAL VOCABULARY & SLANG: Incorporate authentic Hinglish terms like: malum hai na, bantai, scene, gully, haq se, public, mitaoon, dard-e-jaan, aks, rootha, jaam, zeher, heera-pheri, shamo-sehar, raabta, nasha, baat.
-- AD-LIBS: (skrr), (brrr), (malum hai na), (haq se), (bhaiya), (kyun).
+- DICTIONARY & POS STRUCTURE: Use proper POS combinations (Noun + Adjective + Verb + Multisyllabic Rhyme).
+  - Nouns: naseeb (destiny), zeher (poison), chehra (face), raabta (connection), aks (reflection), lafz (words).
+  - Verbs: mitaoon (erase), bataoon (explain), badalta (changing), tehelta (strolling), chalaoon (operate).
+  - Adjectives: gehra (deep), rootha (estranged), haseen (beautiful), dhundhla (blurred).
+- MULTISYLLABIC RHYMES: Build 2-3 syllable end-rhyme chains (e.g. mitaoon/bataoon, naseeb/kareeb, chehra/gehra, scene/haseen).
+- ESSENTIAL SLANG & AD-LIBS: malum hai na, bantai, scene, gully, haq se, public, (skrr), (brrr), (bhaiya).
 - AVOID generic English filler poetry. Make every line sound like an authentic, hard-hitting DHH bar.`;
   }
   if (reg.includes("kanglish")) {
     return `\n\nLANGUAGE & CULTURAL STYLE GUIDELINES (KANNADA RAP / KANGLISH):
-- WRITE IN ROMANIZED KANNADA / KANGLISH (Latin script only).
-- RHYTHM & FLOW: Emulate top Kannada Hip-Hop artists (All Ok, Gubbi, Siri, Rahul Dit-O, Brodha V Kannada flows). Blend crisp Kannada rhythmic cadences with modern trap/drill flows.
-- ESSENTIAL VOCABULARY & SLANG: Incorporate authentic Kanglish terms like: macha, magane, yenu, gothilla, guru, sariyaagi, scene-u, bekku, taage, paata, haadu, namma, preeti, kopa, sakkat, dhoolu, kettodhga, oota.
-- AD-LIBS: (macha), (magane), (guru), (sariyaagi), (scene-u), (huu).
+- WRITE IN ROMANIZED KANNADA / KANGLISH (Latin script only, extracted from KEED dictionary).
+- DICTIONARY & POS STRUCTURE: Use proper Kannada POS flow (Noun + Adjective + Verb + Multisyllabic Rhyme).
+  - Nouns: bengaluru, paata (lesson), haadu (song), preeti (love), kopa (anger), huduga (boy), hudugi (girl).
+  - Verbs: kaltivi (learned), maado (doing), barli (let come), kelo (listen), kettodhga (ruined).
+  - Adjectives: bisi (hot), sakkat (awesome), sariyaagi (properly).
+- MULTISYLLABIC RHYMES: Build 2-3 syllable end-rhyme chains (e.g. sariyaagi/kettodhga, gothu/mattu/suttu, huduga/magga, macha/locha).
+- ESSENTIAL SLANG & AD-LIBS: macha, magane, yenu, gothilla, guru, sariyaagi, scene-u, bekku, taage, (huu).
 - AVOID generic English filler. Keep the flow tightly cadence-matched and culturally authentic.`;
   }
   return "";
@@ -411,6 +417,10 @@ function fillToCadence(parsed: WriteShape | null, cadence: LocalCadence): LocalL
   return group(parsed?.title ?? "Untitled", flat.slice(0, needed), cadence);
 }
 
+import { recallHybridStyleExamples } from "./style-hybrid-rag";
+import { synthesizeMetaphors } from "./metaphor-synthesizer";
+import { planRhymeLadders } from "./rhyme-planner";
+
 async function writeOneChunk(
   config: LlmConfig,
   profile: LocalProfile,
@@ -419,9 +429,17 @@ async function writeOneChunk(
   brief: LocalBrief | undefined,
   examples: { bars: string[]; meta: string }[],
 ): Promise<WriteShape | null> {
-  const sys = `You are an elite ghostwriter for punch-in rappers/vocalists. The artist mumbled a flow; you write finished bars they can punch in over the same take.
+  const lang = brief?.slangRegion?.includes("hinglish") ? "hinglish" : brief?.slangRegion?.includes("kanglish") ? "kannada" : "auto";
+  const metaphorBp = synthesizeMetaphors(brief?.topic, brief?.attitude, brief?.slangRegion);
+  const rhymePlan = planRhymeLadders(cadence, lang);
+
+  const sys = `You are an elite ghostwriter for punch-in rappers/vocalists. Write high-artistry finished bars that sit perfectly on beat.
 
 ${CRAFT}
+
+${metaphorBp.promptInstructions}
+
+${rhymePlan.promptInstructions}
 
 CADENCE LOCK: for each cadence bar produce ONE finished bar with target syllables (±1) and target endSound. Group by section.
 
@@ -610,8 +628,8 @@ export async function runLocalPipeline(
     return ragResult;
   }
 
-  // Embedding-based recall: retrieve top-K most relevant past wins for this transcript + brief.
-  const { recallStyleExamples, buildRecallQuery } = await import("./style-recall");
+  // Multi-Level Hybrid RAG: Fuse Vector Similarity, Cadence Pocket, and POS/Metaphor Rimes via RRF
+  const { buildRecallQuery } = await import("./style-recall");
   const recallQuery = buildRecallQuery({
     transcript,
     topic: brief?.topic,
@@ -619,10 +637,13 @@ export async function runLocalPipeline(
     customSlang: brief?.customSlang,
     genre: brief?.genre,
   });
-  const examples = await recallStyleExamples(
-    recallQuery,
-    { count: 3, filter: { vibe: cadence.detectedVibe, genre: brief?.genre } },
-  );
+  const examples = await recallHybridStyleExamples(recallQuery, {
+    count: 4,
+    targetSyllables: cadence.bars[0]?.syllables ?? 10,
+    vibe: cadence.detectedVibe,
+    genre: brief?.genre,
+    language: brief?.slangRegion?.includes("hinglish") ? "hinglish" : brief?.slangRegion?.includes("kanglish") ? "kannada" : "auto",
+  });
 
   let lyrics: LocalLyrics;
   try {

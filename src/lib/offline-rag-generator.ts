@@ -8,6 +8,7 @@ import { countSyllables, endRhymeKey, rhymeStrength } from "./lyrics-analysis";
 import type { LocalBrief, LocalCadence, LocalLyrics, LocalQuality, LocalPipelineResult } from "./local-pipeline";
 import { loadStyleMemory, DEFAULT_STYLE_SEEDS } from "./style-memory";
 import { lookupIndicRhymes } from "./rhymes";
+import { findRhymesWithPos } from "./indic-dictionary";
 
 // Regional pattern banks for offline fallback generation
 const HINGLISH_PATTERNS = [
@@ -155,14 +156,14 @@ export function generateOfflineRagLyrics(
     // Rhyme alignment: if previous line in section exists, try matching end rhyme
     if (curLines.length > 0) {
       const prevLine = curLines[curLines.length - 1];
-      const prevKey = endRhymeKey(prevLine);
-      const indicRhymes = lookupIndicRhymes(prevLine);
+      const lang = region?.includes("hinglish") ? "hinglish" : region?.includes("kanglish") ? "kannada" : "auto";
+      const matches = findRhymesWithPos(prevLine, lang);
 
-      if (indicRhymes.length) {
-        const rhymingWord = indicRhymes[0].word;
-        // Adapt end of line to include rhyming word if possible
-        if (!bestLine.toLowerCase().includes(rhymingWord)) {
-          bestLine = `${bestLine.replace(/\s+\w+$/, "")} ${rhymingWord}`;
+      if (matches.length) {
+        const topMatch = matches[0];
+        // Adapt end of line to include rhyming dictionary word with POS alignment
+        if (!bestLine.toLowerCase().includes(topMatch.word)) {
+          bestLine = `${bestLine.replace(/\s+\w+$/, "")} ${topMatch.word}`;
         }
       }
     }
