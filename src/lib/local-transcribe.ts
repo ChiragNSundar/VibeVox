@@ -40,10 +40,26 @@ export async function transcribeLocal(audio: Blob, filename: string, config: Loc
   const key = `${audioHash}:${paramHash}`;
   const cached = await cacheGet<string>("transcribe", key);
   if (cached) return cached;
-  const backend = config.backend === "auto" ? await detectBackend(base) : config.backend;
-  const text = backend === "whisper.cpp"
-    ? await transcribeWhisperCpp(audio, filename, base, config)
-    : await transcribeFasterWhisper(audio, filename, base, config);
+  let text: string;
+  try {
+    const backend = config.backend === "auto" ? await detectBackend(base) : config.backend;
+    text = backend === "whisper.cpp"
+      ? await transcribeWhisperCpp(audio, filename, base, config)
+      : await transcribeFasterWhisper(audio, filename, base, config);
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("fetch")) {
+      console.warn(`Local Whisper endpoint (${base}) is offline. Attempting in-browser fallback...`);
+      try {
+        text = await transcribeInBrowser(audio, { model: "whisper-tiny", language: config.language });
+      } catch {
+        throw new Error(`Local Whisper server is offline on ${base}. Start faster-whisper-server or switch to In-Browser Whisper in Settings.`);
+      }
+    } else {
+      throw err;
+    }
+  }
+
   if (text.trim()) {
     await cacheSet("transcribe", key, text, { filename, bytes: audio.size, model: config.model });
   }

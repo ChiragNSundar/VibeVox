@@ -1,0 +1,10 @@
+# Python dependencies for Vocal Muse (VoxScript)
+# Ingestion pipeline, dictionary builder, and local Whisper server
+
+faster-whisper-server>=0.0.2
+faster-whisper>=1.2.1
+ctranslate2>=4.0.0
+fastapi>=0.110.0
+uvicorn[standard]>=0.29.0
+pypdf>=4.0.0
+requests>=2.31.0
