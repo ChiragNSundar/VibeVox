@@ -251,14 +251,16 @@ def main():
     kannada_subset = kannada_data[:3000]
     hindi_subset = hindi_data
 
+    dict_type_def = "export type DictEntry = { word: string; display_word?: string; language?: string; pos: string; definition: string; syllables: number; rime_key: string; multi_rime: string; ipa?: string };\n"
+
     with open(ts_kannada_path, "w", encoding="utf-8") as f:
         f.write(f"// Auto-generated Kannada Lyric Dictionary Subset ({len(kannada_subset)} entries)\n")
-        f.write("export type DictEntry = { word: string; pos: string; definition: string; syllables: number; rime_key: string; multi_rime: string };\n")
+        f.write(dict_type_def)
         f.write(f"export const KANNADA_DICTIONARY: DictEntry[] = {json.dumps(kannada_subset, indent=2)};\n")
 
     with open(ts_hindi_path, "w", encoding="utf-8") as f:
         f.write(f"// Auto-generated Hinglish Lyric Dictionary Subset ({len(hindi_subset)} entries)\n")
-        f.write("export type DictEntry = { word: string; pos: string; definition: string; syllables: number; rime_key: string; multi_rime: string };\n")
+        f.write(dict_type_def)
         f.write(f"export const HINDI_DICTIONARY: DictEntry[] = {json.dumps(hindi_subset, indent=2)};\n")
 
     print(f"[+] Exported TypeScript dictionary modules to {LIB_DATA_DIR}")

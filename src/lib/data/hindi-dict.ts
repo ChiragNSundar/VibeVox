@@ -1,5 +1,5 @@
 // Auto-generated Hinglish Lyric Dictionary Subset (72 entries)
-export type DictEntry = { word: string; pos: string; definition: string; syllables: number; rime_key: string; multi_rime: string };
+export type DictEntry = { word: string; display_word?: string; language?: string; pos: string; definition: string; syllables: number; rime_key: string; multi_rime: string; ipa?: string };
 export const HINDI_DICTIONARY: DictEntry[] = [
   {
     "word": "mitaoon",
