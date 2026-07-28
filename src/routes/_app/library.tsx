@@ -38,12 +38,17 @@ function LibraryPage() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
 
   const { data, isLoading } = useQuery({
-    queryKey: ["tracks", localMode ? "local" : "cloud"],
+    queryKey: ["tracks"],
     queryFn: async () => {
-      if (localMode) {
-        return listLocalTracks(getLocalDeviceId());
+      try {
+        const localTracks = await listLocalTracks();
+        if (localTracks.length > 0 || localMode) {
+          return localTracks;
+        }
+        return await fetchTracks({ data: { deviceId: getDeviceId() } }).catch(() => localTracks);
+      } catch {
+        return [];
       }
-      return fetchTracks({ data: { deviceId: getDeviceId() } });
     },
     refetchInterval: (q) => {
       const rows = q.state.data as { status: string }[] | undefined;

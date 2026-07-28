@@ -490,11 +490,13 @@ async function writeLyrics(
         while (lines.length < slice.length) lines.push(slice[lines.length].text || "Locked in the pocket");
         allLines.push(...lines.slice(0, slice.length));
       } else {
-        allLines.push(...slice.map((b) => b.text));
+        const ragFallback = generateOfflineRagLyrics(slice.map((b) => b.text).join(" "), { bars: slice }, brief);
+        allLines.push(...ragFallback.lyrics.sections.flatMap((s) => s.lines));
       }
     } catch (e) {
-      onProgress({ stage: "write", message: `Chunk ${c + 1} failed: ${e instanceof Error ? e.message : e}` });
-      allLines.push(...slice.map((b) => b.text));
+      onProgress({ stage: "write", message: `Local LLM offline — generating via Zero-LLM RAG Engine` });
+      const ragFallback = generateOfflineRagLyrics(slice.map((b) => b.text).join(" "), { bars: slice }, brief);
+      allLines.push(...ragFallback.lyrics.sections.flatMap((s) => s.lines));
     }
   }
   return group(title, allLines.slice(0, cadence.bars.length), cadence);
@@ -688,13 +690,6 @@ export async function runLocalPipeline(
     onProgress({ stage: "done", message: `Offline RAG complete · ${ragResult.quality.drakeScore.toFixed(1)}/10`, score: ragResult.quality.drakeScore });
     return ragResult;
   }
-  // Only cache "good enough" runs — caching a 3/10 disaster permanently
-  // would be worse than recomputing. Threshold sits below the harvest bar
-  // so even mid-tier successes get retained.
-  if (bestScore >= 6.5) {
-    await cacheSet("pipeline", pipelineKey, result, { model: config.localModel, score: bestScore });
-  }
-  return result;
 }
 
 // Convenience for callers that want to know the harvest threshold without

@@ -144,10 +144,8 @@ function NewTrack() {
         addToStyleMemory({ title: result.lyrics.title, drakeScore: score, vibe: result.cadence.detectedVibe, bars });
         setMemCount(styleMemoryStats().count);
         setLocalResult({ lyrics: result.lyrics, score });
-        // Save to local store if in local mode
-        if (localMode) {
-          await saveLocalTrack(file, result, transcript);
-        }
+        // Always save generated track to local store and navigate to track view
+        await saveLocalTrack(file, result, transcript);
         toast.success(`Offline run complete · ${score.toFixed(1)}/10`);
       } catch (e) {
         toast.error(e instanceof Error ? e.message : "Offline pipeline failed");
@@ -325,7 +323,11 @@ function NewTrack() {
       addToStyleMemory({ title: result.lyrics.title, drakeScore: score, vibe: result.cadence.detectedVibe, bars });
       setMemCount(styleMemoryStats().count);
       setLocalResult({ lyrics: result.lyrics, score });
-      toast.success(`Generated. Score ${score.toFixed(1)}/10${score >= 8 ? " · saved to memory" : ""}`);
+      toast.success(`Generated · ${score.toFixed(1)}/10`);
+
+      // Save generated track to local store and navigate to track view
+      const textBlob = new Blob([localTranscript], { type: "text/plain" });
+      await saveLocalTrack(textBlob, result, localTranscript);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Local generation failed");
     } finally {

@@ -253,10 +253,44 @@ function TrackPage() {
     return val;
   };
 
-  const lyrics = useMemo(() => safeParseJson(trackData?.lyrics ?? (trackData as any)?.lyrics), [trackData]);
-  const cadence = useMemo(() => safeParseJson(trackData?.cadenceMap ?? (trackData as any)?.cadence_map ?? (trackData as any)?.cadence), [trackData]);
-  const quality = useMemo(() => safeParseJson(trackData?.quality), [trackData]);
-  const styleBrief = useMemo(() => safeParseJson(trackData?.styleBrief ?? (trackData as any)?.style_brief), [trackData]);
+  const normalizedLyrics = useMemo(() => {
+    const raw = safeParseJson(trackData?.lyrics ?? (trackData as any)?.lyrics);
+    if (!raw) return null;
+    let title = raw.title || "Untitled";
+    let sections: Array<{ type: string; lines: string[] }> = [];
+
+    if (Array.isArray(raw.sections)) {
+      sections = raw.sections.map((s: any) => ({
+        type: s?.type || "verse",
+        lines: Array.isArray(s?.lines) ? s.lines.map(String) : [],
+      }));
+    } else if (Array.isArray(raw.lines)) {
+      sections = [{ type: "verse", lines: raw.lines.map(String) }];
+    } else if (typeof raw === "string") {
+      sections = [{ type: "verse", lines: [raw] }];
+    }
+
+    if (!sections.length) {
+      sections = [{ type: "verse", lines: [] }];
+    }
+
+    return { title, sections };
+  }, [trackData]);
+
+  const lyrics = normalizedLyrics;
+
+  const cadence = useMemo(() => {
+    const raw = safeParseJson((trackData as any)?.cadenceMap ?? (trackData as any)?.cadence_map ?? (trackData as any)?.cadence);
+    if (!raw) return null;
+    return {
+      bars: Array.isArray(raw.bars) ? raw.bars : [],
+      detectedVibe: raw.detectedVibe || "melodic",
+      detectedKeyPhrases: Array.isArray(raw.detectedKeyPhrases) ? raw.detectedKeyPhrases : [],
+    };
+  }, [trackData]);
+
+  const quality = useMemo(() => safeParseJson((trackData as any)?.quality), [trackData]);
+  const styleBrief = useMemo(() => safeParseJson((trackData as any)?.styleBrief ?? (trackData as any)?.style_brief), [trackData]);
   const isProcessing = trackData ? (trackData.status !== "done" && trackData.status !== "error") : true;
 
   const flatLines = useMemo(() => lyrics ? lyrics.sections.flatMap((s) => s.lines) : [], [lyrics]);
@@ -351,6 +385,27 @@ function TrackPage() {
     );
   }
 
+  const getUpdatedLocalTrack = (newLyricsObj: any, newCadenceObj?: any, newQualityObj?: any): LocalTrack => {
+    const t = trackData as any;
+    return {
+      id: t?.id || id,
+      deviceId: t?.deviceId || getLocalDeviceId(),
+      title: newLyricsObj?.title || t?.title || "Untitled",
+      status: t?.status || "done",
+      bpm: t?.bpm,
+      beatsPerBar: t?.beatsPerBar,
+      createdAt: t?.createdAt || Date.now(),
+      updatedAt: Date.now(),
+      transcript: t?.transcript || t?.raw_transcript || "",
+      briefJson: typeof t?.briefJson === "string" ? t.briefJson : JSON.stringify(t?.briefJson ?? {}),
+      audioKey: t?.audioKey,
+      lyrics: typeof newLyricsObj === "string" ? newLyricsObj : JSON.stringify(newLyricsObj),
+      cadenceMap: typeof newCadenceObj === "string" ? newCadenceObj : JSON.stringify(newCadenceObj ?? t?.cadenceMap ?? cadence ?? {}),
+      quality: typeof newQualityObj === "string" ? newQualityObj : JSON.stringify(newQualityObj ?? t?.quality ?? quality ?? {}),
+      styleBrief: typeof t?.styleBrief === "string" ? t.styleBrief : JSON.stringify(t?.styleBrief ?? styleBrief ?? {}),
+    };
+  };
+
   const regenerate = async (override?: StyleBrief) => {
     setBusy(true);
     try {
@@ -358,35 +413,18 @@ function TrackPage() {
       if (isLocalTrack) {
         // Run local pipeline for regeneration
         const config = loadLlmConfig();
-        const transcript = localTrackData?.transcript || "";
+        const transcript = (trackData as any)?.transcript || (trackData as any)?.raw_transcript || "";
         if (!transcript) throw new Error("No transcript available for local regeneration");
         const result = await runLocalPipeline(config, transcript, effectiveBrief);
-        // Update local track with new result
-        const updatedTrack: LocalTrack = {
-          id: localTrackData!.id || id,
-          deviceId: localTrackData!.deviceId || getLocalDeviceId(),
-          title: localTrackData!.title || "Untitled",
-          status: "done",
-          bpm: localTrackData?.bpm,
-          beatsPerBar: localTrackData?.beatsPerBar,
-          createdAt: localTrackData?.createdAt || Date.now(),
-          updatedAt: Date.now(),
-          transcript: localTrackData?.transcript,
-          briefJson: JSON.stringify(effectiveBrief ?? {}),
-          audioKey: localTrackData?.audioKey,
-          lyrics: JSON.stringify(result.lyrics),
-          cadenceMap: JSON.stringify(result.cadence),
-          quality: JSON.stringify(result.quality),
-          styleBrief: JSON.stringify(effectiveBrief ?? {}),
-        };
+        const updatedTrack = getUpdatedLocalTrack(result.lyrics, result.cadence, result.quality);
         await putLocalTrack(updatedTrack);
         qc.invalidateQueries({ queryKey: ["track", id] });
-        qc.invalidateQueries({ queryKey: ["tracks", "local"] });
+        qc.invalidateQueries({ queryKey: ["tracks"] });
         toast.success("Rewriting with the new brief…");
         setEditingBrief(false);
         return;
       }
-      const transcript = (data as { raw_transcript?: string } | undefined)?.raw_transcript;
+      const transcript = (trackData as any)?.raw_transcript || (trackData as any)?.transcript;
       const query = buildRecallQuery({
         transcript: transcript || undefined,
         topic: effectiveBrief?.topic,
@@ -448,7 +486,7 @@ function TrackPage() {
 
   const rewriteWeakestAxis = () => {
     if (!quality?.councilByRole) return;
-    const weakest = Object.entries(quality.councilByRole).sort((a, b) => a[1] - b[1])[0];
+    const weakest = Object.entries(quality.councilByRole).sort((a: any, b: any) => Number(a[1]) - Number(b[1]))[0];
     if (!weakest) return;
     const [role] = weakest;
     const directive: Record<string, string> = {
@@ -535,40 +573,22 @@ function TrackPage() {
     if (!chosen) return;
     try {
       if (isLocalTrack) {
-        // Update local track - use parsed lyrics state
         if (!lyrics) return;
-        // Find the section and line index
-          let lineIdx = 0;
-          let found = false;
-          for (const section of lyrics.sections) {
-            for (let i = 0; i < section.lines.length; i++) {
-              if (lineIdx === barIndex) {
-                section.lines[i] = chosen;
-                found = true;
-                break;
-              }
-              lineIdx++;
+        let lineIdx = 0;
+        let found = false;
+        for (const section of lyrics.sections) {
+          for (let i = 0; i < section.lines.length; i++) {
+            if (lineIdx === barIndex) {
+              section.lines[i] = chosen;
+              found = true;
+              break;
             }
-            if (found) break;
+            lineIdx++;
           }
-          const updatedTrack: LocalTrack = {
-            id: localTrackData!.id || id,
-            deviceId: localTrackData!.deviceId || getLocalDeviceId(),
-            title: localTrackData!.title || "Untitled",
-            status: "done",
-            bpm: localTrackData?.bpm,
-            beatsPerBar: localTrackData?.beatsPerBar,
-            createdAt: localTrackData?.createdAt || Date.now(),
-            updatedAt: Date.now(),
-            transcript: localTrackData?.transcript,
-            briefJson: localTrackData?.briefJson,
-            audioKey: localTrackData?.audioKey,
-            lyrics: JSON.stringify(lyrics),
-            cadenceMap: localTrackData?.cadenceMap,
-            quality: localTrackData?.quality,
-            styleBrief: localTrackData?.styleBrief,
-          };
-          await putLocalTrack(updatedTrack);
+          if (found) break;
+        }
+        const updatedTrack = getUpdatedLocalTrack(lyrics);
+        await putLocalTrack(updatedTrack);
       } else {
         await updateFn({ data: { deviceId: getDeviceId(), trackId: id, barIndex, text: chosen } });
       }
@@ -611,23 +631,7 @@ function TrackPage() {
             }
             if (found) break;
           }
-          const updatedTrack: LocalTrack = {
-            id: localTrackData!.id || id,
-            deviceId: localTrackData!.deviceId || getLocalDeviceId(),
-            title: localTrackData!.title || "Untitled",
-            status: "done",
-            bpm: localTrackData?.bpm,
-            beatsPerBar: localTrackData?.beatsPerBar,
-            createdAt: localTrackData?.createdAt || Date.now(),
-            updatedAt: Date.now(),
-            transcript: localTrackData?.transcript,
-            briefJson: localTrackData?.briefJson,
-            audioKey: localTrackData?.audioKey,
-            lyrics: JSON.stringify(lyrics),
-            cadenceMap: localTrackData?.cadenceMap,
-            quality: localTrackData?.quality,
-            styleBrief: localTrackData?.styleBrief,
-          };
+          const updatedTrack = getUpdatedLocalTrack(lyrics);
           await putLocalTrack(updatedTrack);
       } else {
         await updateFn({ data: { deviceId: getDeviceId(), trackId: id, barIndex, text: version.text } });
@@ -686,23 +690,7 @@ function TrackPage() {
             }
             if (found) break;
           }
-          const updatedTrack: LocalTrack = {
-            id: localTrackData!.id || id,
-            deviceId: localTrackData!.deviceId || getLocalDeviceId(),
-            title: localTrackData!.title || "Untitled",
-            status: "done",
-            bpm: localTrackData?.bpm,
-            beatsPerBar: localTrackData?.beatsPerBar,
-            createdAt: localTrackData?.createdAt || Date.now(),
-            updatedAt: Date.now(),
-            transcript: localTrackData?.transcript,
-            briefJson: localTrackData?.briefJson,
-            audioKey: localTrackData?.audioKey,
-            lyrics: JSON.stringify(lyrics),
-            cadenceMap: localTrackData?.cadenceMap,
-            quality: localTrackData?.quality,
-            styleBrief: localTrackData?.styleBrief,
-          };
+          const updatedTrack = getUpdatedLocalTrack(lyrics);
           await putLocalTrack(updatedTrack);
         } else {
           await updateFn({ data: { deviceId: getDeviceId(), trackId: id, barIndex: act.barIndex, text: act.serverBefore } });
@@ -716,7 +704,7 @@ function TrackPage() {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Undo failed");
     }
-  }, [undoStack, id, qc, updateFn, isLocalTrack, localTrackData]);
+  }, [undoStack, id, qc, updateFn, isLocalTrack, trackData]);
 
   const doRedo = useCallback(async () => {
     const act = redoStack[redoStack.length - 1];
@@ -738,23 +726,7 @@ function TrackPage() {
             }
             if (found) break;
           }
-          const updatedTrack: LocalTrack = {
-            id: localTrackData!.id || id,
-            deviceId: localTrackData!.deviceId || getLocalDeviceId(),
-            title: localTrackData!.title || "Untitled",
-            status: localTrackData?.status || "done",
-            bpm: localTrackData?.bpm,
-            beatsPerBar: localTrackData?.beatsPerBar,
-            createdAt: localTrackData?.createdAt || Date.now(),
-            updatedAt: Date.now(),
-            transcript: localTrackData?.transcript,
-            briefJson: localTrackData?.briefJson,
-            audioKey: localTrackData?.audioKey,
-            lyrics: JSON.stringify(lyrics),
-            cadenceMap: localTrackData?.cadenceMap,
-            quality: localTrackData?.quality,
-            styleBrief: localTrackData?.styleBrief,
-          };
+          const updatedTrack = getUpdatedLocalTrack(lyrics);
           await putLocalTrack(updatedTrack);
         } else {
           await updateFn({ data: { deviceId: getDeviceId(), trackId: id, barIndex: act.barIndex, text: act.serverAfter } });
@@ -768,7 +740,7 @@ function TrackPage() {
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Redo failed");
     }
-  }, [redoStack, id, qc, updateFn, isLocalTrack, localTrackData]);
+  }, [redoStack, id, qc, updateFn, isLocalTrack, trackData]);
 
 
 
@@ -941,19 +913,19 @@ function TrackPage() {
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <h1 className="font-display text-3xl font-semibold truncate">
-              {lyrics?.title || data.title || "Untitled"}
+              {lyrics?.title || (trackData as any)?.title || "Untitled"}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               {isProcessing
-                ? data.status === "transcribing" ? "Mapping cadence…" : "Writing & editing lyrics…"
-                : data.status === "error" ? "Something went wrong" : `Lyrics ready · scheme ${scheme}`}
+                ? (trackData as any)?.status === "transcribing" ? "Mapping cadence…" : "Writing & editing lyrics…"
+                : (trackData as any)?.status === "error" ? "Something went wrong" : `Lyrics ready · scheme ${scheme}`}
             </p>
           </div>
           <div className="flex gap-2 shrink-0">
             <Button
               variant="outline" size="sm"
               onClick={() => regenerate()}
-              disabled={busy || isProcessing || !data.raw_transcript}
+              disabled={busy || isProcessing || !((trackData as any)?.transcript || (trackData as any)?.raw_transcript)}
             >
               <RefreshCw className="h-4 w-4 mr-1.5" /> Regenerate
             </Button>
@@ -963,9 +935,9 @@ function TrackPage() {
           </div>
         </div>
 
-        {data.audio_url && (
+        {((trackData as any)?.audio_url || (trackData as any)?.audioKey) && (
           <Card className="p-4">
-            <audio controls src={data.audio_url} className="w-full" />
+            <audio controls src={(trackData as any)?.audio_url || (trackData as any)?.audioKey} className="w-full" />
           </Card>
         )}
 
@@ -1308,7 +1280,7 @@ function TrackPage() {
           </div>
         )}
 
-        {data.raw_transcript && (
+        {((trackData as any)?.transcript || (trackData as any)?.raw_transcript) && (
           <Collapsible>
             <CollapsibleTrigger asChild>
               <button className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
@@ -1318,7 +1290,7 @@ function TrackPage() {
             </CollapsibleTrigger>
             <CollapsibleContent>
               <Card className="p-4 mt-2 text-sm text-muted-foreground whitespace-pre-line">
-                {data.raw_transcript}
+                {(trackData as any)?.transcript || (trackData as any)?.raw_transcript}
               </Card>
             </CollapsibleContent>
           </Collapsible>
