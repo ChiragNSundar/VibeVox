@@ -176,8 +176,6 @@ function TrackPage() {
   const [editingBrief, setEditingBrief] = useState(false);
   const [briefDraft, setBriefDraft] = useState<StyleBrief>(DEFAULT_BRIEF);
   const [local, setLocal] = useState<BarLocalState>(() => loadLocal(id));
-  const [isLocalTrack, setIsLocalTrack] = useState(false);
-  const [localTrackData, setLocalTrackData] = useState<LocalTrack | null>(null);
   const [rewritingIdx, setRewritingIdx] = useState<number | null>(null);
   const initialBulk = useMemo(() => loadBulk(id), [id]);
   const [selectMode, setSelectMode] = useState<boolean>(initialBulk.selectMode);
@@ -199,19 +197,22 @@ function TrackPage() {
   }, [id, selectMode, selectedBars, bulkOpts]);
 
   // Load track from local store first, then fall back to server
-  const { data, isLoading, error } = useQuery({
+  const { data: trackData, isLoading } = useQuery({
     queryKey: ["track", id],
     queryFn: async () => {
-      // First check local store
-      const localTrack = await getLocalTrack(id);
-      if (localTrack) {
-        setIsLocalTrack(true);
-        setLocalTrackData(localTrack);
-        return null; // Don't use server data
+      try {
+        const localTrack = await getLocalTrack(id);
+        if (localTrack) {
+          return { ...localTrack, isLocal: true };
+        }
+        if (!isLocalOnly()) {
+          const cloud = await fetchTrack({ data: { deviceId: getDeviceId(), id } }).catch(() => null);
+          if (cloud) return { ...cloud, isLocal: false };
+        }
+      } catch {
+        /* ignore */
       }
-      // Fall back to server
-      setIsLocalTrack(false);
-      return fetchTrack({ data: { deviceId: getDeviceId(), id } });
+      return null;
     },
     refetchInterval: (q) => {
       const t = q.state.data as { status?: string } | undefined;
@@ -219,36 +220,24 @@ function TrackPage() {
     },
   });
 
-  // Use local track data if available
-  const trackData = isLocalTrack ? localTrackData : data;
-  const lyrics = useMemo(() => {
-    if (!trackData) return null;
-    if (isLocalTrack && trackData.lyrics) {
-      return JSON.parse(trackData.lyrics);
+  const isLocalTrack = Boolean(trackData?.isLocal);
+
+  const safeParseJson = (val: any) => {
+    if (!val) return null;
+    if (typeof val === "string") {
+      try {
+        return JSON.parse(val);
+      } catch {
+        return null;
+      }
     }
-    return (trackData as any).lyrics ?? null;
-  }, [trackData, isLocalTrack]);
-  const cadence = useMemo(() => {
-    if (!trackData) return null;
-    if (isLocalTrack && trackData.cadenceMap) {
-      return JSON.parse(trackData.cadenceMap);
-    }
-    return (trackData as any).cadence ?? null;
-  }, [trackData, isLocalTrack]);
-  const quality = useMemo(() => {
-    if (!trackData) return null;
-    if (isLocalTrack && trackData.quality) {
-      return JSON.parse(trackData.quality);
-    }
-    return (trackData as any).quality ?? null;
-  }, [trackData, isLocalTrack]);
-  const styleBrief = useMemo(() => {
-    if (!trackData) return null;
-    if (isLocalTrack && trackData.styleBrief) {
-      return JSON.parse(trackData.styleBrief);
-    }
-    return (trackData as any).styleBrief ?? null;
-  }, [trackData, isLocalTrack]);
+    return val;
+  };
+
+  const lyrics = useMemo(() => safeParseJson(trackData?.lyrics ?? (trackData as any)?.lyrics), [trackData]);
+  const cadence = useMemo(() => safeParseJson(trackData?.cadenceMap ?? (trackData as any)?.cadence_map ?? (trackData as any)?.cadence), [trackData]);
+  const quality = useMemo(() => safeParseJson(trackData?.quality), [trackData]);
+  const styleBrief = useMemo(() => safeParseJson(trackData?.styleBrief ?? (trackData as any)?.style_brief), [trackData]);
   const isProcessing = trackData ? (trackData.status !== "done" && trackData.status !== "error") : true;
 
   const flatLines = useMemo(() => lyrics ? lyrics.sections.flatMap((s) => s.lines) : [], [lyrics]);
@@ -274,7 +263,7 @@ function TrackPage() {
 
   // Auto-harvest into style memory when the track scores Drake-tier.
   useEffect(() => {
-    if (!lyrics || !data || data.status !== "done") return;
+    if (!lyrics || !trackData || trackData.status !== "done") return;
     const score = quality?.drakeScore ?? 0;
     if (score >= 8.0) {
       const bars = lyrics.sections.flatMap((s) => s.lines);
@@ -289,9 +278,9 @@ function TrackPage() {
       });
       addBurnedPhrasesFromBars(bars);
     }
-  }, [data?.status, id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [trackData?.status, id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (isLoading || (!data && !isLocalTrack)) {
+  if (isLoading) {
     return (
       <div className="max-w-3xl mx-auto space-y-6" aria-busy="true" aria-label="Loading track">
         <div className="flex items-start justify-between gap-4">
@@ -323,6 +312,21 @@ function TrackPage() {
               <Skeleton key={i} className="h-6" style={{ width: `${60 + ((i * 13) % 35)}%` }} />
             ))}
           </div>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!trackData) {
+    return (
+      <div className="max-w-md mx-auto text-center space-y-4 py-16">
+        <Card className="p-8 space-y-4 border-dashed">
+          <div className="text-4xl">🎵</div>
+          <h2 className="text-xl font-bold">Track Not Found</h2>
+          <p className="text-sm text-muted-foreground">
+            This track was not found in your local studio memory.
+          </p>
+          <Button onClick={() => navigate({ to: "/library" })}>Go to Track Library</Button>
         </Card>
       </div>
     );

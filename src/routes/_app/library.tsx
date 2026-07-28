@@ -1,10 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { listTracks } from "@/lib/tracks.functions";
+import { listTracks, deleteTrack } from "@/lib/tracks.functions";
 import { getDeviceId } from "@/lib/device-id";
-import { listTracks as listLocalTracks, isLocalOnly, getDeviceId as getLocalDeviceId } from "@/lib/local-store";
+import { listTracks as listLocalTracks, deleteTrack as deleteLocalTrack, isLocalOnly, getDeviceId as getLocalDeviceId } from "@/lib/local-store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,8 +14,9 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { EmptyState } from "@/components/EmptyState";
-import { Mic, Plus, Database, Search, SortAsc, Filter, Music } from "lucide-react";
+import { Mic, Plus, Database, Search, SortAsc, Filter, Music, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/library")({
   head: () => ({ meta: [{ title: "Your library · VoxScript" }] }),
@@ -27,7 +28,9 @@ type StatusFilter = "all" | "done" | "processing" | "error";
 
 function LibraryPage() {
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const fetchTracks = useServerFn(listTracks);
+  const deleteTrackRpc = useServerFn(deleteTrack);
   const localMode = isLocalOnly();
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -47,6 +50,24 @@ function LibraryPage() {
       return rows?.some((r) => r.status !== "done" && r.status !== "error") ? 3000 : false;
     },
   });
+
+  const handleDeleteTrack = async (e: React.MouseEvent, trackId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to delete this track?")) return;
+
+    try {
+      if (localMode) {
+        await deleteLocalTrack(trackId);
+      } else {
+        await deleteTrackRpc({ data: { id: trackId } });
+      }
+      qc.invalidateQueries({ queryKey: ["tracks"] });
+      toast.success("Track deleted");
+    } catch {
+      toast.error("Failed to delete track");
+    }
+  };
 
   // Filter + Sort
   const filtered = useMemo(() => {
@@ -213,7 +234,18 @@ function LibraryPage() {
                       </div>
                     </div>
                   </div>
-                  <StatusPill status={t.status} />
+                  <div className="flex items-center gap-2">
+                    <StatusPill status={t.status} />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-80 group-hover:opacity-100"
+                      onClick={(e) => handleDeleteTrack(e, t.id)}
+                      title="Delete track"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </Card>
             </Link>

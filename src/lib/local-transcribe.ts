@@ -68,16 +68,19 @@ export async function transcribeLocal(audio: Blob, filename: string, config: Loc
 
 async function detectBackend(base: string): Promise<"faster-whisper" | "whisper.cpp"> {
   try {
-    const r = await fetch(`${base}/v1/models`, { method: "GET" });
-    if (r.ok) return "faster-whisper";
+    const health = await fetch(`${base}/health`, { method: "GET" });
+    if (health.ok) return "faster-whisper";
+    const models = await fetch(`${base}/v1/models`, { method: "GET" });
+    if (models.ok) return "faster-whisper";
   } catch { /* fall through */ }
-  return "whisper.cpp";
+  return "faster-whisper";
 }
 
 async function transcribeFasterWhisper(audio: Blob, filename: string, base: string, config: LocalWhisperConfig): Promise<string> {
   const form = new FormData();
   form.append("file", audio, filename);
   form.append("model", config.model || "Systran/faster-whisper-base.en");
+  form.append("model_name", config.model || "Systran/faster-whisper-base.en");
   if (config.language) form.append("language", config.language);
   form.append("response_format", "json");
   const res = await fetch(`${base}/v1/audio/transcriptions`, { method: "POST", body: form });
@@ -111,11 +114,11 @@ export async function pingLocalWhisper(config: LocalWhisperConfig): Promise<{ ok
       const r = await fetch(`${base}/`, { method: "GET" });
       return { ok: r.ok, message: r.ok ? "Connected" : `HTTP ${r.status}` };
     }
-    const r = await fetch(`${base}/v1/models`);
-    if (!r.ok) return { ok: false, message: `HTTP ${r.status}` };
-    const j = (await r.json()) as { data?: { id?: string }[] };
-    const ids = (j.data ?? []).map((m) => m.id).filter(Boolean);
-    return { ok: true, message: `Connected. ${ids.length} model${ids.length === 1 ? "" : "s"} available.` };
+    const rHealth = await fetch(`${base}/health`);
+    if (rHealth.ok) return { ok: true, message: "Connected (faster-whisper)" };
+    const rModels = await fetch(`${base}/v1/models`);
+    if (rModels.ok) return { ok: true, message: "Connected (faster-whisper)" };
+    return { ok: false, message: `HTTP ${rHealth.status}` };
   } catch (e) {
     return { ok: false, message: e instanceof Error ? e.message : String(e) };
   }
