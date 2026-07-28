@@ -91,13 +91,21 @@ function tx<T>(name: Store, mode: IDBTransactionMode, fn: (s: IDBObjectStore) =>
   return openDb().then((db) =>
     new Promise<T>((resolve, reject) => {
       const t = db.transaction(name, mode);
-      const store = t.objectStore(name);
-      Promise.resolve(fn(store)).then(
-        (v) => { t.oncomplete = () => resolve(v); },
-        (e) => { t.abort(); reject(e); },
-      );
+      let resultVal: T;
+      t.oncomplete = () => resolve(resultVal);
       t.onerror = () => reject(t.error);
       t.onabort = () => reject(t.error);
+      const store = t.objectStore(name);
+      Promise.resolve(fn(store)).then(
+        (v) => {
+          resultVal = v;
+          if (mode === "readonly") resolve(v);
+        },
+        (e) => {
+          try { t.abort(); } catch { /* ignore */ }
+          reject(e);
+        },
+      );
     }),
   );
 }
@@ -114,12 +122,12 @@ export async function putTrack(t: LocalTrack): Promise<void> {
 
 export async function getTrack(id: string): Promise<LocalTrack | null> {
   try {
-    let track = await tx("tracks", "readonly", (s) => req(s.get(id) as IDBRequest<LocalTrack>));
-    if (!track) {
-      await new Promise((r) => setTimeout(r, 100));
-      track = await tx("tracks", "readonly", (s) => req(s.get(id) as IDBRequest<LocalTrack>));
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const track = await tx("tracks", "readonly", (s) => req(s.get(id) as IDBRequest<LocalTrack>));
+      if (track) return track;
+      if (attempt < 3) await new Promise((r) => setTimeout(r, 100 * (attempt + 1)));
     }
-    return track ?? null;
+    return null;
   } catch {
     return null;
   }

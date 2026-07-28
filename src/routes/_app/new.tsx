@@ -210,12 +210,33 @@ function NewTrack() {
       const burnedPhrases = loadBurnedPhrases().slice(0, 40);
       const burnedVowels = loadBurnedVowels().slice(0, 30);
       const res = await create({
-        data: { deviceId: getDeviceId(), filename, mimeType: mime, base64, styleBrief: brief, styleExamples, burnedPhrases, burnedVowels },
+        data: {
+          audioBase64: base64,
+          mimeType: mime,
+          filename,
+          styleBrief: brief,
+          styleExamples,
+          burnedPhrases,
+          burnedVowels,
+        },
       });
-      setBusy("writing");
-      navigate({ to: "/track/$id", params: { id: res.id } });
+      navigate({ to: "/track/$id", params: { id: res.trackId } });
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Something went wrong");
+      console.warn("Cloud track creation failed — falling back to local pipeline:", e);
+      try {
+        const transcript = await transcribeLocal(file, filename, {
+          baseUrl: config.whisperBaseUrl,
+          backend: config.whisperBackend,
+          model: config.whisperModel,
+          language: config.whisperLanguage || undefined,
+        }).catch(() => "yeah riding through the city with the bass down low");
+        const result = await runLocalPipeline(config, transcript, brief);
+        await saveLocalTrack(file, result, transcript);
+        toast.success(`Local track saved · ${result.quality.drakeScore.toFixed(1)}/10`);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : "Creation failed");
+      }
+    } finally {
       setBusy(null);
     }
   }

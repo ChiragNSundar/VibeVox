@@ -240,6 +240,41 @@ function TrackPage() {
   });
 
   const isLocalTrack = Boolean(trackData?.isLocal);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    let createdUrl: string | null = null;
+
+    async function loadAudio() {
+      const url = (trackData as any)?.audio_url;
+      if (url) {
+        if (active) setAudioUrl(url);
+        return;
+      }
+      const key = (trackData as any)?.audioKey;
+      if (key) {
+        try {
+          const blob = await getLocalBlob(key);
+          if (blob && active) {
+            createdUrl = URL.createObjectURL(blob);
+            setAudioUrl(createdUrl);
+          }
+        } catch (e) {
+          console.warn("Failed to load local audio blob:", e);
+        }
+      } else {
+        if (active) setAudioUrl(null);
+      }
+    }
+
+    loadAudio();
+
+    return () => {
+      active = false;
+      if (createdUrl) URL.revokeObjectURL(createdUrl);
+    };
+  }, [trackData]);
 
   const safeParseJson = (val: any) => {
     if (!val) return null;
@@ -935,9 +970,9 @@ function TrackPage() {
           </div>
         </div>
 
-        {((trackData as any)?.audio_url || (trackData as any)?.audioKey) && (
+        {audioUrl && (
           <Card className="p-4">
-            <audio controls src={(trackData as any)?.audio_url || (trackData as any)?.audioKey} className="w-full" />
+            <audio controls src={audioUrl} className="w-full" />
           </Card>
         )}
 

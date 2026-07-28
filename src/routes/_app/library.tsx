@@ -217,44 +217,48 @@ function LibraryPage() {
             {filtered.length} track{filtered.length !== 1 ? "s" : ""}
             {searchQuery && ` matching "${searchQuery}"`}
           </div>
-          {filtered.map((t) => (
-            <Link key={t.id} to="/track/$id" params={{ id: t.id }} className="block">
-              <Card className="p-4 hover:border-primary/50 transition-colors group">
-                <div className="flex items-center justify-between">
-                  <div className="min-w-0 flex items-center gap-3">
-                    <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/60 shrink-0 group-hover:bg-primary/10 transition-colors">
-                      <Music className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    </div>
-                    <div className="min-w-0">
-                      <div className="font-display font-semibold truncate">{t.title}</div>
-                      <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
-                        {localMode ? (
-                          <>
-                            <Database className="h-3 w-3" />
-                            {formatDistanceToNow(new Date('createdAt' in t ? t.createdAt : t.created_at), { addSuffix: true })}
-                          </>
-                        ) : (
-                          formatDistanceToNow(new Date('created_at' in t ? t.created_at : t.createdAt), { addSuffix: true })
-                        )}
+          {filtered.map((t) => {
+            const rawDate = 'createdAt' in t ? (t as any).createdAt : (t as any).created_at;
+            const validDate = rawDate ? new Date(rawDate) : new Date();
+            const dateStr = !isNaN(validDate.getTime()) ? formatDistanceToNow(validDate, { addSuffix: true }) : "recently";
+
+            return (
+              <div
+                key={t.id}
+                onClick={() => navigate({ to: "/track/$id", params: { id: t.id } })}
+                className="cursor-pointer block"
+              >
+                <Card className="p-4 hover:border-primary/50 transition-colors group">
+                  <div className="flex items-center justify-between">
+                    <div className="min-w-0 flex items-center gap-3">
+                      <div className="flex items-center justify-center w-9 h-9 rounded-lg bg-muted/60 shrink-0 group-hover:bg-primary/10 transition-colors">
+                        <Music className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-display font-semibold truncate">{t.title || "Untitled"}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
+                          <Database className="h-3 w-3 text-muted-foreground" />
+                          {dateStr}
+                        </div>
                       </div>
                     </div>
+                    <div className="flex items-center gap-2">
+                      <StatusPill status={t.status} />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-80 group-hover:opacity-100"
+                        onClick={(e) => handleDeleteTrack(e, t.id)}
+                        title="Delete track"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <StatusPill status={t.status} />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-80 group-hover:opacity-100"
-                      onClick={(e) => handleDeleteTrack(e, t.id)}
-                      title="Delete track"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          ))}
+                </Card>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>
