@@ -18,15 +18,34 @@ export function syllablesInWord(word: string): number {
   if (!w) return 0;
   if (w.length <= 2) return 1;
 
-  // silent trailing e (but not "le" after a consonant)
+  // Active trailing 'e' in Indic Romanized scripts (e.g. -de, -re, -ke, -me, -se, -te, -ne, -ge, -he, -ye)
+  const isIndicActiveE =
+    /(?:[aeiou]|de|re|ke|me|se|te|ne|ge|he|ye|che|phe)$/i.test(w) &&
+    !/(?:the|here|there|were|where|make|take|like|come|some|give|have|life|love|time|name|place|game|lame|home|alone|side|ride|hide|inside|outside)$/i.test(w);
+
   let s = w;
-  if (s.endsWith("e") && !s.endsWith("le")) s = s.slice(0, -1);
+  // silent trailing e in English (but not "le" after a consonant or Indic active e)
+  if (s.endsWith("e") && !s.endsWith("le") && !isIndicActiveE) s = s.slice(0, -1);
 
-  // remove final "es" / "ed" when preceded by consonant (silent)
-  if (/[^aeiouy](?:es|ed)$/.test(s)) s = s.slice(0, -2);
+  // remove final "es" / "ed" when preceded by consonant (silent in English)
+  if (/[^aeiouy](?:es|ed)$/.test(s) && !isIndicActiveE) s = s.slice(0, -2);
 
-  // collapse diphthongs
-  const groups = s.match(/[aeiouy]+/g);
+  // Split hiatus pairs common in Indic Romanization (e.g. ao in mitaoon, ia in duniya, ua in hua)
+  const expanded = s.replace(/([aeiouy])([aeiouy])/g, (m, v1, v2) => {
+    if (
+      (v1 === "a" && v2 === "a") ||
+      (v1 === "e" && v2 === "e") ||
+      (v1 === "o" && v2 === "o") ||
+      (v1 === "a" && v2 === "i") ||
+      (v1 === "a" && v2 === "u")
+    ) {
+      return m; // keep aa, ee, oo, ai, au together as single vowel nucleus
+    }
+    return `${v1} ${v2}`;
+  });
+
+  // collapse vowel groups
+  const groups = expanded.match(/[aeiouy]+/g);
   let n = groups ? groups.length : 0;
 
   // "le" after a consonant adds a syllable (e.g. "table")

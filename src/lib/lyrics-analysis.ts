@@ -21,6 +21,10 @@ export const CLICHES: string[] = [
   "rags to riches", "haters gonna hate", "live my best life",
   "shine bright", "chasing dreams", "ride or die",
   "trust the process", "level up", "no cap on god on god",
+  // Hinglish clichés
+  "apna time aayega", "gully ka raja", "raat ko soya nahi", "dil me hai tu", "aankhon me aasoo",
+  // Kanglish clichés
+  "kannada gothilla", "namma bengaluru", "nanna hudugi", "bengaluru huduga",
 ];
 
 export function countCliches(lines: string[], extraBanned: string[] = []): number {

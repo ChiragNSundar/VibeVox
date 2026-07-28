@@ -32,6 +32,10 @@ const GENRES = [
 
 const REGIONS = [
   ["auto", "Auto-detect"],
+  ["hinglish", "Hindi (Romanized / Hinglish)"],
+  ["hinglish-english", "Hinglish + English Code-Switch"],
+  ["kanglish", "Kannada (Romanized / Kanglish)"],
+  ["kanglish-english", "Kanglish + English Code-Switch"],
   ["us-south", "US South"],
   ["us-east", "US East"],
   ["us-west", "US West"],
@@ -182,7 +186,13 @@ export function StyleBriefForm({
           <Label className="text-xs uppercase tracking-wider">Custom slang / ad-libs</Label>
           <Input
             className="mt-1.5"
-            placeholder="on god, skrr, blicky, fr fr"
+            placeholder={
+              v.slangRegion?.includes("hinglish")
+                ? "malum hai na, bantai, gully, haq se, public, scene kya hai"
+                : v.slangRegion?.includes("kanglish")
+                ? "macha, magane, sariyaagi, scene-u, guru, sakkat"
+                : "on god, skrr, blicky, fr fr"
+            }
             value={v.customSlang}
             onChange={(e) => set("customSlang", e.target.value)}
           />
