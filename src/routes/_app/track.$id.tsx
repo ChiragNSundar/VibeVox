@@ -516,8 +516,8 @@ function TrackPage() {
       if (isLocalTrack) {
         // Local rewrite using local pipeline
         const config = loadLlmConfig();
-        const transcript = trackData?.transcript || "";
-        const brief = trackData?.styleBrief || undefined;
+        const transcript = (trackData as any)?.transcript || (trackData as any)?.raw_transcript || "";
+        const brief = (trackData as any)?.styleBrief || (trackData as any)?.style_brief || undefined;
         const result = await runLocalPipeline(config, transcript, brief);
         // For simplicity, use the rewritten lyrics as proposals
         // In a real implementation, we'd have a more targeted rewrite
