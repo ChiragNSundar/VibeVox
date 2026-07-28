@@ -67,6 +67,16 @@ Explore the core studios and modules of **Vocal Muse**:
 
 ![Reference & Style Intelligence](public/screenshots/reference_and_style.png)
 
+### 7. Ghostwriter Scorecard & Critic Council
+*Multi-pass cadence scorecard, radar chart breakdown (Pocket, Wordplay, Authenticity), Critic Council rewrite suggestions, and real-time syllable target tooltips.*
+
+![Ghostwriter Scorecard & Critic Council](public/screenshots/ghostwriter_scorecard.png)
+
+### 8. Cadence Pocket Grid & Rhyme Scheme Highlighting
+*Interactive lyric editor with real-time cadence density highlighting, syllable count matching, and rhyme scheme visualization.*
+
+![Cadence Pocket Grid & Rhyme Scheme Highlighting](public/screenshots/lyrics_pocket_grid.png)
+
 ---
 
 ## 🚀 Quickstart
