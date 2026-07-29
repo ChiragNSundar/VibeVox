@@ -47,24 +47,29 @@ function OnboardingPage() {
       ]);
       if (llms.length > 0) {
         setLlmOk(true);
-        setLlmName(llms[0].label);
+        setLlmName(llms[0].backend);
       } else {
         // Try pinging the saved config
         const cfg = loadLlmConfig();
         try {
           await pingLocalLlm(cfg);
           setLlmOk(true);
-          setLlmName(cfg.model || "Local LLM");
+          setLlmName(cfg.localModel || "Local LLM");
         } catch {
           setLlmOk(false);
         }
       }
       if (whispers.length > 0) {
         setWhisperOk(true);
-        setWhisperName(whispers[0].label);
+        setWhisperName(whispers[0].backend);
       } else {
+        const cfg = loadLlmConfig();
         try {
-          await pingLocalWhisper();
+          await pingLocalWhisper({
+            baseUrl: cfg.whisperBaseUrl,
+            backend: cfg.whisperBackend,
+            model: cfg.whisperModel,
+          });
           setWhisperOk(true);
           setWhisperName("Whisper Server");
         } catch {

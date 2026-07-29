@@ -57,6 +57,7 @@ export class LiveCapture {
   constructor(private opts: LiveCaptureOpts) {}
 
   get isRunning() { return !!this.state; }
+  get stream(): MediaStream | null { return this.state?.stream ?? null; }
 
   async start() {
     if (this.state) return;

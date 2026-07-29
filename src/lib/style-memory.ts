@@ -12,7 +12,7 @@ export type StyleMemoryEntry = {
   attitude?: string[];
   bars: string[];
   createdAt: number;
-  source?: "self-play" | "track" | "web" | "paste" | "import";
+  source?: "self-play" | "track" | "web" | "web-search" | "paste" | "manual" | "import";
   sourceUrl?: string;
 };
 

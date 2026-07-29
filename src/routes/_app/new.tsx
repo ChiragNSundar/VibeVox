@@ -220,7 +220,7 @@ function NewTrack() {
           burnedVowels,
         },
       });
-      navigate({ to: "/track/$id", params: { id: res.trackId } });
+      navigate({ to: "/track/$id", params: { id: res.id } });
     } catch (e) {
       console.warn("Cloud track creation failed — falling back to local pipeline:", e);
       try {
