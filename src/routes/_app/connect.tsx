@@ -30,7 +30,7 @@ export const Route = createFileRoute("/_app/connect")({
 });
 
 function ConnectPage() {
-  const [config, setConfig] = useState<LlmConfig>(loadLlmConfig());
+  const [config, setConfig] = useState<LlmConfig>(() => loadLlmConfig());
   const [llms, setLlms] = useState<DiscoveredLlm[]>([]);
   const [whispers, setWhispers] = useState<DiscoveredWhisper[]>([]);
   const [scanning, setScanning] = useState(false);

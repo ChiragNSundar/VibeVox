@@ -87,9 +87,9 @@ function LibraryPage() {
     if (!confirm("Are you sure you want to delete this track?")) return;
 
     try {
-      if (localMode) {
-        await deleteLocalTrack(trackId);
-      } else {
+      // Always clean IndexedDB so tracks don't reappear
+      await deleteLocalTrack(trackId).catch(() => {});
+      if (!localMode) {
         await deleteTrackRpc({ data: { id: trackId } });
       }
       qc.invalidateQueries({ queryKey: ["tracks"] });

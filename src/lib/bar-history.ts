@@ -18,6 +18,7 @@ export interface BarVersion {
 const STORE_KEY = "voxscript:bar-history";
 
 function loadAll(): Record<string, BarVersion[]> {
+  if (typeof localStorage === "undefined") return {};
   try {
     const raw = localStorage.getItem(STORE_KEY);
     return raw ? JSON.parse(raw) : {};
@@ -27,6 +28,7 @@ function loadAll(): Record<string, BarVersion[]> {
 }
 
 function saveAll(store: Record<string, BarVersion[]>) {
+  if (typeof localStorage === "undefined") return;
   localStorage.setItem(STORE_KEY, JSON.stringify(store));
 }
 
@@ -89,5 +91,6 @@ export function clearBarHistory(barId: string) {
  * Clear all bar history (e.g. for a track delete).
  */
 export function clearAllBarHistory() {
+  if (typeof localStorage === "undefined") return;
   localStorage.removeItem(STORE_KEY);
 }
