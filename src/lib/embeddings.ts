@@ -3,8 +3,16 @@
 // Two backends:
 //   - "cloud" → calls the `embedTexts` server function (Lovable AI Gateway,
 //     gemini-embedding-001 by default, 3072 dims).
-//   - "local" → POSTs to the user's local OpenAI-compatible /v1/embeddings
-//     endpoint (Ollama, LM Studio). Default model: nomic-embed-text (768 dims).
+//   - "direct" → POSTs to an OpenAI-compatible /v1/embeddings endpoint. That
+//     may be local (Ollama, LM Studio — nomic-embed-text, 768 dims) or a
+//     hosted provider that offers embeddings.
+//
+// Embeddings are configured independently of chat because several chat
+// providers don't offer them at all — OpenRouter is chat-only, so running
+// generation there while keeping vectors on a local Ollama is the normal
+// setup, not an edge case. `embeddingsAvailable` is the guard for the case
+// where no embedding backend is reachable; hybrid recall degrades to its
+// lexical signals rather than failing.
 //
 // All callers go through `embedMany` / `embedOne`, which dedupes the request,
 // checks the IDB cache for each text, fetches only the misses in one batch,
@@ -12,30 +20,49 @@
 // so swapping models or hosts doesn't return stale vectors.
 
 import { cacheGet, cacheSet, hashInputs } from "./cache";
-import { loadLlmConfig, type LlmConfig } from "./llm-config";
+import { embedTarget, loadLlmConfig, type LlmConfig } from "./llm-config";
+import { getProvider, resolveTarget } from "./providers";
 
 export type EmbedBackend = "cloud" | "local";
 
 export type EmbedContext = {
+  /** "cloud" routes through the server function; "local" is a direct fetch. */
   backend: EmbedBackend;
   model: string;
-  baseUrl?: string; // local only
-  apiKey?: string; // local only
+  baseUrl?: string; // direct only
+  apiKey?: string; // direct only
+  /** Auth/attribution headers for the direct path. */
+  headers?: Record<string, string>;
+  /** False when the selected provider has no /embeddings endpoint. */
+  supported: boolean;
 };
 
 const CLOUD_DEFAULT_MODEL = "google/gemini-embedding-001";
-const LOCAL_DEFAULT_MODEL = "nomic-embed-text";
 
 export function resolveEmbedContext(config: LlmConfig = loadLlmConfig()): EmbedContext {
-  if (config.mode === "local") {
-    return {
-      backend: "local",
-      model: LOCAL_DEFAULT_MODEL,
-      baseUrl: config.localBaseUrl,
-      apiKey: config.localApiKey || "local",
-    };
+  const input = embedTarget(config);
+  const provider = getProvider(input.providerId);
+
+  // Server-side gateway — no browser fetch, no base URL.
+  if (provider.serverSide) {
+    return { backend: "cloud", model: input.model || CLOUD_DEFAULT_MODEL, supported: true };
   }
-  return { backend: "cloud", model: CLOUD_DEFAULT_MODEL };
+
+  if (!provider.embeddings) {
+    // e.g. OpenRouter selected for chat and carried over here. Report it as
+    // unsupported so callers can skip vector recall instead of 404-looping.
+    return { backend: "local", model: input.model ?? "", baseUrl: input.baseUrl, supported: false };
+  }
+
+  const target = resolveTarget(input);
+  return {
+    backend: "local",
+    model: target.model || provider.defaultEmbedModel || "nomic-embed-text",
+    baseUrl: target.baseUrl,
+    apiKey: target.apiKey,
+    headers: target.headers,
+    supported: true,
+  };
 }
 
 async function keyFor(ctx: EmbedContext, text: string): Promise<string> {
@@ -43,16 +70,19 @@ async function keyFor(ctx: EmbedContext, text: string): Promise<string> {
 }
 
 async function callLocal(ctx: EmbedContext, texts: string[]): Promise<number[][]> {
+  if (!ctx.supported) {
+    throw new Error(`Provider has no embeddings endpoint (model: ${ctx.model})`);
+  }
   const url = `${(ctx.baseUrl ?? "").replace(/\/+$/, "")}/embeddings`;
   const res = await fetch(url, {
     method: "POST",
-    headers: {
+    headers: ctx.headers ?? {
       "Content-Type": "application/json",
       Authorization: `Bearer ${ctx.apiKey || "local"}`,
     },
     body: JSON.stringify({ model: ctx.model, input: texts }),
   });
-  if (!res.ok) throw new Error(`Local embed failed (${res.status})`);
+  if (!res.ok) throw new Error(`Embed failed (${res.status})`);
   const json = (await res.json()) as { data?: { index?: number; embedding?: number[] }[] };
   const items = json.data ?? [];
   return texts.map((_, i) => {
@@ -147,9 +177,11 @@ export function cosineSim(a: number[], b: number[]): number {
  * when credits exist, so we just return true for cloud without a roundtrip.
  */
 export async function embeddingsAvailable(config: LlmConfig = loadLlmConfig()): Promise<boolean> {
-  if (config.mode === "cloud") return true;
+  const ctx = resolveEmbedContext(config);
+  if (!ctx.supported) return false;
+  if (ctx.backend === "cloud") return true;
   try {
-    await embedOne("ping", resolveEmbedContext(config));
+    await embedOne("ping", ctx);
     return true;
   } catch {
     return false;

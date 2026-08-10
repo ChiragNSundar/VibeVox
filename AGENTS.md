@@ -45,6 +45,7 @@ lookups all work with zero backend:
 - **Style memory + embeddings** → IndexedDB via `src/lib/cache.ts` and
   `src/lib/style-memory.ts`.
 - **LLM** → Ollama / LM Studio / llama.cpp server (see `src/lib/llm-config.ts`).
+  Hosted providers work through the same path — see below.
 - **Transcription** → faster-whisper-server or whisper.cpp
   (`src/lib/local-transcribe.ts`).
 - **Rhymes** → Datamuse (free, keyless) plus deep-link into
@@ -54,6 +55,39 @@ Toggle local mode with `setLocalOnly(true)` from `src/lib/local-store.ts`
 or via Settings once wired in the UI. Bundle export/import
 (`exportBundle` / `importBundle` / `downloadBundle`) roundtrips everything
 to a single portable `.json`.
+
+## LLM Providers
+
+`src/lib/providers.ts` is the single registry of OpenAI-compatible backends —
+local servers and hosted gateways (OpenRouter, OpenAI, Groq, DeepSeek,
+Mistral, Together, Gemini). Everything downstream speaks one wire format, so
+provider differences live only here:
+
+- `resolveTarget(input)` → `{ baseUrl, model, headers, strictBody }`. The three
+  fetch call sites (`rawChat` in `local-pipeline.ts`, `pingLlm` in
+  `llm-config.ts`, `callLocal` in `embeddings.ts`) all go through it. Add new
+  call sites the same way rather than reading config fields directly.
+- `applyBodyCompat(body, target)` strips Ollama's nested `options` for
+  providers that reject unknown params, and renames `max_tokens` →
+  `max_completion_tokens` for o-series/gpt-5.
+- `fetchCatalog(input)` lists models. OpenRouter's catalog is public and
+  carries `context_length` + pricing; picking from it fills in the real
+  context window, which is what drives writer chunk sizing.
+
+Keys are stored per-provider in `LlmConfig.apiKeys` so switching backends
+doesn't lose credentials, and they go from the browser straight to the
+provider (`routing: "direct"`). A `"proxy"` value is reserved for a
+server-side relay; if you implement it, the base URL must come from a
+server-side allowlist, never from the client request body.
+
+Embeddings are configured independently (`embedProviderId`) because several
+chat providers have no `/embeddings` endpoint. `resolveEmbedContext` reports
+`supported: false` in that case and recall degrades to its lexical signals.
+
+Hosted model ids carry no parameter count, so `detectModel` matches them by
+family first and pins them to the `large` tier — otherwise a frontier model
+falls through to `other`/`paramsB: 0`, reads as mid-tier, and gets 8K of
+assumed context.
 
 ## Rhyme & Language Intelligence
 

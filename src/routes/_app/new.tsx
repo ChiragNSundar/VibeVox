@@ -17,7 +17,8 @@ import {
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Upload, Mic, Square, Loader2, Sliders, ChevronDown, Cpu, Cloud, Sparkles, Copy, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { loadLlmConfig, isOfflineReady } from "@/lib/llm-config";
+import { loadLlmConfig, isOfflineReady, isLocalConfig } from "@/lib/llm-config";
+import { getProvider } from "@/lib/providers";
 import { transcribeLocal } from "@/lib/local-transcribe";
 import { addToStyleMemory, sampleStyleExamples, styleMemoryStats, loadBurnedPhrases, loadBurnedVowels } from "@/lib/style-memory";
 import { recallStyleExamples, buildRecallQuery } from "@/lib/style-recall";
@@ -95,6 +96,7 @@ function NewTrack() {
   const [recording, setRecording] = useState(false);
   const [brief, setBrief] = useState<StyleBrief>(DEFAULT_BRIEF);
   const [llmMode, setLlmMode] = useState<"cloud" | "local">("cloud");
+  const [llmLabel, setLlmLabel] = useState("Cloud");
   const [memCount, setMemCount] = useState(0);
   const [localTranscript, setLocalTranscript] = useState("");
   const [localProgress, setLocalProgress] = useState<string>("");
@@ -110,7 +112,9 @@ function NewTrack() {
       const saved = localStorage.getItem(BRIEF_KEY);
       if (saved) setBrief({ ...DEFAULT_BRIEF, ...JSON.parse(saved) });
     } catch { /* ignore */ }
-    setLlmMode(loadLlmConfig().mode);
+    const cfg = loadLlmConfig();
+    setLlmMode(isLocalConfig(cfg) ? "local" : "cloud");
+    setLlmLabel(getProvider(cfg.providerId).label);
     setMemCount(styleMemoryStats().count);
   }, []);
 
@@ -384,7 +388,7 @@ function NewTrack() {
         </div>
         <div className="flex items-center gap-2">
           <Badge variant={llmMode === "local" ? "default" : "secondary"}>
-            {llmMode === "local" ? <><Cpu className="h-3 w-3 mr-1" /> Local LLM</> : <><Cloud className="h-3 w-3 mr-1" /> Cloud</>}
+            {llmMode === "local" ? <><Cpu className="h-3 w-3 mr-1" /> {llmLabel}</> : <><Cloud className="h-3 w-3 mr-1" /> {llmLabel}</>}
           </Badge>
           {memCount > 0 && (
             <Badge variant="outline" className="gap-1">

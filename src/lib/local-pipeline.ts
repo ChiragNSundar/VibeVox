@@ -17,11 +17,13 @@
 // settings/new pages keep working.
 
 import { countSyllables, endRhymeKey } from "./lyrics-analysis";
-import type { LlmConfig } from "./llm-config";
+import { chatTarget, type LlmConfig } from "./llm-config";
+import { applyBodyCompat, resolveTarget } from "./providers";
 import { styleExamplesPromptBlock } from "./style-memory";
 import {
   adaptiveChunkBars,
   budgetFor,
+  budgetForProfile,
   formatHint,
   profileFor,
   tierFor,
@@ -153,8 +155,8 @@ type ChatOpts = {
 
 async function rawChat(config: LlmConfig, system: string, user: string, opts: ChatOpts): Promise<string> {
   // In-browser provider (WebLLM)
-  if (config.localBaseUrl === "in-browser") {
-    const model = (config as any).inBrowserModel || "qwen2.5-0.5b";
+  if (config.baseUrl === "in-browser") {
+    const model = config.inBrowserModel || "qwen2.5-0.5b";
     return chatInBrowser(
       { model: model as any, temperature: opts.temperature, top_p: opts.top_p, max_tokens: opts.max_tokens },
       system,
@@ -162,11 +164,13 @@ async function rawChat(config: LlmConfig, system: string, user: string, opts: Ch
       opts
     );
   }
-  
-  // Standard OpenAI-compatible endpoint (Ollama, LM Studio, etc.)
-  const url = `${config.localBaseUrl.replace(/\/+$/, "")}/chat/completions`;
+
+  // Any OpenAI-compatible endpoint — local (Ollama, LM Studio) or hosted
+  // (OpenRouter, OpenAI, Groq). `resolveTarget` supplies the auth headers
+  // and per-provider quirks so this stays one code path.
+  const target = resolveTarget(chatTarget(config));
   const body: Record<string, unknown> = {
-    model: config.localModel,
+    model: target.model,
     messages: [
       { role: "system", content: system },
       { role: "user", content: user },
@@ -176,7 +180,8 @@ async function rawChat(config: LlmConfig, system: string, user: string, opts: Ch
   };
   if (opts.top_p !== undefined) body.top_p = opts.top_p;
   // Ollama-style repetition penalty is non-standard for OpenAI-compat — also
-  // pass `frequency_penalty` so LM Studio/vLLM honour it.
+  // pass `frequency_penalty` so LM Studio/vLLM honour it. `applyBodyCompat`
+  // strips the nested form for providers that reject unknown params.
   if (opts.repeat_penalty !== undefined) {
     body.frequency_penalty = Math.max(0, opts.repeat_penalty - 1);
     (body as { options?: Record<string, unknown> }).options = { repeat_penalty: opts.repeat_penalty };
@@ -186,7 +191,7 @@ async function rawChat(config: LlmConfig, system: string, user: string, opts: Ch
   // hash, not store raw, because user transcripts can be PII and the
   // hash keeps the IDB record small.
   const cacheKey = opts.bypassCache ? "" : await hashInputs([
-    config.localBaseUrl, config.localModel, system, user,
+    target.baseUrl, target.model, system, user,
     opts.temperature ?? 0.7, opts.top_p ?? null, opts.repeat_penalty ?? null, opts.max_tokens ?? 4096,
   ]);
   if (cacheKey) {
@@ -194,19 +199,16 @@ async function rawChat(config: LlmConfig, system: string, user: string, opts: Ch
     if (hit !== null) return hit;
   }
 
-  const res = await fetch(url, {
+  const res = await fetch(`${target.baseUrl}/chat/completions`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${config.localApiKey || "local"}`,
-    },
-    body: JSON.stringify(body),
+    headers: target.headers,
+    body: JSON.stringify(applyBodyCompat(body, target)),
   });
   if (!res.ok) throw new Error(`${res.status} ${await res.text().catch(() => "").then((s) => s.slice(0, 200))}`);
   const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
   const content = json.choices?.[0]?.message?.content ?? "";
   if (cacheKey && content) {
-    await cacheSet("chat", cacheKey, content, { model: config.localModel, temp: opts.temperature ?? 0.7 });
+    await cacheSet("chat", cacheKey, content, { model: target.model, temp: opts.temperature ?? 0.7 });
   }
   return content;
 }
@@ -352,7 +354,7 @@ async function buildCadence(
   transcript: string,
   onProgress: (e: ProgressEvent) => void,
 ): Promise<LocalCadence> {
-  onProgress({ stage: "cadence", message: `Mapping cadence on ${config.localModel}…` });
+  onProgress({ stage: "cadence", message: `Mapping cadence on ${config.model}…` });
   const seeded = heuristicCadence(transcript);
   const numbered = seeded.bars.map((b) => `${b.index}. ${b.text}`).join("\n");
   const sys = `Analyze rough mumble vocal transcripts and return a strict cadence map as JSON only.
@@ -479,7 +481,7 @@ async function writeLyrics(
   let title = "Untitled";
   const total = Math.ceil(cadence.bars.length / chunkSize) || 1;
   for (let c = 0; c < total; c++) {
-    onProgress({ stage: "write", message: `Writing chunk ${c + 1}/${total} on ${config.localModel}…` });
+    onProgress({ stage: "write", message: `Writing chunk ${c + 1}/${total} on ${config.model}…` });
     const slice = cadence.bars.slice(c * chunkSize, (c + 1) * chunkSize);
     try {
       const parsed = await writeOneChunk(config, profile, cadence, slice, brief, examples);
@@ -576,7 +578,7 @@ ${formatHint(profile)}`;
 // ---------------------------------------------------------------------------
 
 function resolveProfile(config: LlmConfig): LocalProfile {
-  const base = profileFor(config.localModel);
+  const base = profileFor(config.model);
   // Apply user overrides if set (tier override is the most common — user
   // knows they're running a heavy quant they wouldn't want auto-detected).
   const family = (config.familyOverride as LocalProfile["family"] | undefined) ?? base.family;
@@ -592,18 +594,18 @@ export async function runLocalPipeline(
   brief: LocalBrief | undefined,
   onProgress: (e: ProgressEvent) => void = () => {},
 ): Promise<LocalPipelineResult> {
-  const isExplicitOffline = config.localBaseUrl === "offline" || config.localBaseUrl === "none";
+  const isExplicitOffline = config.baseUrl === "offline" || config.baseUrl === "none";
 
   const profile = resolveProfile(config);
-  const baseBudget = budgetFor(profile.tier);
-  const ctx = config.localContextTokens || profile.defaultContextTokens;
+  const baseBudget = budgetForProfile(profile);
+  const ctx = config.contextTokens || profile.defaultContextTokens;
   const chunkBars = adaptiveChunkBars(ctx, baseBudget.chunkBars);
   const budget = { ...baseBudget, chunkBars };
 
   // Pipeline-level cache: identical (model + transcript + brief + profile)
   // returns the prior result instantly.
   const pipelineKey = await hashInputs([
-    config.localBaseUrl, config.localModel, ctx, transcript, brief ?? null,
+    config.baseUrl, config.model, ctx, transcript, brief ?? null,
     profile.family, profile.tier, profile.writeFormat, budget.maxIterations, budget.targetScore, chunkBars,
   ]);
   const cached = await cacheGet<LocalPipelineResult>("pipeline", pipelineKey);

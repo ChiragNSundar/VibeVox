@@ -9,7 +9,7 @@ import {
   ArrowRight, ArrowLeft, Zap, Radio, Brain,
 } from "lucide-react";
 import { discoverLlmBackends, discoverWhisperBackends } from "@/lib/local-discovery";
-import { loadLlmConfig, pingLocalLlm } from "@/lib/llm-config";
+import { loadLlmConfig, pingLlm } from "@/lib/llm-config";
 import { pingLocalWhisper } from "@/lib/local-transcribe";
 import { playFx } from "@/lib/sound-fx";
 
@@ -52,9 +52,9 @@ function OnboardingPage() {
         // Try pinging the saved config
         const cfg = loadLlmConfig();
         try {
-          await pingLocalLlm(cfg);
+          await pingLlm(cfg);
           setLlmOk(true);
-          setLlmName(cfg.localModel || "Local LLM");
+          setLlmName(cfg.model || "Local LLM");
         } catch {
           setLlmOk(false);
         }

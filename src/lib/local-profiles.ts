@@ -22,9 +22,22 @@ export type LocalFamily =
   | "phi"
   | "command-r"
   | "yi"
-  | "other";
+  | "other"
+  // Hosted frontier families. These have no parameter count in their id, so
+  // the size heuristics below can't rank them — they're pinned to `large`.
+  | "gpt"
+  | "claude"
+  | "gemini"
+  | "grok";
 
 export type LocalTier = "small" | "mid" | "large";
+
+const HOSTED_FAMILIES: ReadonlySet<LocalFamily> = new Set<LocalFamily>(["gpt", "claude", "gemini", "grok"]);
+
+/** True for API-only frontier models (billed per call, no local weights). */
+export function isHostedFamily(family: LocalFamily): boolean {
+  return HOSTED_FAMILIES.has(family);
+}
 
 /** Preferred response format for the writer pass. */
 export type WriteFormat = "json" | "xml" | "markdown";
@@ -58,9 +71,28 @@ export type IterationBudget = {
   chunkBars: number;
 };
 
-/** Parse "qwen2.5:14b", "llama3.1-70b-instruct-q4", "mixtral:8x7b" → {family, paramsB} */
+/**
+ * Parse "qwen2.5:14b", "llama3.1-70b-instruct-q4", "mixtral:8x7b",
+ * "anthropic/claude-sonnet-4.5", "openai/gpt-5" → {family, paramsB}.
+ *
+ * Hosted ids are matched first: a gateway prefixes them with a vendor
+ * ("openai/", "google/"), and the local heuristics would otherwise fall
+ * through to family "other" with paramsB 0 — which reads as mid-tier and
+ * gives a frontier model 8K of assumed context.
+ */
 export function detectModel(modelId: string): { family: LocalFamily; paramsB: number } {
   const id = modelId.toLowerCase();
+
+  const hosted: LocalFamily | null =
+    /claude|sonnet|opus|haiku/.test(id) ? "claude"
+    : /gemini/.test(id) ? "gemini"
+    : /grok/.test(id) ? "grok"
+    // `gpt-oss-*` is open-weights — let it fall through to the size parser.
+    : /gpt/.test(id) && !/gpt-oss/.test(id) ? "gpt"
+    : /(^|\/)o[1345](-|$)/.test(id) ? "gpt"
+    : null;
+  if (hosted) return { family: hosted, paramsB: 0 };
+
   const family: LocalFamily =
     /qwen/.test(id) ? "qwen"
     : /llama/.test(id) ? "llama"
@@ -81,7 +113,10 @@ export function detectModel(modelId: string): { family: LocalFamily; paramsB: nu
   return { family, paramsB };
 }
 
-export function tierFor(paramsB: number): LocalTier {
+export function tierFor(paramsB: number, family?: LocalFamily): LocalTier {
+  // Hosted frontier models carry no size in their id but are all at or above
+  // the capability of a 70B local — treat them as large regardless.
+  if (family && isHostedFamily(family)) return "large";
   if (paramsB <= 0) return "mid"; // unknown → assume mid; user can override
   if (paramsB <= 9) return "small";
   if (paramsB <= 40) return "mid";
@@ -102,6 +137,12 @@ export function tierFor(paramsB: number): LocalTier {
  */
 function preferredFormat(family: LocalFamily): WriteFormat {
   switch (family) {
+    // Frontier hosted models all honour a strict JSON contract; there's no
+    // reason to spend tokens on the XML/markdown repair paths.
+    case "gpt":
+    case "claude":
+    case "gemini":
+    case "grok":
     case "qwen":
     case "deepseek":
       return "json";
@@ -119,6 +160,12 @@ function preferredFormat(family: LocalFamily): WriteFormat {
 
 function defaultContext(family: LocalFamily, paramsB: number): number {
   // Conservative defaults; replaced by actual probe value when available.
+  // Hosted values are deliberately under the advertised maximum — the
+  // catalog fills in the real number when the user picks from the list.
+  if (family === "claude") return 200_000;
+  if (family === "gemini") return 1_000_000;
+  if (family === "gpt") return 128_000;
+  if (family === "grok") return 128_000;
   if (family === "qwen") return 32_768;
   if (family === "deepseek") return 16_384;
   if (family === "llama" && paramsB >= 70) return 128_000;
@@ -133,7 +180,7 @@ export function profileFor(modelId: string): LocalProfile {
   const { family, paramsB } = detectModel(modelId);
   return {
     family,
-    tier: tierFor(paramsB),
+    tier: tierFor(paramsB, family),
     paramsB,
     writeFormat: preferredFormat(family),
     defaultContextTokens: defaultContext(family, paramsB),
@@ -162,6 +209,18 @@ export function budgetFor(tier: LocalTier): IterationBudget {
     case "large":
       return { maxIterations: 6, targetScore: 9.0, harvestThreshold: 8.5, chunkBars: 20 };
   }
+}
+
+/**
+ * Same budget, adjusted for who's paying. Hosted models bill per call, and
+ * the critic→refine loop is the most expensive part of the pipeline — six
+ * iterations against a frontier model is real money for a run that usually
+ * clears the target score on the second pass.
+ */
+export function budgetForProfile(profile: LocalProfile): IterationBudget {
+  const base = budgetFor(profile.tier);
+  if (!isHostedFamily(profile.family)) return base;
+  return { ...base, maxIterations: 3 };
 }
 
 /**

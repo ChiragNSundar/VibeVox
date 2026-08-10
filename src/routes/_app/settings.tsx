@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
@@ -32,7 +33,8 @@ import { searchWebLyrics, type WebLyricsResult } from "@/lib/lyrics-fetcher";
 import { toast } from "sonner";
 import { trainRound } from "@/lib/tracks.functions";
 import { harvestFromUrl } from "@/lib/harvest.functions";
-import { DEFAULT_LLM_CONFIG, loadLlmConfig, pingLocalLlm, saveLlmConfig, type LlmConfig } from "@/lib/llm-config";
+import { DEFAULT_LLM_CONFIG, loadLlmConfig, pingLlm, saveLlmConfig, isLocalConfig, keyFor, setKeyFor, selectProvider, type LlmConfig } from "@/lib/llm-config";
+import { chatProviders, getProvider, type ProviderId } from "@/lib/providers";
 import {
   addToStyleMemory,
   addHarvestedBars,
@@ -191,7 +193,7 @@ function SettingsPage() {
   async function testConnection() {
     setPinging(true);
     setPingResult(null);
-    const r = await pingLocalLlm(config);
+    const r = await pingLlm(config);
     setPingResult(r);
     setPinging(false);
   }
@@ -221,7 +223,7 @@ function SettingsPage() {
       try {
         const examples = sampleStyleExamples(3, { vibe: seed.vibe });
         let result;
-        if (config.mode === "local") {
+        if (config.providerId !== "lovable") {
           result = await runLocalPipeline(config, seed.transcript, undefined, (e) =>
             setTrainProgress((p) => ({ ...p, lastMessage: `Round ${i + 1}/${trainRounds}: ${e.message}` })),
           );
@@ -237,7 +239,7 @@ function SettingsPage() {
         if (score > topScore) topScore = score;
         completed += 1;
         const bars = result.lyrics.sections.flatMap((s) => s.lines);
-        const minThreshold = config.mode === "local" ? harvestThresholdFor(config) : 8.0;
+        const minThreshold = config.providerId !== "lovable" ? harvestThresholdFor(config) : 8.0;
         if (score >= minThreshold) {
           addToStyleMemory({
             title: result.lyrics.title,
@@ -266,7 +268,7 @@ function SettingsPage() {
     recordTrainRun({
       startedAt,
       endedAt: Date.now(),
-      mode: config.mode,
+      mode: isLocalConfig(config) ? "local" : "cloud",
       rounds: trainRounds,
       completed,
       harvested,
@@ -402,46 +404,84 @@ function SettingsPage() {
       <Card className="p-6 space-y-4">
         <div className="flex items-center gap-2">
           <Brain className="h-5 w-5 text-primary" />
-          <h2 className="font-display text-lg font-semibold">Local AI Backend</h2>
+          <h2 className="font-display text-lg font-semibold">AI Backend</h2>
         </div>
 
         <div className="space-y-4 pt-2">
-          <div className="rounded-md bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
-            <p className="font-semibold text-foreground">Setup (one time):</p>
-            <p>1. Install <a href="https://ollama.com" target="_blank" rel="noreferrer" className="text-primary underline">Ollama</a> or LM Studio.</p>
-            <p>2. Pull a capable model: <code className="bg-background px-1 rounded">ollama pull llama3.1:8b</code> (or qwen2.5:14b, mistral-small)</p>
-            <p>3. Allow this site to call your LLM:<br/><code className="bg-background px-1 rounded">OLLAMA_ORIGINS=&apos;*&apos; ollama serve</code></p>
-            <p>4. Test the connection below.</p>
+          {isLocalConfig(config) ? (
+            <div className="rounded-md bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
+              <p className="font-semibold text-foreground">Local setup (one time):</p>
+              <p>1. Install <a href="https://ollama.com" target="_blank" rel="noreferrer" className="text-primary underline">Ollama</a> or LM Studio.</p>
+              <p>2. Pull a capable model: <code className="bg-background px-1 rounded">ollama pull llama3.1:8b</code> (or qwen2.5:14b, mistral-small)</p>
+              <p>3. Allow this site to call your LLM:<br/><code className="bg-background px-1 rounded">OLLAMA_ORIGINS=&apos;*&apos; ollama serve</code></p>
+              <p>4. Test the connection below.</p>
+            </div>
+          ) : (
+            <div className="rounded-md bg-muted/40 p-3 text-xs text-muted-foreground space-y-1">
+              <p className="font-semibold text-foreground">{getProvider(config.providerId).label}</p>
+              <p>
+                Requests go straight from this browser to the provider, with the key held in localStorage.
+                Set a spend limit on the key — that&apos;s what actually caps your exposure if it leaks.
+              </p>
+              <p>Use the <a href="/connect" className="text-primary underline">Connect</a> page to browse models and context sizes.</p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-2">
+              <Label htmlFor="provider">Provider</Label>
+              <Select
+                value={config.providerId}
+                onValueChange={(v: ProviderId) => {
+                  const next = selectProvider(config, v);
+                  setConfig(next);
+                  saveLlmConfig(next);
+                }}
+              >
+                <SelectTrigger id="provider"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {chatProviders().map((p) => (
+                    <SelectItem key={p.id} value={p.id}>{p.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="key">
+                API key {getProvider(config.providerId).needsKey ? "" : "(if required)"}
+              </Label>
+              <Input
+                id="key"
+                type={getProvider(config.providerId).needsKey ? "password" : "text"}
+                autoComplete="off"
+                value={keyFor(config)}
+                onChange={(e) => {
+                  const next = setKeyFor(config, config.providerId, e.target.value);
+                  setConfig(next);
+                  saveLlmConfig(next);
+                }}
+                placeholder={getProvider(config.providerId).keyPlaceholder ?? "sk-…"}
+              />
+            </div>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="url">Endpoint URL</Label>
             <Input
               id="url"
-              value={config.localBaseUrl}
-              onChange={(e) => update("localBaseUrl", e.target.value)}
-              placeholder="http://localhost:1234/v1"
+              value={config.baseUrl}
+              onChange={(e) => update("baseUrl", e.target.value)}
+              placeholder={getProvider(config.providerId).baseUrl || "http://localhost:1234/v1"}
             />
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-2">
-              <Label htmlFor="model">Model name</Label>
-              <Input
-                id="model"
-                value={config.localModel}
-                onChange={(e) => update("localModel", e.target.value)}
-                placeholder="local-model"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="key">API key (if required)</Label>
-              <Input
-                id="key"
-                value={config.localApiKey}
-                onChange={(e) => update("localApiKey", e.target.value)}
-                placeholder="lm-studio"
-              />
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="model">Model name</Label>
+            <Input
+              id="model"
+              value={config.model}
+              onChange={(e) => update("model", e.target.value)}
+              placeholder={getProvider(config.providerId).defaultModel || "local-model"}
+            />
           </div>
 
           <div className="flex items-center gap-3">
@@ -663,7 +703,7 @@ function SettingsPage() {
             <>
               <Button onClick={runTraining}>
                 <Play className="h-4 w-4 mr-2" />
-                Train ({config.mode === "local" ? "Local LLM" : "Cloud"})
+                Train ({getProvider(config.providerId).label})
               </Button>
               <Button variant="secondary" onClick={() => { setTrainRounds(25); setTimeout(runTraining, 0); }}>
                 Quick · 25
