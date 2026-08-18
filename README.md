@@ -25,6 +25,11 @@ While cloud-based tools rely on remote APIs and subscription credits, **Vocal Mu
 
 - 🎙️ **Live Punch-In Studio**: Real-time voice capture with latency-compensated bar slicing, Web Audio oscilloscope waveform, and metronome pulse ring.
 - 🧠 **Ghostwriter & Zero-LLM RAG Engine**: Multi-pass cadence matching, anti-cliché burned-phrase filter, and Reciprocal Rank Fusion ($RRF$) hybrid vector recall. Works seamlessly with local LLMs (**LM Studio**, **Ollama**) or **100% Zero-LLM Offline RAG Mode** (POS-grammar cadence assembly via style memory + Indic phonetic rimes) when no LLM is connected.
+- ⚡ **Web Worker Pipeline Offloading**: Off-main-thread worker bridge (`pipeline.worker.ts`) keeps the UI thread running smoothly at 60 FPS during heavy multi-pass LLM reasoning and RAG vector scoring.
+- 📜 **Virtual Scrolling Bar List**: Integrated `@tanstack/react-virtual` for smooth 60 FPS virtualized rendering of long track bar lists (30+ bars).
+- 🕒 **Track Version History & Snapshots**: Persistent snapshots of track lyrics, cadence maps, and briefs with 1-click bar/track level restoration (`src/lib/track-versions.ts`).
+- 🔔 **Notification Center Progress Drawer**: Slide-out activity drawer tracking real-time pipeline pass progress, iteration counts, and quality scores across sessions.
+- 🎧 **Audio Playback with Bar Sync**: Custom Web Audio player (`AudioPlayer.tsx`) featuring real-time bar timestamp highlighting synchronized to track BPM.
 - 🎨 **Metaphor & Imagery Synthesizer**: Pre-generation sensory domain mapping (tactile textures, visual settings, luxury vs street contrasts, and double-entendre wordplay blueprints).
 - 🎵 **Pre-Generation Rhyme Ladder Planner**: Pre-plans 2-syllable and 3-syllable multisyllabic rime clusters across 4-bar blocks (AABB, ABAB, AAAA) using custom Indic and English phonetic rime engines.
 - 📚 **Multilingual Dictionary Datasets**: Native support for **Romanized Hindi (Hinglish)** and **Romanized Kannada (Kanglish)** with complete 31,021-entry **KEED 2018** Kannada-English dictionary ingestion (`public/data/kannada_lyric_dictionary.json`), Desi Hip-Hop vocabulary blueprints, parts-of-speech annotations, and English meanings.
@@ -42,7 +47,8 @@ flowchart TD
     subgraph Client["Client UI (Browser / Local Workspace)"]
         LiveStudio["🎙️ Live Punch-In Studio\n(Web Audio & Oscilloscope)"]
         StyleBrief["🎛️ Style Brief Form\n(Genre, Slang Region, Topic)"]
-        LyricEditor["📝 Pocket Grid Lyric Editor\n(Syllable & Rhyme Inspector)"]
+        LyricEditor["📝 Pocket Grid Lyric Editor\n(VirtualizedBarList & VersionHistory)"]
+        NotifCenter["🔔 Notification Center\n(Pipeline Activity Drawer)"]
     end
 
     subgraph AudioEngine["Audio & Speech Layer"]
@@ -59,22 +65,24 @@ flowchart TD
     end
 
     subgraph PipelineExecution["Ghostwriter Execution Modes"]
+        PipelineWorker["⚡ Web Worker Bridge\n(pipeline.worker.ts)"]
         LocalLLM["🤖 Local LLM Server\n(Ollama / LM Studio / WebLLM)"]
         ZeroLLMRAG["⚡ Zero-LLM Offline RAG Engine\n(POS Grammar Assembly)"]
         CriticCouncil["⚖️ Critic Council\n(Pocket, Wordplay, Authenticity)"]
     end
 
     subgraph StorageLayer["Local-First Persistence"]
-        IndexedDB[("💾 IndexedDB\n(Tracks, Bars, Style Memory)")]
+        IndexedDB[("💾 IndexedDB\n(Tracks, Bars, Style Memory, Snapshots)")]
         OPFS[("📂 OPFS\n(Audio Takes)")]
     end
 
     LiveStudio --> MicCapture
     MicCapture --> LocalWhisper
     LocalWhisper --> CadenceSlicer
-    CadenceSlicer --> HybridRAG
-    StyleBrief --> HybridRAG
+    CadenceSlicer --> PipelineWorker
+    StyleBrief --> PipelineWorker
 
+    PipelineWorker --> HybridRAG
     DictEngine --> HybridRAG
     DictEngine --> RhymePlanner
     HybridRAG --> MetaphorSynth
@@ -83,6 +91,7 @@ flowchart TD
     RhymePlanner --> LocalLLM
     RhymePlanner --> ZeroLLMRAG
     LocalLLM --> CriticCouncil
+    CriticCouncil --> NotifCenter
     CriticCouncil --> LyricEditor
     ZeroLLMRAG --> LyricEditor
 
@@ -152,42 +161,49 @@ Vocal Muse
 ├── scripts/
 │   └── build_dictionary_datasets.py    # Python ingestion pipeline for KEED 2018 PDF & Hinglish dataset
 ├── src/
-│   ├── components/                     # UI components (PocketGrid, StyleBriefForm, CriticCard, etc.)
-│   ├── hooks/                          # Custom React hooks (use-shortcuts, use-live-capture, etc.)
+│   ├── components/                     # UI components
+│   │   ├── connect/                    # Extracted Connect page scan panels (LlmScanPanel, WhisperScanPanel)
+│   │   ├── settings/                   # Extracted Settings panels (StyleTrainingPanel, StyleMemoryPanel)
+│   │   ├── track/                      # Extracted Track editor sub-components (BarRow, TrackScorecard, ExportMenu, BulkRewriteBar, TrackToolbar, VirtualizedBarList, VersionHistory, AudioPlayer)
+│   │   ├── NotificationCenter.tsx      # Pipeline progress drawer
+│   │   ├── PocketGrid.tsx              # Cadence syllable grid & rhyme visualizer
+│   │   └── StyleBriefForm.tsx          # Lyric direction & brief controls
+│   ├── hooks/                          # Custom React hooks (use-notifications, use-shortcuts, use-live-capture)
 │   ├── lib/                            # Core intelligence & persistence layer
 │   │   ├── data/                       # Pre-compiled TypeScript dictionary modules
-│   │   │   ├── kannada-dict.ts         # Fast-lookup Kannada dictionary subset
-│   │   │   └── hindi-dict.ts           # Fast-lookup Hinglish dictionary subset
-│   │   ├── __tests__/                  # Vitest unit test suite (51/51 tests passing)
+│   │   ├── __tests__/                  # Vitest unit test suite (87/87 tests passing)
 │   │   │   ├── artistic-ghostwriter.test.ts
+│   │   │   ├── BarRow.test.tsx
+│   │   │   ├── cache.test.ts
 │   │   │   ├── indic-phonetics.test.ts
+│   │   │   ├── local-pipeline.integration.test.ts
+│   │   │   ├── local-store.test.ts
 │   │   │   ├── offline-rag.test.ts
 │   │   │   ├── phonemes.test.ts
+│   │   │   ├── PocketGrid.test.tsx
+│   │   │   ├── providers.test.ts
 │   │   │   ├── style-memory.merge.test.ts
-│   │   │   ├── cache.test.ts
 │   │   │   └── style-recall.test.ts
-│   │   ├── critics.ts                  # Multi-critic council (Pocket, Wordplay, Authenticity)
-│   │   ├── indic-dictionary.ts         # Unified Indic POS & dictionary lookup service
-│   │   ├── live-capture.ts             # Web Audio real-time recording & metronome engine
 │   │   ├── local-pipeline.ts           # Ghostwriter generation & refinement pipeline
+│   │   ├── pipeline.worker.ts          # Off-thread Web Worker pipeline runner
+│   │   ├── pipeline-worker-bridge.ts   # Main thread worker bridge
+│   │   ├── track-versions.ts           # Persistent track snapshot history
 │   │   ├── local-store.ts              # IndexedDB & OPFS local storage manager
-│   │   ├── metaphor-synthesizer.ts     # Pre-generation sensory domain & metaphor mapper
 │   │   ├── offline-rag-generator.ts    # Zero-LLM Offline POS-Grammar Cadence Engine
-│   │   ├── phonetics.ts                # Indic & English syllable counter and rime engine
-│   │   ├── rhyme-planner.ts            # Multisyllabic rhyme ladder planner (2-3 syl)
-│   │   ├── rhymes.ts                   # Pluggable rhyme providers (Datamuse, CMUdict, Indic)
-│   │   ├── style-hybrid-rag.ts         # Reciprocal Rank Fusion (RRF) Multi-Level Hybrid RAG
-│   │   └── style-recall.ts             # TF-IDF / Embedding style memory recall
+│   │   ├── rhymes.ts                   # Dynamic lazy-loaded rhyme providers (Datamuse, CMUdict, Indic)
+│   │   └── style-hybrid-rag.ts         # Reciprocal Rank Fusion (RRF) Multi-Level Hybrid RAG
 │   └── routes/                         # TanStack Start file-based route handlers
 │       ├── __root.tsx
 │       ├── _app/                       # Authenticated application surface
-│       │   ├── index.tsx
 │       │   ├── live.tsx                # Live Punch-In studio page
 │       │   ├── new.tsx                 # New track studio page
 │       │   ├── library.tsx             # Track library dashboard
 │       │   ├── references.tsx          # Reference fingerprints page
-│       │   └── settings.tsx            # Settings & LLM configuration
+│       │   ├── settings.tsx            # Settings & LLM configuration
+│       │   └── track.$id.tsx           # Track lyrics editor & studio
 │       └── onboarding.tsx
+├── .commitlintrc.json                  # Conventional commits linting config
+├── .env.example                        # Documented environment template
 ├── graphify-out/                       # Graphify AST Knowledge Graph index
 ├── start-local.bat                     # Windows 1-click launcher script
 └── README.md
