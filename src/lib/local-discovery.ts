@@ -186,16 +186,20 @@ export type WhisperRecommendation = {
 export function recommendedWhisper(): WhisperRecommendation[] {
   return [
     {
+      command: "faster-whisper-server --port 9000 --compute_type int8 --model tiny.en",
+      description: "Low-RAM mode (int8). Uses ~180MB RAM with sub-100ms latency.",
+    },
+    {
+      command: "./whisper-server -m models/ggml-tiny.en.bin --port 9000 -vulkan",
+      description: "AMD GPU (Vulkan/DirectML). Ultra-fast GPU acceleration for AMD Radeon.",
+    },
+    {
+      command: "pip install onnxruntime-directml && faster-whisper-server --port 9000 --device auto",
+      description: "DirectML execution provider for Windows AMD GPUs.",
+    },
+    {
       command: "docker run -d --name fw -p 9000:8000 fedirz/faster-whisper-server:latest-cpu",
-      description: "faster-whisper-server (OpenAI-compatible). CPU build; GPU image available.",
-    },
-    {
-      command: "uvx faster-whisper-server --host 0.0.0.0 --port 9000",
-      description: "Same, without Docker. Requires Python + uv.",
-    },
-    {
-      command: "./server -m models/ggml-base.en.bin --host 0.0.0.0 --port 8081",
-      description: "whisper.cpp HTTP server. Builds from github.com/ggerganov/whisper.cpp.",
+      description: "Docker CPU build fallback.",
     },
   ];
 }

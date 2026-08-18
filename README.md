@@ -241,12 +241,19 @@ For offline AI lyric generation and ghostwriter assistance:
 - **LM Studio**: Open LM Studio $\rightarrow$ Load a model (e.g., `Qwen2.5-7B` or `Llama-3.2`) $\rightarrow$ Go to **Local Server** tab ($\langle/\rangle$) $\rightarrow$ Click **Start Server** (Port `1234`). Enable **CORS** in settings.
 - **Ollama**: Run `ollama pull llama3.1:8b` and start with `OLLAMA_ORIGINS='*' ollama serve`.
 
-### 2. Live Voice Transcription (faster-whisper)
+### 2. Live Voice Transcription & AMD GPU / Low-RAM Setup
 For real-time voice-to-text recording:
+
+#### Option A: Low-RAM Mode (int8) — ~180 MB RAM (CPU / General)
 ```bash
 pip install faster-whisper-server
-faster-whisper-server --model Systran/faster-whisper-base.en --port 9000
+faster-whisper-server --model tiny.en --compute_type int8 --port 9000
 ```
+
+#### Option B: AMD Radeon GPU Acceleration (DirectML / Vulkan)
+For Windows PCs with AMD Radeon GPUs:
+- **DirectML**: `pip install onnxruntime-directml` and launch `faster-whisper-server --device auto --port 9000`.
+- **whisper.cpp (Vulkan GPU)**: Build with `-DGGML_VULKAN=ON` and run `./whisper-server -m models/ggml-tiny.en.bin --port 9000 -vulkan`. Operates entirely on AMD GPU shaders with ~150 MB RAM overhead.
 
 ---
 
