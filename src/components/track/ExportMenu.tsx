@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Download } from "lucide-react";
 import {
-  toPlainText, toGeniusMarkdown, toRtf, toTimestamped, toPrintableHtml,
+  toPlainText, toGeniusMarkdown, toRtf, toTimestamped, toLrc, toPrintableHtml,
   downloadBlob, openPrintWindow, slugify,
 } from "@/lib/exports";
 import { toast } from "sonner";
@@ -21,12 +21,13 @@ export type ExportMenuProps = {
 };
 
 export function ExportMenu({ lyrics, cadence, bpm }: ExportMenuProps) {
-  const exportAs = (format: "txt" | "md" | "rtf" | "timestamped" | "pdf") => {
+  const exportAs = (format: "txt" | "md" | "rtf" | "timestamped" | "lrc" | "pdf") => {
     const slug = slugify(lyrics.title);
     if (format === "txt") downloadBlob(`${slug}.txt`, toPlainText(lyrics), "text/plain");
     else if (format === "md") downloadBlob(`${slug}.md`, toGeniusMarkdown(lyrics), "text/markdown");
     else if (format === "rtf") downloadBlob(`${slug}.rtf`, toRtf(lyrics), "application/rtf");
     else if (format === "timestamped") downloadBlob(`${slug}.timestamped.txt`, toTimestamped(lyrics, cadence ?? null, bpm ?? 90), "text/plain");
+    else if (format === "lrc") downloadBlob(`${slug}.lrc`, toLrc(lyrics, cadence ?? null, bpm ?? 90), "text/plain");
     else if (format === "pdf") openPrintWindow(toPrintableHtml(lyrics));
     toast.success(format === "pdf" ? "Opening print dialog…" : "Downloaded");
   };
@@ -42,6 +43,7 @@ export function ExportMenu({ lyrics, cadence, bpm }: ExportMenuProps) {
         <DropdownMenuLabel className="text-xs uppercase tracking-wider">Export as</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => exportAs("pdf")}>PDF (print sheet)</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => exportAs("lrc")}>Synced LRC (DAWs & Spotify)</DropdownMenuItem>
         <DropdownMenuItem onClick={() => exportAs("rtf")}>RTF (Word / Pages)</DropdownMenuItem>
         <DropdownMenuItem onClick={() => exportAs("md")}>Markdown (Genius-style)</DropdownMenuItem>
         <DropdownMenuItem onClick={() => exportAs("timestamped")}>Plain text w/ timestamps</DropdownMenuItem>

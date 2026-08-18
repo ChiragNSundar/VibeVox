@@ -62,6 +62,25 @@ export function toTimestamped(lyrics: Lyrics, cadence: CadenceMap | null, bpm = 
   return `${lyrics.title} · est. ${bpm} BPM\n\n${stamped.join("\n")}`;
 }
 
+/** Standard synced LRC format for DAWs, Spotify & Karaoke players. */
+export function toLrc(lyrics: Lyrics, cadence: CadenceMap | null, bpm = 90): string {
+  const lines = flatLines(lyrics);
+  const secondsPerBeat = 60 / bpm;
+  let acc = 0;
+  const header = `[ti:${lyrics.title}]\n[ar:Vocal Muse]\n[by:VoxScript AI]\n[re:Vocal Muse Studio]\n[ve:1.0]\n\n`;
+  const stamped = lines.map((line, i) => {
+    const bar = cadence?.bars[i];
+    const syll = bar?.syllables ?? Math.max(4, Math.round(line.split(/\s+/).length * 1.3));
+    const start = acc;
+    acc += (syll / 4) * secondsPerBeat;
+    const mm = Math.floor(start / 60).toString().padStart(2, "0");
+    const ss = Math.floor(start % 60).toString().padStart(2, "0");
+    const ms = Math.floor((start % 1) * 100).toString().padStart(2, "0");
+    return `[${mm}:${ss}.${ms}]${line}`;
+  });
+  return header + stamped.join("\n");
+}
+
 /** Returns formatted HTML for the print dialog → PDF. */
 export function toPrintableHtml(lyrics: Lyrics): string {
   const css = `
