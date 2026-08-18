@@ -1005,111 +1005,19 @@ function TrackPage() {
 
         {lyrics && (
           <Card className="p-6">
-            <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="font-display font-semibold">Lyrics</h2>
-                {warnings.length > 0 && (
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-400 border border-amber-500/30">
-                        <AlertTriangle className="h-3 w-3" />
-                        {warnings.length} repetition warning{warnings.length === 1 ? "" : "s"}
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent side="bottom" className="text-xs max-w-xs">
-                      <ul className="space-y-1">
-                        {warnings.map((w, i) => <li key={i}>• {w.message}</li>)}
-                      </ul>
-                    </TooltipContent>
-                  </Tooltip>
-                )}
-              </div>
-              <div className="flex items-center gap-1">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost" size="icon"
-                      onClick={doUndo}
-                      disabled={undoStack.length === 0}
-                      aria-label="Undo"
-                    >
-                      <Undo2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs">
-                    {undoStack.length ? `Undo: ${undoStack[undoStack.length - 1].label}` : "Nothing to undo"}
-                    <span className="ml-2 opacity-60">⌘/Ctrl+Z</span>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost" size="icon"
-                      onClick={doRedo}
-                      disabled={redoStack.length === 0}
-                      aria-label="Redo"
-                    >
-                      <Redo2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom" className="text-xs">
-                    {redoStack.length ? `Redo: ${redoStack[redoStack.length - 1].label}` : "Nothing to redo"}
-                    <span className="ml-2 opacity-60">⌘/Ctrl+Shift+Z</span>
-                  </TooltipContent>
-                </Tooltip>
-                <Button
-                  variant={selectMode ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => { if (selectMode) exitSelectMode(); else setSelectMode(true); }}
-                  title="Toggle bulk rewrite (B)"
-                >
-                  <CheckSquare className="h-4 w-4 mr-1.5" />
-                  {selectMode ? "Done" : "Bulk rewrite"}
-                </Button>
-                <Button variant="ghost" size="sm" onClick={copyAll} title="Copy plain text">
-                  <Copy className="h-4 w-4 mr-1.5" /> Copy
-                </Button>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <Download className="h-4 w-4 mr-1.5" /> Export
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel className="text-xs uppercase tracking-wider">Export as</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => exportAs("pdf")}>PDF (print sheet)</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => exportAs("rtf")}>RTF (Word / Pages)</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => exportAs("md")}>Markdown (Genius-style)</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => exportAs("timestamped")}>Plain text w/ timestamps</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => exportAs("txt")}>Plain text</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" title="Keyboard shortcuts">
-                      <Keyboard className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-72">
-                    <DropdownMenuLabel className="text-xs uppercase tracking-wider">Shortcuts</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <div className="px-2 py-1.5 text-xs space-y-1">
-                      <div className="flex justify-between"><span>Navigate bars</span><kbd className="text-[10px] bg-muted px-1.5 rounded">↑ ↓ / j k</kbd></div>
-                      <div className="flex justify-between"><span>Rewrite focused bar</span><kbd className="text-[10px] bg-muted px-1.5 rounded">R</kbd></div>
-                      <div className="flex justify-between"><span>Lock / unlock</span><kbd className="text-[10px] bg-muted px-1.5 rounded">L</kbd></div>
-                      <div className="flex justify-between"><span>Cycle alternates</span><kbd className="text-[10px] bg-muted px-1.5 rounded">← →</kbd></div>
-                      <div className="flex justify-between"><span>Accept alternate</span><kbd className="text-[10px] bg-muted px-1.5 rounded">A / Enter</kbd></div>
-                      <div className="flex justify-between"><span>Discard alternate</span><kbd className="text-[10px] bg-muted px-1.5 rounded">D</kbd></div>
-                      <div className="flex justify-between"><span>Bulk mode</span><kbd className="text-[10px] bg-muted px-1.5 rounded">B</kbd></div>
-                      <div className="flex justify-between"><span>Toggle selection</span><kbd className="text-[10px] bg-muted px-1.5 rounded">S</kbd></div>
-                      <div className="flex justify-between"><span>Undo</span><kbd className="text-[10px] bg-muted px-1.5 rounded">⌘/Ctrl+Z</kbd></div>
-                      <div className="flex justify-between"><span>Redo</span><kbd className="text-[10px] bg-muted px-1.5 rounded">⌘/Ctrl+⇧+Z</kbd></div>
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </div>
+            <TrackToolbar
+              lyrics={lyrics}
+              cadence={cadence}
+              scheme={scheme}
+              warnings={warnings}
+              undoStack={undoStack}
+              redoStack={redoStack}
+              selectMode={selectMode}
+              onUndo={doUndo}
+              onRedo={doRedo}
+              onToggleSelectMode={() => setSelectMode(true)}
+              onExitSelectMode={exitSelectMode}
+            />
             {selectMode && (
               <div className="mb-4 flex items-center justify-between text-xs text-muted-foreground border-b border-border pb-2">
                 <span>
@@ -1174,64 +1082,18 @@ function TrackPage() {
         )}
 
         {selectMode && (
-          <div className="sticky bottom-4 z-20">
-            <Card className="p-3 shadow-lg border-primary/40 bg-background/95 backdrop-blur">
-              <div className="flex items-center gap-3 flex-wrap">
-                <div className="text-sm font-display font-semibold shrink-0">
-                  Bulk rewrite
-                  <span className="ml-2 text-xs text-muted-foreground font-normal">
-                    {selectedBars.size} selected
-                  </span>
-                </div>
-                <div className="flex items-center gap-3 text-xs flex-wrap">
-                  <label className="flex items-center gap-1.5">
-                    <Checkbox checked={bulkOpts.keepEndSound} onCheckedChange={(v) => setBulkOpts((o) => ({ ...o, keepEndSound: !!v }))} />
-                    Keep end-sound
-                  </label>
-                  <label className="flex items-center gap-1.5">
-                    <Checkbox checked={bulkOpts.swapMetaphor} onCheckedChange={(v) => setBulkOpts((o) => ({ ...o, swapMetaphor: !!v }))} />
-                    Swap image
-                  </label>
-                  <label className="flex items-center gap-1.5">
-                    <Checkbox checked={bulkOpts.raiseDensity} onCheckedChange={(v) => setBulkOpts((o) => ({ ...o, raiseDensity: !!v }))} />
-                    Push density
-                  </label>
-                  <div className="flex items-center gap-1">
-                    <span className="text-muted-foreground">Alts</span>
-                    {[1, 2, 3, 4].map((n) => (
-                      <button
-                        key={n}
-                        type="button"
-                        onClick={() => setBulkOpts((o) => ({ ...o, count: n }))}
-                        className={`h-6 w-6 text-xs rounded border ${bulkOpts.count === n ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
-                      >{n}</button>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex gap-1.5 ml-auto">
-                  <Button size="sm" variant="ghost" onClick={bulkDiscardAll} disabled={bulkRunning}>
-                    <X className="h-3.5 w-3.5 mr-1" /> Discard all
-                  </Button>
-                  <Button size="sm" variant="outline" onClick={bulkAcceptAll} disabled={bulkRunning}>
-                    <Check className="h-3.5 w-3.5 mr-1" /> Accept all
-                  </Button>
-                  <Button size="sm" onClick={runBulkRewrite} disabled={bulkRunning || selectedBars.size === 0}>
-                    {bulkRunning
-                      ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />
-                      : <Wand2 className="h-3.5 w-3.5 mr-1" />}
-                    Rewrite {selectedBars.size || ""}
-                  </Button>
-                </div>
-              </div>
-              <Textarea
-                value={bulkOpts.custom}
-                onChange={(e) => setBulkOpts((o) => ({ ...o, custom: e.target.value }))}
-                placeholder="Optional direction applied to every selected bar (e.g. 'darker imagery', 'callback to the hook')"
-                className="mt-2 h-12 text-xs"
-              />
-            </Card>
-          </div>
+          <BulkRewriteBar
+            selectedCount={selectedBars.size}
+            bulkOpts={bulkOpts}
+            bulkRunning={bulkRunning}
+            onOptsChange={setBulkOpts}
+            onRun={runBulkRewrite}
+            onAcceptAll={bulkAcceptAll}
+            onDiscardAll={bulkDiscardAll}
+          />
         )}
+
+
 
         {((trackData as any)?.transcript || (trackData as any)?.raw_transcript) && (
           <Collapsible>
