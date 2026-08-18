@@ -109,15 +109,15 @@ export function WhisperScanPanel({
                       {active ? "Active ✓" : "Use this server"}
                     </Button>
                   </div>
-                  {corsHint(w.backend) && (
+                  {corsHint("whisper") && (
                     <div className="bg-amber-500/10 text-amber-500 p-2 rounded text-[11px] flex items-center justify-between gap-2">
-                      <span>CORS startup flag: <code>{corsHint(w.backend)}</code></span>
+                      <span>CORS startup flag: <code>{corsHint("whisper")}</code></span>
                       <Button
                         size="sm"
                         variant="ghost"
                         className="h-6 text-[10px]"
                         onClick={() => {
-                          navigator.clipboard.writeText(corsHint(w.backend)!);
+                          navigator.clipboard.writeText(corsHint("whisper")!);
                           toast.success("Copied");
                         }}
                       >

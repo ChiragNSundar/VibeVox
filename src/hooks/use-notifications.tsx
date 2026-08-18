@@ -1,6 +1,6 @@
 // Notification state context and hook for tracking pipeline stage progress.
 
-import { useState, useEffect, createContext, useContext, ReactNode } from "react";
+import { useState, createContext, useContext, type ReactNode } from "react";
 import type { ProgressEvent } from "@/lib/local-pipeline";
 
 export type NotificationItem = {

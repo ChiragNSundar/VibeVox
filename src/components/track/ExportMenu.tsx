@@ -26,7 +26,7 @@ export function ExportMenu({ lyrics, cadence, bpm }: ExportMenuProps) {
     if (format === "txt") downloadBlob(`${slug}.txt`, toPlainText(lyrics), "text/plain");
     else if (format === "md") downloadBlob(`${slug}.md`, toGeniusMarkdown(lyrics), "text/markdown");
     else if (format === "rtf") downloadBlob(`${slug}.rtf`, toRtf(lyrics), "application/rtf");
-    else if (format === "timestamped") downloadBlob(`${slug}.timestamped.txt`, toTimestamped(lyrics, cadence, bpm ?? 90), "text/plain");
+    else if (format === "timestamped") downloadBlob(`${slug}.timestamped.txt`, toTimestamped(lyrics, cadence ?? null, bpm ?? 90), "text/plain");
     else if (format === "pdf") openPrintWindow(toPrintableHtml(lyrics));
     toast.success(format === "pdf" ? "Opening print dialog…" : "Downloaded");
   };

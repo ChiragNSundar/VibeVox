@@ -128,7 +128,7 @@ export function LlmScanPanel({
               {testing === "llm" && <Loader2 className="h-4 w-4 mr-1.5 animate-spin" />}
               Test connection
             </Button>
-            {provider.supportsCatalog && (
+            {provider.catalogUrl && (
               <Button size="sm" variant="outline" onClick={onLoadCatalog} disabled={catalogState === "loading" || needsKey}>
                 {catalogState === "loading" ? <Loader2 className="h-4 w-4 mr-1.5 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-1.5" />}
                 Load model list
@@ -174,7 +174,6 @@ export function LlmScanPanel({
                 >
                   <div className="min-w-0 flex-1 truncate pr-2">
                     <span className="font-mono">{m.id}</span>
-                    {m.name && m.name !== m.id && <span className="text-muted-foreground ml-2">({m.name})</span>}
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     {m.contextTokens && <Badge variant="outline" className="text-[10px]">{Math.round(m.contextTokens / 1024)}K ctx</Badge>}
@@ -191,7 +190,7 @@ export function LlmScanPanel({
       <Card>
         <CardHeader>
           <CardTitle>Discovered Local Servers</CardTitle>
-          <CardDescription>Servers listening on standard ports ({recommendedModels.map((m) => m.port).join(", ")}).</CardDescription>
+          <CardDescription>Servers listening on standard ports ({recommendedModels("ollama").map((m) => m.port).join(", ")}).</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {llms.length === 0 ? (

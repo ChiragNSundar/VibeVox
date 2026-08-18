@@ -29,7 +29,10 @@ import { recallStyleExamples, buildRecallQuery } from "@/lib/style-recall";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PocketGrid, type BarPocketItem } from "@/components/PocketGrid";
 import { analyzeRepetition } from "@/lib/track-analytics";
-import { toPlainText } from "@/lib/exports";
+import {
+  toPlainText, toGeniusMarkdown, toRtf, toTimestamped, toPrintableHtml,
+  downloadBlob, openPrintWindow, slugify,
+} from "@/lib/exports";
 import { getTrack as getLocalTrack, listTracks as listLocalTracks, deleteTrack as deleteLocalTrack, putBar as putLocalBar, putBars as putLocalBars, getBlob as getLocalBlob, putTrack as putLocalTrack, isLocalOnly, getDeviceId as getLocalDeviceId, runLocalPipeline, type LocalPipelineResult, type LocalLyrics, type LocalCadence, type LocalQuality, type LocalTrack } from "@/lib/local-store";
 import { loadLlmConfig } from "@/lib/llm-config";
 
