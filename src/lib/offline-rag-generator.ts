@@ -61,9 +61,25 @@ const ENGLISH_PATTERNS = [
 
 function selectPatternBank(region?: string): string[] {
   const r = (region || "").toLowerCase();
-  if (r.includes("hinglish")) return HINGLISH_PATTERNS;
-  if (r.includes("kanglish")) return KANGLISH_PATTERNS;
-  return ENGLISH_PATTERNS;
+  let baseBank = ENGLISH_PATTERNS;
+  if (r.includes("hinglish")) baseBank = HINGLISH_PATTERNS;
+  else if (r.includes("kanglish")) baseBank = KANGLISH_PATTERNS;
+
+  try {
+    const memory = loadStyleMemory();
+    const memoryBars = memory
+      .filter((m) => m.drakeScore >= 8.0)
+      .flatMap((m) => m.bars)
+      .filter((b) => b && b.trim().length >= 10);
+
+    if (memoryBars.length > 0) {
+      return Array.from(new Set([...memoryBars, ...baseBank]));
+    }
+  } catch {
+    /* fallback to baseBank */
+  }
+
+  return baseBank;
 }
 
 function getRegionalAdlib(region?: string, customSlang?: string): string {
