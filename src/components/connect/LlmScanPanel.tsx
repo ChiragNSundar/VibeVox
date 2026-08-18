@@ -190,7 +190,7 @@ export function LlmScanPanel({
       <Card>
         <CardHeader>
           <CardTitle>Discovered Local Servers</CardTitle>
-          <CardDescription>Servers listening on standard ports ({recommendedModels("ollama").map((m) => m.port).join(", ")}).</CardDescription>
+          <CardDescription>Servers listening on standard ports (11434, 1234, 8080).</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           {llms.length === 0 ? (
