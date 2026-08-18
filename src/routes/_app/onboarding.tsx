@@ -45,37 +45,45 @@ function OnboardingPage() {
         discoverLlmBackends(),
         discoverWhisperBackends(),
       ]);
-      if (llms.length > 0) {
+
+      const activeLlm = llms.find((l) => l.reachable && l.models.length > 0);
+      if (activeLlm) {
         setLlmOk(true);
-        setLlmName(llms[0].backend);
+        setLlmName(activeLlm.backend);
       } else {
-        // Try pinging the saved config
         const cfg = loadLlmConfig();
-        try {
-          await pingLlm(cfg);
+        const res = await pingLlm(cfg);
+        if (res.ok) {
           setLlmOk(true);
           setLlmName(cfg.model || "Local LLM");
-        } catch {
+        } else {
           setLlmOk(false);
+          setLlmName(cfg.model || "Not Connected");
         }
       }
-      if (whispers.length > 0) {
+
+      const activeWhisper = whispers.find((w) => w.reachable);
+      if (activeWhisper) {
         setWhisperOk(true);
-        setWhisperName(whispers[0].backend);
+        setWhisperName(activeWhisper.backend);
       } else {
         const cfg = loadLlmConfig();
-        try {
-          await pingLocalWhisper({
-            baseUrl: cfg.whisperBaseUrl,
-            backend: cfg.whisperBackend,
-            model: cfg.whisperModel,
-          });
+        const res = await pingLocalWhisper({
+          baseUrl: cfg.whisperBaseUrl,
+          backend: cfg.whisperBackend,
+          model: cfg.whisperModel,
+        });
+        if (res.ok) {
           setWhisperOk(true);
           setWhisperName("Whisper Server");
-        } catch {
+        } else {
           setWhisperOk(false);
+          setWhisperName("Not Connected");
         }
       }
+    } catch {
+      setLlmOk(false);
+      setWhisperOk(false);
     } finally {
       setScanning(false);
     }

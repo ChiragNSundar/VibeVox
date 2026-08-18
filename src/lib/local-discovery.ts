@@ -127,7 +127,7 @@ export async function probeLlmBackend(candidate: { backend: LlmBackend; baseUrl:
 
 export async function discoverLlmBackends(): Promise<DiscoveredLlm[]> {
   const results = await Promise.all(LLM_CANDIDATES.map(probeLlmBackend));
-  return results.filter((r) => r.reachable || true); // return all so UI can show what was checked
+  return results.filter((r) => r.reachable && r.models.length > 0);
 }
 
 export async function probeWhisperBackend(candidate: { backend: DiscoveredWhisper["backend"]; baseUrl: string }): Promise<DiscoveredWhisper> {
@@ -146,7 +146,8 @@ export async function probeWhisperBackend(candidate: { backend: DiscoveredWhispe
 }
 
 export async function discoverWhisperBackends(): Promise<DiscoveredWhisper[]> {
-  return Promise.all(WHISPER_CANDIDATES.map(probeWhisperBackend));
+  const results = await Promise.all(WHISPER_CANDIDATES.map(probeWhisperBackend));
+  return results.filter((r) => r.reachable);
 }
 
 export type RecommendedModel = {
