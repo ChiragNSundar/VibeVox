@@ -85,10 +85,10 @@ function OnboardingPage() {
     if (step === 0) scanAi();
   }, [step]);
 
-  function complete() {
+  function complete(targetRoute: "/library" | "/new" = "/library") {
     localStorage.setItem(ONBOARDING_KEY, "true");
     playFx("track-saved");
-    navigate({ to: "/library" });
+    navigate({ to: targetRoute });
   }
 
   const steps = [
@@ -305,15 +305,20 @@ function OnboardingPage() {
             ))}
           </div>
 
-          <div className="flex justify-between pt-2">
+          <div className="flex justify-between items-center pt-2 flex-wrap gap-2">
             <Button variant="ghost" onClick={() => setStep(1)}>
               <ArrowLeft className="h-4 w-4 mr-1.5" />
               Back
             </Button>
-            <Button onClick={complete} className="shadow-lg shadow-primary/20">
-              <Sparkles className="h-4 w-4 mr-1.5" />
-              Finish Setup & Open Library
-            </Button>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => complete("/library")}>
+                Library
+              </Button>
+              <Button onClick={() => complete("/new")} className="shadow-lg shadow-primary/20">
+                <Sparkles className="h-4 w-4 mr-1.5" />
+                Create First Track
+              </Button>
+            </div>
           </div>
         </Card>
       )}
