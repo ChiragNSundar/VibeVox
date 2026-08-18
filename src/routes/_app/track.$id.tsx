@@ -1115,10 +1115,8 @@ function TrackPage() {
   );
 }
 
-type RewriteOpts = { keepEndSound: boolean; swapMetaphor: boolean; raiseDensity: boolean; custom: string; count: number };
 
-function BarRow({
-  line, bar, got, gotEnd, ok, locked, proposal, history, rewriting,
+
   selectMode = false, selected: barSelected = false, focused = false, repeatWarn = false,
   onToggleSelect, onFocus,
   onRewrite, onMoreAlternates, onSelectAlternate, onAccept, onRevert, onToggleLock, onRestore,
