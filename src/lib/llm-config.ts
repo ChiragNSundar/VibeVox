@@ -45,9 +45,9 @@ export type LlmConfig = {
   embedModel: string;
 
   // Transcription
-  transcriptionMode: "cloud" | "local";
+  transcriptionMode: "cloud" | "local" | "webgpu";
   whisperBaseUrl: string;
-  whisperBackend: "faster-whisper" | "whisper.cpp" | "auto";
+  whisperBackend: "faster-whisper" | "whisper.cpp" | "auto" | "in-browser";
   whisperModel: string;
   whisperLanguage: string;
 
@@ -70,10 +70,10 @@ export const DEFAULT_LLM_CONFIG: LlmConfig = {
   embedProviderId: "local",
   embedBaseUrl: "http://localhost:1234/v1",
   embedModel: "nomic-embed-text",
-  transcriptionMode: "local",
+  transcriptionMode: "webgpu",
   whisperBaseUrl: "http://localhost:9000",
-  whisperBackend: "faster-whisper",
-  whisperModel: "Systran/faster-whisper-base.en",
+  whisperBackend: "in-browser",
+  whisperModel: "whisper-base",
   whisperLanguage: "",
   localMemoryCap: 2000,
 };

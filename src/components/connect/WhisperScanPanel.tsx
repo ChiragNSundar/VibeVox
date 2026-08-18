@@ -47,12 +47,18 @@ export function WhisperScanPanel({
               <Label>Transcription Mode</Label>
               <Select
                 value={config.transcriptionMode ?? "local"}
-                onValueChange={(v: "local" | "cloud") => onUpdateConfig({ transcriptionMode: v })}
+                onValueChange={(v: "local" | "cloud" | "webgpu") => 
+                  onUpdateConfig({ 
+                    transcriptionMode: v,
+                    whisperBackend: v === "webgpu" ? "in-browser" : config.whisperBackend
+                  })
+                }
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="local">Local (faster-whisper-server)</SelectItem>
-                  <SelectItem value="cloud">Cloud / Browser fallback</SelectItem>
+                  <SelectItem value="webgpu">WebGPU (In-Browser AMD Radeon GPU)</SelectItem>
+                  <SelectItem value="local">Local Server (faster-whisper-server / whisper.cpp)</SelectItem>
+                  <SelectItem value="cloud">Cloud / Standard fallback</SelectItem>
                 </SelectContent>
               </Select>
             </div>
