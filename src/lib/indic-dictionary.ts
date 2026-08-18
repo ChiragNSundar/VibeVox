@@ -4,8 +4,7 @@
 // and curated Romanized Hindi (Hinglish) rap vocabulary.
 // Provides POS-aware rhyme matching, multisyllabic rimes, English meanings, and syllable lookup.
 
-import { KANNADA_DICTIONARY, type DictEntry } from "./data/kannada-dict";
-import { HINDI_DICTIONARY } from "./data/hindi-dict";
+import type { DictEntry } from "./data/kannada-dict";
 
 export type { DictEntry };
 
@@ -13,6 +12,40 @@ export type WordMatch = DictEntry & {
   score: number;
   language: "kannada" | "hinglish";
 };
+
+let cachedKannada: DictEntry[] | null = null;
+let cachedHindi: DictEntry[] | null = null;
+
+async function ensureDictionariesLoaded() {
+  if (!cachedKannada) {
+    const mod = await import("./data/kannada-dict");
+    cachedKannada = mod.KANNADA_DICTIONARY;
+  }
+  if (!cachedHindi) {
+    const mod = await import("./data/hindi-dict");
+    cachedHindi = mod.HINDI_DICTIONARY;
+  }
+  return { kannada: cachedKannada, hindi: cachedHindi };
+}
+
+/**
+ * Synchronous dictionary getters for existing callers (falls back to empty if not yet loaded).
+ */
+function getKannadaDictSync(): DictEntry[] {
+  if (!cachedKannada) {
+    import("./data/kannada-dict").then((m) => { cachedKannada = m.KANNADA_DICTIONARY; });
+    return [];
+  }
+  return cachedKannada;
+}
+
+function getHindiDictSync(): DictEntry[] {
+  if (!cachedHindi) {
+    import("./data/hindi-dict").then((m) => { cachedHindi = m.HINDI_DICTIONARY; });
+    return [];
+  }
+  return cachedHindi;
+}
 
 /**
  * Find words matching a rime key or end sound with optional Part of Speech filter.
@@ -27,11 +60,14 @@ export function findRhymesWithPos(
 
   const dataset: { data: DictEntry[]; lang: "kannada" | "hinglish" }[] = [];
 
+  const kannada = getKannadaDictSync();
+  const hindi = getHindiDictSync();
+
   if (language === "kannada" || language === "auto") {
-    dataset.push({ data: KANNADA_DICTIONARY, lang: "kannada" });
+    if (kannada.length) dataset.push({ data: kannada, lang: "kannada" });
   }
   if (language === "hinglish" || language === "auto") {
-    dataset.push({ data: HINDI_DICTIONARY, lang: "hinglish" });
+    if (hindi.length) dataset.push({ data: hindi, lang: "hinglish" });
   }
 
   const endSound = clean.slice(-3);
@@ -84,12 +120,14 @@ export function searchDictionaryWords(
   if (!q) return [];
 
   const dataset: { data: DictEntry[]; lang: "kannada" | "hinglish" }[] = [];
+  const kannada = getKannadaDictSync();
+  const hindi = getHindiDictSync();
 
   if (language === "kannada" || language === "auto") {
-    dataset.push({ data: KANNADA_DICTIONARY, lang: "kannada" });
+    if (kannada.length) dataset.push({ data: kannada, lang: "kannada" });
   }
   if (language === "hinglish" || language === "auto") {
-    dataset.push({ data: HINDI_DICTIONARY, lang: "hinglish" });
+    if (hindi.length) dataset.push({ data: hindi, lang: "hinglish" });
   }
 
   const results: WordMatch[] = [];
@@ -116,10 +154,12 @@ export function getWordMetadata(word: string): DictEntry | null {
   const clean = word.toLowerCase().replace(/[^a-z]/g, "");
   if (!clean) return null;
 
-  const foundHindi = HINDI_DICTIONARY.find((e) => e.word === clean);
+  const hindi = getHindiDictSync();
+  const foundHindi = hindi.find((e) => e.word === clean);
   if (foundHindi) return foundHindi;
 
-  const foundKannada = KANNADA_DICTIONARY.find((e) => e.word === clean);
+  const kannada = getKannadaDictSync();
+  const foundKannada = kannada.find((e) => e.word === clean);
   if (foundKannada) return foundKannada;
 
   return null;

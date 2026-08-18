@@ -18,7 +18,6 @@
 // Works completely offline, no network required.
 
 import { cacheGet, cacheSet, hashInputs } from "./cache";
-import { findRhymes as cmudictFindRhymes, type CmudictRhymeHit } from "./cmudict-rhymes";
 
 export type RhymeKind = "perfect" | "near" | "consonant" | "sound-like" | "related";
 
@@ -114,8 +113,9 @@ async function customLookup(word: string, cfg: RhymeProviderConfig): Promise<Rhy
 // ---------- CMUdict local provider ----------
 
 async function cmudictLookup(word: string): Promise<RhymeHit[]> {
-  const hits = await cmudictFindRhymes(word, { maxResults: 50 });
-  return hits.map((h: CmudictRhymeHit) => ({
+  const { findRhymes } = await import("./cmudict-rhymes");
+  const hits = await findRhymes(word, { maxResults: 50 });
+  return hits.map((h) => ({
     word: h.word,
     score: h.score,
     syllables: h.syllables,

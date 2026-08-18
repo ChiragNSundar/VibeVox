@@ -1,4 +1,5 @@
-﻿import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { z } from "zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getTrack, regenerateLyrics, deleteTrack, rewriteBar, updateBar } from "@/lib/tracks.functions";
@@ -40,15 +41,21 @@ import { BulkRewriteBar, type BulkOpts, DEFAULT_BULK_OPTS } from "@/components/t
 
 type Lyrics = { title: string; sections: { type: string; lines: string[] }[] };
 
+const trackSearchSchema = z.object({
+  bar: z.number().catch(0).optional(),
+  mode: z.enum(["edit", "view"]).catch("edit").optional(),
+});
+
 export const Route = createFileRoute("/_app/track/$id")({
-  head: () => ({ meta: [{ title: "Track Â· VoxScript" }] }),
+  head: () => ({ meta: [{ title: "Track · VoxScript" }] }),
+  validateSearch: trackSearchSchema,
   component: TrackPage,
   errorComponent: ({ error }) => {
     console.error("Track page error:", error);
     return (
       <div className="max-w-md mx-auto text-center space-y-4 py-16">
         <Card className="p-8 space-y-4 border-dashed">
-          <div className="text-4xl">ðŸŽµ</div>
+          <div className="text-4xl">🎵</div>
           <h2 className="text-xl font-bold">Track Not Found</h2>
           <p className="text-sm text-muted-foreground">
             This track could not be loaded from studio memory.
