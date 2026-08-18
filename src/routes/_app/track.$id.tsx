@@ -29,10 +29,7 @@ import { recallStyleExamples, buildRecallQuery } from "@/lib/style-recall";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PocketGrid, type BarPocketItem } from "@/components/PocketGrid";
 import { analyzeRepetition } from "@/lib/track-analytics";
-import {
-  toPlainText, toGeniusMarkdown, toRtf, toTimestamped, toPrintableHtml,
-  downloadBlob, openPrintWindow, slugify,
-} from "@/lib/exports";
+import { toPlainText } from "@/lib/exports";
 import { getTrack as getLocalTrack, listTracks as listLocalTracks, deleteTrack as deleteLocalTrack, putBar as putLocalBar, putBars as putLocalBars, getBlob as getLocalBlob, putTrack as putLocalTrack, isLocalOnly, getDeviceId as getLocalDeviceId, runLocalPipeline, type LocalPipelineResult, type LocalLyrics, type LocalCadence, type LocalQuality, type LocalTrack } from "@/lib/local-store";
 import { loadLlmConfig } from "@/lib/llm-config";
 
@@ -432,22 +429,7 @@ function TrackPage() {
     }
   };
 
-  const copyAll = async () => {
-    if (!lyrics) return;
-    await navigator.clipboard.writeText(toPlainText(lyrics));
-    toast.success("Copied to clipboard");
-  };
 
-  const exportAs = (format: "txt" | "md" | "rtf" | "timestamped" | "pdf") => {
-    if (!lyrics) return;
-    const slug = slugify(lyrics.title);
-    if (format === "txt") downloadBlob(`${slug}.txt`, toPlainText(lyrics), "text/plain");
-    else if (format === "md") downloadBlob(`${slug}.md`, toGeniusMarkdown(lyrics), "text/markdown");
-    else if (format === "rtf") downloadBlob(`${slug}.rtf`, toRtf(lyrics), "application/rtf");
-    else if (format === "timestamped") downloadBlob(`${slug}.timestamped.txt`, toTimestamped(lyrics, cadence, 90), "text/plain");
-    else if (format === "pdf") openPrintWindow(toPrintableHtml(lyrics));
-    toast.success(format === "pdf" ? "Opening print dialogâ€¦" : "Downloaded");
-  };
 
   const rewriteWeakestAxis = () => {
     if (!quality?.councilByRole) return;
