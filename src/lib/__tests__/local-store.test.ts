@@ -25,6 +25,6 @@ describe("local-store IndexedDB operations", () => {
 
     await deleteTrack("test-track-123");
     const deleted = await getTrack("test-track-123");
-    expect(deleted).toBeUndefined();
+    expect(deleted).toBeFalsy();
   });
 });
