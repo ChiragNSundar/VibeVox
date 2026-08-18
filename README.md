@@ -216,9 +216,11 @@ Vocal Muse
 ### Option A: Windows 1-Click Launcher (Recommended)
 Double-click `start-local.bat` in the project root. It automatically:
 1. Runs pre-flight diagnostic checks (Node.js version, missing dependencies).
-2. Auto-starts `faster-whisper-server` (voice transcription) on port `9000` if installed.
+2. Auto-starts AMD GPU DirectML `faster-whisper-server` (voice transcription) on port `9000`.
 3. Opens **[http://localhost:8080](http://localhost:8080)** in your web browser.
 4. Starts the local development server.
+
+*To shut down all background AI servers and dev ports cleanly, double-click **`stop-local.bat`**.*
 
 ### Option B: Command Line (Cross-Platform)
 

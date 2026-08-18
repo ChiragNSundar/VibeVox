@@ -91,6 +91,16 @@ echo ======================================================================
 echo.
 
 start "" "http://localhost:8080/"
-npm run dev
+call npm run dev
 
+:cleanup
+echo.
+echo ======================================================================
+echo [CLEANUP] Terminating background AI processes...
+echo ======================================================================
+taskkill /F /FI "WINDOWTITLE eq Vocal Muse - Whisper STT Server*" >nul 2>nul
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":9000" ^| findstr "LISTENING"') do taskkill /F /PID %%a >nul 2>nul
+for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8080" ^| findstr "LISTENING"') do taskkill /F /PID %%a >nul 2>nul
+echo [OK] Vocal Muse processes terminated cleanly.
+echo.
 pause
