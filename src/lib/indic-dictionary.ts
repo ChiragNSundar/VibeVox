@@ -4,7 +4,8 @@
 // and curated Romanized Hindi (Hinglish) rap vocabulary.
 // Provides POS-aware rhyme matching, multisyllabic rimes, English meanings, and syllable lookup.
 
-import type { DictEntry } from "./data/kannada-dict";
+import { KANNADA_DICTIONARY, type DictEntry } from "./data/kannada-dict";
+import { HINDI_DICTIONARY } from "./data/hindi-dict";
 
 export type { DictEntry };
 
@@ -13,38 +14,12 @@ export type WordMatch = DictEntry & {
   language: "kannada" | "hinglish";
 };
 
-let cachedKannada: DictEntry[] | null = null;
-let cachedHindi: DictEntry[] | null = null;
-
-async function ensureDictionariesLoaded() {
-  if (!cachedKannada) {
-    const mod = await import("./data/kannada-dict");
-    cachedKannada = mod.KANNADA_DICTIONARY;
-  }
-  if (!cachedHindi) {
-    const mod = await import("./data/hindi-dict");
-    cachedHindi = mod.HINDI_DICTIONARY;
-  }
-  return { kannada: cachedKannada, hindi: cachedHindi };
-}
-
-/**
- * Synchronous dictionary getters for existing callers (falls back to empty if not yet loaded).
- */
 function getKannadaDictSync(): DictEntry[] {
-  if (!cachedKannada) {
-    import("./data/kannada-dict").then((m) => { cachedKannada = m.KANNADA_DICTIONARY; });
-    return [];
-  }
-  return cachedKannada;
+  return KANNADA_DICTIONARY;
 }
 
 function getHindiDictSync(): DictEntry[] {
-  if (!cachedHindi) {
-    import("./data/hindi-dict").then((m) => { cachedHindi = m.HINDI_DICTIONARY; });
-    return [];
-  }
-  return cachedHindi;
+  return HINDI_DICTIONARY;
 }
 
 /**
