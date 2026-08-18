@@ -76,9 +76,9 @@ powershell -NoProfile -Command "(New-Object Net.Sockets.TcpClient).Connect('127.
 if %ERRORLEVEL% EQU 0 (
     echo [OK] Local Whisper Transcription Server detected ^& active on port 9000!
 ) else (
-    echo [INFO] Launching faster-whisper-server in background on port 9000...
-    start "Vocal Muse - Whisper STT Server ^(Port 9000^)" cmd /k "python -m faster_whisper_server --port 9000 Systran/faster-whisper-base.en"
-    echo [OK] Faster-Whisper server launched!
+    echo [INFO] Launching AMD GPU DirectML Whisper server in background on port 9000...
+    start "Vocal Muse - Whisper STT Server (Port 9000)" cmd /k "python scripts\launch_whisper_directml.py"
+    echo [OK] AMD GPU DirectML Whisper server launched!
 )
 echo.
 
