@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { runOfflineRagGenerator } from "../offline-rag-generator";
+import { generateOfflineRagLyrics } from "../offline-rag-generator";
+import type { LocalCadence } from "../local-pipeline";
 
 describe("offline-rag-generator integration test", () => {
   it("generates cadence-locked lyrics and quality scores without an LLM", async () => {
@@ -9,8 +10,15 @@ describe("offline-rag-generator integration test", () => {
       topic: "city lights night drive",
     };
     const transcript = "yeah in the city late night driving fast money on my mind";
+    const cadence: LocalCadence = {
+      bars: [
+        { index: 0, syllables: 12, endSound: "ind", section: "verse", text: "yeah in the city late night driving fast" },
+        { index: 1, syllables: 12, endSound: "ind", section: "verse", text: "money on my mind" },
+      ],
+      detectedVibe: "trap",
+    };
 
-    const result = await runOfflineRagGenerator(transcript, brief);
+    const result = generateOfflineRagLyrics(transcript, cadence, brief);
 
     expect(result).toBeDefined();
     expect(result.lyrics).toBeDefined();

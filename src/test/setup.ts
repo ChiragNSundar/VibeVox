@@ -1,4 +1,5 @@
 import "@testing-library/jest-dom/vitest";
+import "fake-indexeddb/auto";
 
 if (!globalThis.crypto) {
   // @ts-expect-error polyfill
