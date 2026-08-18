@@ -1117,11 +1117,8 @@ function TrackPage() {
 
 
 
-  selectMode = false, selected: barSelected = false, focused = false, repeatWarn = false,
-  onToggleSelect, onFocus,
-  onRewrite, onMoreAlternates, onSelectAlternate, onAccept, onRevert, onToggleLock, onRestore,
-}: {
-  line: string;
+
+
   bar: CadenceMap["bars"][number] | undefined;
   got: number;
   gotEnd: string;
