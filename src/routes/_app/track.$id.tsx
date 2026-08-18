@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+﻿import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { getTrack, regenerateLyrics, deleteTrack, rewriteBar, updateBar } from "@/lib/tracks.functions";
@@ -41,14 +41,14 @@ import { BulkRewriteBar, type BulkOpts, DEFAULT_BULK_OPTS } from "@/components/t
 type Lyrics = { title: string; sections: { type: string; lines: string[] }[] };
 
 export const Route = createFileRoute("/_app/track/$id")({
-  head: () => ({ meta: [{ title: "Track · VoxScript" }] }),
+  head: () => ({ meta: [{ title: "Track Â· VoxScript" }] }),
   component: TrackPage,
   errorComponent: ({ error }) => {
     console.error("Track page error:", error);
     return (
       <div className="max-w-md mx-auto text-center space-y-4 py-16">
         <Card className="p-8 space-y-4 border-dashed">
-          <div className="text-4xl">🎵</div>
+          <div className="text-4xl">ðŸŽµ</div>
           <h2 className="text-xl font-bold">Track Not Found</h2>
           <p className="text-sm text-muted-foreground">
             This track could not be loaded from studio memory.
@@ -100,7 +100,7 @@ function saveLocal(trackId: string, state: BarLocalState) {
 
 // Undo/redo. A bar-scoped action captures the slice of local state for one
 // bar plus the server text before/after, so we can re-apply or invert without
-// re-running any pipeline. Stacks live in memory only (intentional — refresh
+// re-running any pipeline. Stacks live in memory only (intentional â€” refresh
 // is its own kind of reset).
 type BarSlice = { proposal?: BarProposal; history: BarVersion[]; locked: boolean };
 type UndoAction = {
@@ -375,7 +375,7 @@ function TrackPage() {
         await putLocalTrack(updatedTrack);
         qc.invalidateQueries({ queryKey: ["track", id] });
         qc.invalidateQueries({ queryKey: ["tracks"] });
-        toast.success("Rewriting with the new brief…");
+        toast.success("Rewriting with the new briefâ€¦");
         setEditingBrief(false);
         return;
       }
@@ -397,7 +397,7 @@ function TrackPage() {
         data: { deviceId: getDeviceId(), trackId: id, styleBrief: override ?? styleBrief ?? undefined, styleExamples, burnedPhrases, burnedVowels },
       });
       qc.invalidateQueries({ queryKey: ["track", id] });
-      toast.success("Rewriting with the new brief…");
+      toast.success("Rewriting with the new briefâ€¦");
       setEditingBrief(false);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Failed");
@@ -436,7 +436,7 @@ function TrackPage() {
     else if (format === "rtf") downloadBlob(`${slug}.rtf`, toRtf(lyrics), "application/rtf");
     else if (format === "timestamped") downloadBlob(`${slug}.timestamped.txt`, toTimestamped(lyrics, cadence, 90), "text/plain");
     else if (format === "pdf") openPrintWindow(toPrintableHtml(lyrics));
-    toast.success(format === "pdf" ? "Opening print dialog…" : "Downloaded");
+    toast.success(format === "pdf" ? "Opening print dialogâ€¦" : "Downloaded");
   };
 
   const rewriteWeakestAxis = () => {
@@ -445,16 +445,16 @@ function TrackPage() {
     if (!weakest) return;
     const [role] = weakest;
     const directive: Record<string, string> = {
-      pocket: "Lock the cadence harder — every bar must hit syllable target ±0 and stress where the mumble stressed. Kill any bar that jaw-breaks.",
+      pocket: "Lock the cadence harder â€” every bar must hit syllable target Â±0 and stress where the mumble stressed. Kill any bar that jaw-breaks.",
       wordplay: "Push wordplay: 2-3 syllable end-rhymes, internal rhymes inside every bar, at least two double-entendres in the verse.",
-      authenticity: "Strip every cliché and AI-tell. Make it sound like a real human artist with a specific voice — concrete brands/places/objects, not abstractions.",
+      authenticity: "Strip every clichÃ© and AI-tell. Make it sound like a real human artist with a specific voice â€” concrete brands/places/objects, not abstractions.",
     };
     const augmented: StyleBrief = {
       ...DEFAULT_BRIEF,
       ...(styleBrief ?? {}),
       structuralRules: [(styleBrief?.structuralRules ?? "").trim(), directive[role] ?? ""].filter(Boolean).join("\n"),
     };
-    toast.message(`Rewriting to lift "${role}" axis…`);
+    toast.message(`Rewriting to lift "${role}" axisâ€¦`);
     regenerate(augmented);
   };
 
@@ -773,7 +773,7 @@ function TrackPage() {
     await Promise.all(Array.from({ length: Math.min(CONC, targets.length) }, worker));
     setBulkRunning(false);
     setBulkPending(new Set());
-    toast.success(`Generated alternates for ${ok} bar${ok === 1 ? "" : "s"}${fail ? ` · ${fail} failed` : ""}. Review and accept inline.`);
+    toast.success(`Generated alternates for ${ok} bar${ok === 1 ? "" : "s"}${fail ? ` Â· ${fail} failed` : ""}. Review and accept inline.`);
   };
 
   const bulkAcceptAll = async () => {
@@ -902,7 +902,7 @@ function TrackPage() {
     return (
       <div className="max-w-md mx-auto text-center space-y-4 py-16">
         <Card className="p-8 space-y-4 border-dashed">
-          <div className="text-4xl">🎵</div>
+          <div className="text-4xl">ðŸŽµ</div>
           <h2 className="text-xl font-bold">Track Not Found</h2>
           <p className="text-sm text-muted-foreground">
             This track was not found in your local studio memory.
@@ -925,8 +925,8 @@ function TrackPage() {
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
               {isProcessing
-                ? (trackData as any)?.status === "transcribing" ? "Mapping cadence…" : "Writing & editing lyrics…"
-                : (trackData as any)?.status === "error" ? "Something went wrong" : `Lyrics ready · scheme ${scheme}`}
+                ? (trackData as any)?.status === "transcribing" ? "Mapping cadenceâ€¦" : "Writing & editing lyricsâ€¦"
+                : (trackData as any)?.status === "error" ? "Something went wrong" : `Lyrics ready Â· scheme ${scheme}`}
             </p>
           </div>
           <div className="flex gap-2 shrink-0">
@@ -972,7 +972,7 @@ function TrackPage() {
                 <Sliders className="h-4 w-4 text-primary" />
                 Style brief
                 <span className="text-xs font-normal text-muted-foreground">
-                  {styleBrief ? "— edit & rewrite" : "— none set"}
+                  {styleBrief ? "â€” edit & rewrite" : "â€” none set"}
                 </span>
               </span>
               <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -998,7 +998,7 @@ function TrackPage() {
           <Card className="p-10 text-center">
             <Loader2 className="h-6 w-6 text-primary mx-auto mb-3 animate-spin" />
             <div className="text-sm text-muted-foreground">
-              Hang tight — this updates automatically.
+              Hang tight â€” this updates automatically.
             </div>
           </Card>
         )}
@@ -1022,7 +1022,7 @@ function TrackPage() {
               <div className="mb-4 flex items-center justify-between text-xs text-muted-foreground border-b border-border pb-2">
                 <span>
                   {selectedBars.size} bar{selectedBars.size === 1 ? "" : "s"} selected
-                  {" · "}locked bars are skipped
+                  {" Â· "}locked bars are skipped
                 </span>
                 <div className="flex gap-2">
                   <button onClick={selectAllBars} className="hover:text-foreground underline-offset-2 hover:underline">Select all</button>
@@ -1115,235 +1115,3 @@ function TrackPage() {
   );
 }
 
-
-
-
-
-  bar: CadenceMap["bars"][number] | undefined;
-  got: number;
-  gotEnd: string;
-  ok: boolean;
-  locked: boolean;
-  proposal: { original: string; proposals: string[]; selectedIdx: number } | undefined;
-  history: BarVersion[];
-  rewriting: boolean;
-  selectMode?: boolean;
-  selected?: boolean;
-  focused?: boolean;
-  repeatWarn?: boolean;
-  onToggleSelect?: () => void;
-  onFocus?: () => void;
-  onRewrite: (opts: RewriteOpts) => void;
-  onMoreAlternates: (opts: RewriteOpts) => void;
-  onSelectAlternate: (delta: number) => void;
-  onAccept: () => void;
-  onRevert: () => void;
-  onToggleLock: () => void;
-  onRestore: (v: BarVersion) => void;
-}) {
-  const [open, setOpen] = useState(false);
-  const [keepEndSound, setKeepEndSound] = useState(true);
-  const [swapMetaphor, setSwapMetaphor] = useState(false);
-  const [raiseDensity, setRaiseDensity] = useState(false);
-  const [count, setCount] = useState(3);
-  const [custom, setCustom] = useState("");
-  const rowRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    if (focused && rowRef.current) {
-      rowRef.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
-    }
-  }, [focused]);
-
-  const opts: RewriteOpts = { keepEndSound, swapMetaphor, raiseDensity, custom, count };
-  const total = proposal?.proposals.length ?? 0;
-  const selectedAlt = proposal?.proposals[proposal.selectedIdx] ?? "";
-  const canSelect = selectMode && !locked && !!line.trim();
-
-  return (
-    <div
-      ref={rowRef}
-      className={`group rounded ${focused ? "outline outline-2 outline-primary/60 outline-offset-2" : ""}`}
-      onClick={onFocus}
-    >
-      <div className="flex items-start gap-1">
-        {selectMode && (
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); if (canSelect) onToggleSelect?.(); }}
-            disabled={!canSelect}
-            title={locked ? "Locked — unlock to include" : barSelected ? "Deselect" : "Select"}
-            className="mt-1 mr-1 text-muted-foreground hover:text-primary disabled:opacity-30 shrink-0"
-          >
-            {barSelected
-              ? <CheckSquare className="h-4 w-4 text-primary" />
-              : <Square className="h-4 w-4" />}
-          </button>
-        )}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className={`flex-1 px-1 -mx-1 rounded ${!ok ? "bg-amber-500/10" : ""} ${repeatWarn ? "border-b border-dashed border-amber-500/50" : ""} ${locked ? "border-l-2 border-primary/60 pl-2" : ""} ${barSelected ? "ring-1 ring-primary/40" : ""}`}>
-              {line || <span className="text-muted-foreground italic">(silence)</span>}
-            </div>
-          </TooltipTrigger>
-          {bar && (
-            <TooltipContent side="right" className="text-xs">
-              <div>Target: <b>{bar.syllables}</b> syll · end <b>"{bar.endSound}"</b></div>
-              <div>Got: <b>{got}</b> syll · end <b>"{gotEnd}"</b></div>
-              <div className="text-muted-foreground mt-1">Mumble: "{bar.text}"</div>
-              {repeatWarn && <div className="text-amber-400 mt-1">⚠ part of a repetition streak</div>}
-            </TooltipContent>
-          )}
-        </Tooltip>
-
-        <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex shrink-0">
-          <button
-            onClick={onToggleLock}
-            title={locked ? "Unlock (allow rewrite)" : "Lock (protect from rewrites)"}
-            className="p-1 text-muted-foreground hover:text-foreground"
-          >
-            {locked ? <Lock className="h-3.5 w-3.5" /> : <LockOpen className="h-3.5 w-3.5" />}
-          </button>
-
-          {history.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  title={`${history.length} prior version${history.length === 1 ? "" : "s"}`}
-                  className="p-1 text-muted-foreground hover:text-foreground relative"
-                >
-                  <History className="h-3.5 w-3.5" />
-                  <span className="absolute -top-0.5 -right-0.5 text-[9px] font-mono bg-primary/80 text-primary-foreground rounded-full h-3 min-w-3 px-0.5 leading-3 flex items-center justify-center">
-                    {history.length}
-                  </span>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <DropdownMenuLabel className="text-xs uppercase tracking-wider">Bar history</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {history.map((v) => (
-                  <DropdownMenuItem
-                    key={v.ts}
-                    onClick={() => onRestore(v)}
-                    className="flex flex-col items-start gap-0.5 cursor-pointer"
-                  >
-                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                      {v.source} · {new Date(v.ts).toLocaleTimeString()}
-                    </div>
-                    <div className="text-sm truncate w-full">{v.text}</div>
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <button
-                disabled={locked || rewriting}
-                title={locked ? "Locked" : "Rewrite this bar"}
-                className="p-1 text-muted-foreground hover:text-primary disabled:opacity-30"
-              >
-                {rewriting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
-              </button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4 space-y-3" align="end">
-              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Rewrite this bar</div>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox checked={keepEndSound} onCheckedChange={(v) => setKeepEndSound(!!v)} />
-                  Keep end-sound ({bar?.endSound ?? "?"})
-                </label>
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox checked={swapMetaphor} onCheckedChange={(v) => setSwapMetaphor(!!v)} />
-                  Swap metaphor / image
-                </label>
-                <label className="flex items-center gap-2 text-sm">
-                  <Checkbox checked={raiseDensity} onCheckedChange={(v) => setRaiseDensity(!!v)} />
-                  Push rhyme density
-                </label>
-              </div>
-              <div>
-                <Label className="text-xs">Alternates</Label>
-                <div className="flex gap-1 mt-1">
-                  {[1, 2, 3, 4].map((n) => (
-                    <button
-                      key={n}
-                      type="button"
-                      onClick={() => setCount(n)}
-                      className={`flex-1 h-7 text-xs rounded border ${count === n ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground"}`}
-                    >
-                      {n}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <Label className="text-xs">Custom direction (optional)</Label>
-                <Textarea
-                  value={custom}
-                  onChange={(e) => setCustom(e.target.value)}
-                  placeholder="e.g. make it more menacing, add a callback to the hook"
-                  className="mt-1 h-16 text-sm"
-                />
-              </div>
-              <div className="flex justify-end">
-                <Button
-                  size="sm"
-                  onClick={() => { onRewrite(opts); setOpen(false); }}
-                >
-                  <Wand2 className="h-3.5 w-3.5 mr-1.5" /> Rewrite
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
-
-      {proposal && (
-        <div className="mt-1 mb-2 ml-2 pl-3 border-l-2 border-primary/60 bg-primary/5 rounded-r-md py-2 pr-2">
-          <div className="flex items-center justify-between mb-1">
-            <div className="text-[10px] uppercase tracking-wider text-primary/80">
-              Alternate {proposal.selectedIdx + 1} of {total}
-            </div>
-            {total > 1 && (
-              <div className="flex items-center gap-0.5">
-                <button
-                  onClick={() => onSelectAlternate(-1)}
-                  className="p-0.5 text-primary/70 hover:text-primary"
-                  title="Previous alternate"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                </button>
-                <button
-                  onClick={() => onSelectAlternate(1)}
-                  className="p-0.5 text-primary/70 hover:text-primary"
-                  title="Next alternate"
-                >
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </button>
-              </div>
-            )}
-          </div>
-          <BarDiff original={proposal?.original ?? line} proposed={selectedAlt} />
-          <div className="flex gap-1 mt-2 flex-wrap">
-            <Button size="sm" variant="default" onClick={onAccept}>
-              <Check className="h-3.5 w-3.5 mr-1" /> Accept
-            </Button>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onMoreAlternates(opts)}
-              disabled={rewriting || total >= 8}
-            >
-              {rewriting ? <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" /> : <Plus className="h-3.5 w-3.5 mr-1" />}
-              More
-            </Button>
-            <Button size="sm" variant="ghost" onClick={onRevert}>
-              <X className="h-3.5 w-3.5 mr-1" /> Discard
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
