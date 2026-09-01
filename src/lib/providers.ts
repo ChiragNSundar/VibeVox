@@ -28,7 +28,7 @@ export type Provider = {
   /** OpenAI-compatible root, no trailing slash. Empty for server-side providers. */
   baseUrl: string;
   needsKey: boolean;
-  /** Runs through a server function rather than a browser fetch (Lovable gateway). */
+  /** Runs through a server function rather than a browser fetch (Cloud gateway). */
   serverSide: boolean;
   /** Rejects unknown body params — drop `options`/`repeat_penalty` before sending. */
   strictBody: boolean;
@@ -188,9 +188,9 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
   },
   lovable: {
     id: "lovable",
-    label: "Lovable AI Gateway",
+    label: "Cloud AI Gateway",
     baseUrl: "",
-    needsKey: false, // key lives in LOVABLE_API_KEY server-side
+    needsKey: false, // key lives in server environment
     serverSide: true,
     strictBody: true,
     chat: true,
@@ -198,7 +198,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
     transcription: true,
     defaultModel: "google/gemini-2.5-flash",
     defaultEmbedModel: "google/gemini-embedding-001",
-    hint: "Routed through this app's server functions. Requires LOVABLE_API_KEY in the deployment env.",
+    hint: "Routed through this app's server functions. Requires AI_GATEWAY_KEY in the deployment env.",
   },
   custom: {
     id: "custom",

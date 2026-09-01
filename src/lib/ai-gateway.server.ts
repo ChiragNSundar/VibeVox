@@ -1,15 +1,18 @@
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
 
-export function createLovableGateway(apiKey: string) {
+export function createAiGateway(apiKey: string) {
+  const baseURL = process.env.AI_GATEWAY_URL || "https://ai.gateway.lovable.dev/v1";
   return createOpenAICompatible({
-    name: "lovable",
-    baseURL: "https://ai.gateway.lovable.dev/v1",
+    name: "cloud-gateway",
+    baseURL,
     headers: {
-      "Lovable-API-Key": apiKey,
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
+      Authorization: `Bearer ${apiKey}`,
+      "X-API-Key": apiKey,
     },
   });
 }
+
+export const createLovableGateway = createAiGateway;
 
 export async function transcribeAudio(apiKey: string, audio: Blob, filename: string) {
   const form = new FormData();
@@ -19,7 +22,8 @@ export async function transcribeAudio(apiKey: string, audio: Blob, filename: str
     "Transcribe rap/R&B punch-in vocals. Preserve every audible vocalization in order, including mumbles, hums, ad-libs, filler syllables like uh/um/yeah/aye, repeated words, and partial phrases. Do not summarize or clean up the performance.",
   );
   form.append("file", audio, filename);
-  const res = await fetch("https://ai.gateway.lovable.dev/v1/audio/transcriptions", {
+  const baseURL = process.env.AI_GATEWAY_URL || "https://ai.gateway.lovable.dev/v1";
+  const res = await fetch(`${baseURL.replace(/\/+$/, "")}/audio/transcriptions`, {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}` },
     body: form,
