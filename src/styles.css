@@ -93,3 +93,36 @@
     letter-spacing: -0.01em;
   }
 }
+
+/* Custom Sleek Dark Studio Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.28 0.007 270);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.38 0.01 270);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.28 0.007 270) transparent;
+}
+
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

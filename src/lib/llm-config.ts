@@ -112,7 +112,13 @@ function inferProvider(baseUrl: string): ProviderId {
  */
 function migrate(raw: LegacyLlmConfig & Partial<LlmConfig>): LlmConfig {
   // Already migrated.
-  if (raw.providerId) return { ...DEFAULT_LLM_CONFIG, ...(raw as Partial<LlmConfig>) } as LlmConfig;
+  if (raw.providerId) {
+    const res = { ...DEFAULT_LLM_CONFIG, ...(raw as Partial<LlmConfig>) } as LlmConfig;
+    if (res.providerId === "local" && (res.model?.includes("gemini") || res.model?.includes("gpt-") || res.model?.includes("claude"))) {
+      res.model = res.baseUrl === "offline" ? "offline-rag" : "local-model";
+    }
+    return res;
+  }
 
   const legacyUrl = raw.localBaseUrl ?? "";
   const wasCloud = raw.mode === "cloud";
@@ -215,6 +221,9 @@ export function isOfflineReady(config: LlmConfig): boolean {
 // ---------------------------------------------------------------------------
 
 export async function pingLlm(config: LlmConfig): Promise<{ ok: boolean; message: string }> {
+  if (config.baseUrl === "offline" || config.baseUrl === "none") {
+    return { ok: true, message: "Zero-LLM RAG Engine active (Cadence segmentation + Local Brain)." };
+  }
   const provider = getProvider(config.providerId);
   if (provider.serverSide) {
     return { ok: false, message: `${provider.label} runs server-side — nothing to ping from the browser.` };

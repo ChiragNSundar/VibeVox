@@ -226,8 +226,8 @@ function ScribblePage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* Left Column: The Scribble Pad Canvas */}
         <div className="lg:col-span-6 space-y-4">
-          {/* Mode Selector */}
-          <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+          {/* Mode Selector Segmented Control */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 rounded-xl bg-card/60 border border-border/70">
             {[
               { id: "full-song", label: "Full Song", icon: Music },
               { id: "verse-16", label: "16-Bar Verse", icon: Layers },
@@ -237,17 +237,19 @@ function ScribblePage() {
               const Icon = item.icon;
               const active = mode === item.id;
               return (
-                <Button
+                <button
                   key={item.id}
                   type="button"
-                  size="sm"
-                  variant={active ? "secondary" : "outline"}
-                  className={`text-xs h-7 px-2.5 gap-1 ${active ? "border-primary/50 text-foreground" : "text-muted-foreground"}`}
                   onClick={() => setMode(item.id as ScribbleMode)}
+                  className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    active
+                      ? "bg-primary text-primary-foreground shadow-sm font-semibold"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  }`}
                 >
-                  <Icon className="h-3 w-3" />
-                  {item.label}
-                </Button>
+                  <Icon className="h-3.5 w-3.5 shrink-0" />
+                  <span className="truncate">{item.label}</span>
+                </button>
               );
             })}
           </div>
