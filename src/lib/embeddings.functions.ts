@@ -1,4 +1,4 @@
-// Cloud embedding server function — calls Lovable AI Gateway's OpenAI-compatible
+// Cloud embedding server function — calls Cloud AI Gateway's OpenAI-compatible
 // /v1/embeddings endpoint. Used by style-memory recall when the user is in
 // cloud LLM mode. We batch up to 32 strings per call; the client de-dupes
 // and caches results in IndexedDB, so a typical recall round-trip embeds
@@ -15,11 +15,12 @@ const Input = z.object({
 export const embedTexts = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<{ model: string; vectors: number[][] }> => {
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
+    const apiKey = process.env.AI_GATEWAY_KEY || process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("Missing AI_GATEWAY_KEY");
     const model = data.model || "google/gemini-embedding-001";
+    const gatewayUrl = process.env.AI_GATEWAY_URL || "https://ai.gateway.lovable.dev/v1";
 
-    const res = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
+    const res = await fetch(`${gatewayUrl.replace(/\/+$/, "")}/embeddings`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
