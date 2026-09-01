@@ -1,0 +1,16 @@
+# Title: Late Night Reflection
+# Genre: hip-hop
+# Vibe: boom-bap
+# Attitude: reflective, focused
+# TargetSyllables: 10
+# (Lines starting with # are metadata comments and ignored by lyric chunker)
+
+walking through Brooklyn with the tape deck humming
+copped the vintage leather jacket just to match the autumn
+every notebook holds a winter that I barely got through
+pencil smudges on the margin where the truth was drawn through
+
+mama told me keep the faith when the budget got thin
+now the stadium seats filled up to the brim
+never took a shortcut, built it from the floor
+heavy is the head when you open up the door

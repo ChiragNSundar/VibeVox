@@ -6,9 +6,10 @@
 
 import { countSyllables, endRhymeKey, rhymeStrength } from "./lyrics-analysis";
 import type { LocalBrief, LocalCadence, LocalLyrics, LocalQuality, LocalPipelineResult } from "./local-pipeline";
-import { loadStyleMemory, DEFAULT_STYLE_SEEDS } from "./style-memory";
+import { loadStyleMemory, loadUnifiedStyleMemory, DEFAULT_STYLE_SEEDS } from "./style-memory";
 import { lookupIndicRhymes } from "./rhymes";
 import { findRhymesWithPos } from "./indic-dictionary";
+import { loadBrainState, getBrainPromptDirectives } from "./brain-indexer";
 
 // Regional pattern banks for offline fallback generation
 const HINGLISH_PATTERNS = [
@@ -66,15 +67,15 @@ function selectPatternBank(region?: string): string[] {
   else if (r.includes("kanglish")) baseBank = KANGLISH_PATTERNS;
 
   try {
-    const memory = loadStyleMemory();
+    const brainPatterns = loadBrainState().rhymes.flatMap((rb) => rb.patterns).filter(Boolean);
+    const memory = loadUnifiedStyleMemory();
     const memoryBars = memory
       .filter((m) => m.drakeScore >= 8.0)
       .flatMap((m) => m.bars)
       .filter((b) => b && b.trim().length >= 10);
 
-    if (memoryBars.length > 0) {
-      return Array.from(new Set([...memoryBars, ...baseBank]));
-    }
+    const merged = Array.from(new Set([...brainPatterns, ...memoryBars, ...baseBank]));
+    if (merged.length > 0) return merged;
   } catch {
     /* fallback to baseBank */
   }
@@ -83,8 +84,10 @@ function selectPatternBank(region?: string): string[] {
 }
 
 function getRegionalAdlib(region?: string, customSlang?: string): string {
-  if (customSlang) {
-    const slangs = customSlang.split(/[,;]/).map((s) => s.trim()).filter(Boolean);
+  const brainSlang = getBrainPromptDirectives().slangTokens;
+  const combinedSlang = [customSlang, ...brainSlang].filter(Boolean).join(", ");
+  if (combinedSlang) {
+    const slangs = combinedSlang.split(/[,;]/).map((s) => s.trim()).filter(Boolean);
     if (slangs.length) return slangs[Math.floor(Math.random() * slangs.length)];
   }
   const r = (region || "").toLowerCase();
@@ -135,7 +138,7 @@ export function generateOfflineRagLyrics(
 ): LocalPipelineResult {
   const region = brief?.slangRegion;
   const bank = selectPatternBank(region);
-  const memories = loadStyleMemory();
+  const memories = loadUnifiedStyleMemory();
   const memoryBars = (memories.length ? memories : DEFAULT_STYLE_SEEDS).flatMap((m) => m.bars);
 
   // Pool of candidate lines

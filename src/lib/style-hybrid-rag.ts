@@ -8,7 +8,7 @@
 // Merges all streams using RRF: Score = sum(1 / (k + rank_i))
 
 import { recallStyleExamples, type RecalledExample } from "./style-recall";
-import { loadStyleMemory, DEFAULT_STYLE_SEEDS, type StyleMemoryEntry } from "./style-memory";
+import { loadStyleMemory, loadUnifiedStyleMemory, DEFAULT_STYLE_SEEDS, type StyleMemoryEntry } from "./style-memory";
 import { countSyllables, endRhymeKey } from "./lyrics-analysis";
 import { findRhymesWithPos } from "./indic-dictionary";
 
@@ -26,7 +26,7 @@ export async function recallHybridStyleExamples(
 ): Promise<RecalledExample[]> {
   const k = 60; // RRF constant
   const targetCount = opts.count ?? 4;
-  const memories = loadStyleMemory();
+  const memories = loadUnifiedStyleMemory();
   const pool = memories.length ? memories : DEFAULT_STYLE_SEEDS;
 
   // Stream 1: Semantic Vector Similarity

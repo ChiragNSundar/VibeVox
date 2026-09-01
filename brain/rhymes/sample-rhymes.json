@@ -1,0 +1,21 @@
+{
+  "name": "Urban Cadence & Slang Bank",
+  "language": "english",
+  "rhyme_pairs": [
+    { "target": "hustle", "rhymes": ["muscle", "subtle", "scuffle", "struggle"] },
+    { "target": "vision", "rhymes": ["precision", "decision", "collision", "incision"] },
+    { "target": "shadow", "rhymes": ["meadow", "echo", "ghetto", "mellow"] }
+  ],
+  "regional_slang": [
+    "on god",
+    "locked in",
+    "top tier",
+    "no smoke",
+    "paper trail",
+    "dead to rights"
+  ],
+  "patterns": [
+    "counting every blessing while the dial is spinning slow",
+    "keep the perimeter quiet when the neon starts to glow"
+  ]
+}

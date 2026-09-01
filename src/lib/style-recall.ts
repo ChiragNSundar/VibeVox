@@ -16,7 +16,7 @@
 // endpoint is unavailable (no credits, local Ollama missing the embed model,
 // network error). The writer never sees the difference.
 
-import { loadStyleMemory, sampleStyleExamples, DEFAULT_STYLE_SEEDS, type StyleMemoryEntry } from "./style-memory";
+import { loadStyleMemory, loadUnifiedStyleMemory, sampleStyleExamples, DEFAULT_STYLE_SEEDS, type StyleMemoryEntry } from "./style-memory";
 import { embedMany, embedOne, cosineSim, resolveEmbedContext, type EmbedContext } from "./embeddings";
 
 export type RecalledExample = { bars: string[]; meta: string };
@@ -59,7 +59,7 @@ export async function recallStyleExamples(
 ): Promise<RecalledExample[]> {
   const count = Math.max(1, opts.count ?? 3);
   const trimmedQuery = (query || "").trim();
-  let memory = loadStyleMemory();
+  let memory = loadUnifiedStyleMemory();
   if (!memory.length) memory = DEFAULT_STYLE_SEEDS;
 
   // Apply coarse filter first to keep embedding cost low.

@@ -12,7 +12,7 @@ export type StyleMemoryEntry = {
   attitude?: string[];
   bars: string[];
   createdAt: number;
-  source?: "self-play" | "track" | "web" | "web-search" | "paste" | "manual" | "import";
+  source?: "self-play" | "track" | "web" | "web-search" | "paste" | "manual" | "import" | "brain";
   sourceUrl?: string;
 };
 
@@ -153,6 +153,30 @@ export function loadStyleMemory(): StyleMemoryEntry[] {
     return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
+  }
+}
+
+/** Loads style memory merged with any ingested lyric bars from the localized brain. */
+export function loadUnifiedStyleMemory(): StyleMemoryEntry[] {
+  const local = loadStyleMemory();
+  if (!isBrowser()) return local;
+  try {
+    const raw = localStorage.getItem("voxscript:brain-state");
+    if (!raw) return local;
+    const parsed = JSON.parse(raw) as { lyrics?: StyleMemoryEntry[] };
+    if (!Array.isArray(parsed.lyrics) || !parsed.lyrics.length) return local;
+
+    const seen = new Set(local.map((e) => e.id));
+    const merged = [...local];
+    for (const entry of parsed.lyrics) {
+      if (!seen.has(entry.id)) {
+        merged.push(entry);
+        seen.add(entry.id);
+      }
+    }
+    return merged;
+  } catch {
+    return local;
   }
 }
 
