@@ -19,7 +19,7 @@ picks up this codebase after `git clone`.
 - **TanStack Start v1** (React 19, Vite 7) — file-based routing under `src/routes/`.
 - **Tailwind v4** via `src/styles.css` (native `@theme`, no `tailwind.config.js`).
 - **Bun** as package manager and runtime. `npm`/`pnpm` also work.
-- **Lovable Cloud (Supabase)** is optional. The app can run 100% locally.
+- **Cloud Backend (Supabase)** is optional. The app can run 100% locally.
 
 ## Quickstart
 
@@ -32,7 +32,7 @@ bunx vitest run    # unit tests
 ```
 
 No environment variables are required to run in local mode. The `.env`
-committed here targets the Lovable Cloud project this repo was built in;
+committed here targets the cloud project;
 delete or replace it for your own deployment.
 
 ## Fully-Local Mode
@@ -135,7 +135,7 @@ provider + endpoint + word, so second lookups are instant and offline-safe.
   from `package-lock.json` but will be slower.
 - Tests use Vitest + jsdom; browser-only modules import `fake-indexeddb/auto`
   in `src/test/setup.ts`.
-- Never run `tsc --noEmit` manually — the Lovable harness uses `tsgo`.
+- Never run `tsc --noEmit` manually — the build harness uses `tsgo`.
 
 ## RhymeWave
 
