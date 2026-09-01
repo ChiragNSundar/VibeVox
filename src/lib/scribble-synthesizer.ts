@@ -118,25 +118,35 @@ function synthesizeOfflineLyrics(
 ): SynthesizedSection[] {
   const cleanLines = lines.map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
 
-  // Build cadence-locked bars around clean lines
+  // Fetch candidate memory bars from local brain & style memory
+  const memories = loadUnifiedStyleMemory();
+  const memoryBars = memories.flatMap((m) => m.bars).filter((b) => b && b.trim().length >= 8);
+
+  const candidatePool = [...memoryBars, "locked in the rhythm till the morning breaks", "walking through the static with the tape deck loud"];
+
+  const getCandidateBar = (index: number) => candidatePool[index % candidatePool.length];
+
   if (mode === "hook-anthem") {
     const hookLines = cleanLines.slice(0, 4);
+    let i = 0;
     while (hookLines.length < 4) {
-      hookLines.push("locked inside the rhythm till the morning breaks");
+      hookLines.push(getCandidateBar(i++));
     }
     return [{ type: "hook", lines: hookLines }];
   }
 
   if (mode === "verse-16") {
     const verseLines = cleanLines.slice(0, 16);
+    let i = 0;
     while (verseLines.length < 8) {
-      verseLines.push("walking through the static with the tape deck loud");
+      verseLines.push(getCandidateBar(i++));
     }
     return [{ type: "verse", lines: verseLines }];
   }
 
-  // Full song mode: Hook + Verse 1 + Verse 2
+  // Full song mode: Hook + Verse
   const hook = cleanLines.slice(0, 4);
+  let hIdx = 0;
   if (hook.length < 4) {
     hook.push(
       "standing on the corner where the night runs deep",
@@ -145,12 +155,13 @@ function synthesizeOfflineLyrics(
   }
 
   const verse1 = cleanLines.slice(4, 12);
+  let vIdx = 0;
   if (verse1.length < 4) {
     verse1.push(
-      "every notebook holds a chapter of the climb",
-      "never took a shortcut through the hands of time",
-      "heavy is the crown when the lights stay dim",
-      "keep the vision pure from the base to the brim",
+      getCandidateBar(vIdx++),
+      getCandidateBar(vIdx++),
+      getCandidateBar(vIdx++),
+      getCandidateBar(vIdx++),
     );
   }
 
@@ -196,32 +207,40 @@ Return ONLY a single valid JSON object matching this schema:
 export async function makeSenseOfScribble(
   rawScribble: string,
   mode: ScribbleMode = "full-song",
+  options: { offlineOnly?: boolean } = {},
 ): Promise<ScribbleResult> {
   const trimmed = rawScribble.trim();
   if (!trimmed) {
     throw new Error("Scribble is empty. Write some thoughts or fragments first.");
   }
 
-  // Load Brain Directives so active persona & rules inform synthesis
-  const brain = getBrainPromptDirectives();
-  const brainContext = [
-    brain.personaBlock ? `ACTIVE ARTIST PERSONA:\n${brain.personaBlock}` : null,
-    brain.guidelinesBlock ? `CREATIVE GUIDELINES:\n${brain.guidelinesBlock}` : null,
-    brain.slangTokens.length ? `PREFERRED ARTIST SLANG:\n${brain.slangTokens.join(", ")}` : null,
-  ]
-    .filter(Boolean)
-    .join("\n\n");
+  const config = loadLlmConfig();
+  const isExplicitOffline =
+    options.offlineOnly === true ||
+    config.baseUrl === "offline" ||
+    config.baseUrl === "none";
 
-  const modeInstruction =
-    mode === "hook-anthem"
-      ? "Focus heavily on creating a hypnotic, anthemic 4 to 8-bar Hook from the strongest emotional idea."
-      : mode === "verse-16"
-      ? "Synthesize a continuous, cadence-locked 16-bar verse with dense internal rhymes."
-      : mode === "rhyme-slang"
-      ? "Highlight the slang vocabulary and build tightly coupled rhyme couplets."
-      : "Synthesize a complete structure with a Hook and Verse(s).";
+  if (!isExplicitOffline) {
+    // Load Brain Directives so active persona & rules inform synthesis
+    const brain = getBrainPromptDirectives();
+    const brainContext = [
+      brain.personaBlock ? `ACTIVE ARTIST PERSONA:\n${brain.personaBlock}` : null,
+      brain.guidelinesBlock ? `CREATIVE GUIDELINES:\n${brain.guidelinesBlock}` : null,
+      brain.slangTokens.length ? `PREFERRED ARTIST SLANG:\n${brain.slangTokens.join(", ")}` : null,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
-  const userPrompt = `RAW ARTIST SCRIBBLE:
+    const modeInstruction =
+      mode === "hook-anthem"
+        ? "Focus heavily on creating a hypnotic, anthemic 4 to 8-bar Hook from the strongest emotional idea."
+        : mode === "verse-16"
+        ? "Synthesize a continuous, cadence-locked 16-bar verse with dense internal rhymes."
+        : mode === "rhyme-slang"
+        ? "Highlight the slang vocabulary and build tightly coupled rhyme couplets."
+        : "Synthesize a complete structure with a Hook and Verse(s).";
+
+    const userPrompt = `RAW ARTIST SCRIBBLE:
 """
 ${trimmed}
 """
@@ -232,10 +251,9 @@ ${brainContext}
 
 Make sense of this scribble and return the structured JSON object.`;
 
-  // Attempt LLM generation
-  try {
-    const config = loadLlmConfig();
-    const target = resolveTarget(chatTarget(config));
+    // Attempt LLM generation
+    try {
+      const target = resolveTarget(chatTarget(config));
 
     if (target.baseUrl && target.model) {
       const body: Record<string, unknown> = {
