@@ -116,7 +116,7 @@ function migrate(raw: LegacyLlmConfig & Partial<LlmConfig>): LlmConfig {
 
   const legacyUrl = raw.localBaseUrl ?? "";
   const wasCloud = raw.mode === "cloud";
-  const providerId: ProviderId = wasCloud ? "lovable" : inferProvider(legacyUrl);
+  const providerId: ProviderId = wasCloud ? "gateway" : inferProvider(legacyUrl);
   const apiKeys: Partial<Record<ProviderId, string>> = {};
   if (raw.localApiKey) apiKeys[providerId] = raw.localApiKey;
 
@@ -130,7 +130,7 @@ function migrate(raw: LegacyLlmConfig & Partial<LlmConfig>): LlmConfig {
     contextTokens: raw.localContextTokens,
     inBrowserModel: raw.inBrowserModel,
     // Old "cloud" mode meant Cloud gateway hosted embeddings.
-    embedProviderId: wasCloud ? "lovable" : inferProvider(legacyUrl),
+    embedProviderId: wasCloud ? "gateway" : inferProvider(legacyUrl),
     embedBaseUrl: wasCloud ? "" : legacyUrl || DEFAULT_LLM_CONFIG.embedBaseUrl,
     embedModel: wasCloud ? "google/gemini-embedding-001" : DEFAULT_LLM_CONFIG.embedModel,
   };

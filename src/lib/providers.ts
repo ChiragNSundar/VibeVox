@@ -19,7 +19,7 @@ export type ProviderId =
   | "mistral"
   | "together"
   | "google"
-  | "lovable"
+  | "gateway"
   | "custom";
 
 export type Provider = {
@@ -186,8 +186,8 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
     keyPlaceholder: "AIza…",
     hint: "Gemini's OpenAI-compatibility endpoint.",
   },
-  lovable: {
-    id: "lovable",
+  gateway: {
+    id: "gateway",
     label: "Cloud AI Gateway",
     baseUrl: "",
     needsKey: false, // key lives in server environment
@@ -218,8 +218,9 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
 
 export const PROVIDER_LIST: Provider[] = Object.values(PROVIDERS);
 
-export function getProvider(id: ProviderId): Provider {
-  return PROVIDERS[id] ?? PROVIDERS.custom;
+export function getProvider(id: ProviderId | string): Provider {
+  if (id === "lovable") return PROVIDERS.gateway;
+  return (PROVIDERS as Record<string, Provider>)[id] ?? PROVIDERS.custom;
 }
 
 /** Providers that can serve the generation pipeline, in menu order. */
