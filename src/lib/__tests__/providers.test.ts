@@ -36,7 +36,7 @@ describe("resolveTarget", () => {
   });
 
   it("refuses to build a fetch for server-side providers", () => {
-    expect(() => resolveTarget({ providerId: "lovable" })).toThrow(/server-side/i);
+    expect(() => resolveTarget({ providerId: "gateway" })).toThrow(/server-side/i);
   });
 });
 
@@ -176,7 +176,7 @@ describe("config migration", () => {
   it("maps the legacy cloud mode onto the Cloud gateway", () => {
     localStorage.setItem("voxscript:llm-config", JSON.stringify({ mode: "cloud" }));
     const cfg = loadLlmConfig();
-    expect(cfg.providerId).toBe("lovable");
+    expect(cfg.providerId).toBe("gateway");
     expect(resolveEmbedContext(cfg).backend).toBe("cloud");
   });
 
