@@ -7,10 +7,12 @@
 //  - chain scorer counts multi-syllable end-rhyme runs
 //  - scheme labeler returns "AABB" / "ABAB" / "freeform"
 
+import { romanizeIndic } from "./indic-romanizer";
+
 const VOWELS = "aeiouy";
 
 function cleanWord(w: string): string {
-  return w.toLowerCase().replace(/[^a-z']/g, "");
+  return romanizeIndic(w).toLowerCase().replace(/[^a-z']/g, "");
 }
 
 export function syllablesInWord(word: string): number {
@@ -56,7 +58,8 @@ export function syllablesInWord(word: string): number {
 
 export function countSyllables(line: string): number {
   if (!line) return 0;
-  const cleaned = line
+  const romanized = romanizeIndic(line);
+  const cleaned = romanized
     .toLowerCase()
     .replace(/\([^)]*\)/g, " ") // strip parenthetical ad-libs
     .replace(/[^a-z'\s-]/g, " ");
@@ -71,7 +74,8 @@ export function countSyllables(line: string): number {
 
 // Last word of a line, cleaned. Skips parenthetical ad-libs at the end.
 function lastWord(line: string): string {
-  const cleaned = line
+  const romanized = romanizeIndic(line);
+  const cleaned = romanized
     .toLowerCase()
     .replace(/\([^)]*\)\s*$/g, "")
     .replace(/[^a-z'\s]/g, " ")

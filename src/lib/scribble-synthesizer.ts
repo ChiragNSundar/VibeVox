@@ -9,6 +9,7 @@ import { saveBrainFile } from "./brain.functions";
 import { reindexBrain } from "./brain-indexer";
 import { loadUnifiedStyleMemory } from "./style-memory";
 import { getBrainPromptDirectives } from "./brain-indexer";
+import { romanizeIndic, stripPronunciationMarks } from "./indic-romanizer";
 
 export type ScribbleMode = "full-song" | "verse-16" | "hook-anthem" | "rhyme-slang";
 
@@ -183,6 +184,9 @@ YOUR MISSION:
 2. Isolate the artist's standout punchlines and gems — never discard their authentic voice, slang, or rawest lines.
 3. Synthesize the scribbles into high-artistry, cadence-locked lyrics with tight syllable counts (±1 syl variance) and multi-syllabic internal rhymes.
 4. Eliminate clichés while preserving their exact street dialect, attitude, and personal truth.
+5. KANGLISH & HINGLISH SUPPORT:
+   - If the artist scribbles in Kannada, Hindi, Kanglish (Kannada + English), or Hinglish (Hindi + English), write lyrics in natural, street-authentic Romanized Latin script.
+   - CRITICAL: ZERO PRONUNCIATION MARKS. Absolutely DO NOT use any macrons (ā, ī, ū, ē, ō), accents (á, é), retroflex dots (ṭ, ḍ, ṇ, ḷ, ṛ), or phonetic symbols. Write clean colloquial English letters only (write "kya baat hai", "macha", "guru", "apna", "bengaluru", NOT "kyā bāt hai", "macā", "gurū", "bengalūru").
 
 Return ONLY a single valid JSON object matching this schema:
 {
@@ -282,10 +286,19 @@ Make sense of this scribble and return the structured JSON object.`;
           if (content) {
             const parsed = parseModelJsonResponse(content);
             if (parsed) {
+              const cleanTitle = stripPronunciationMarks(romanizeIndic(parsed.title || "Midnight Scribbles"));
+              const cleanSections = (parsed.sections || []).map((sec: any) => ({
+                type: sec.type,
+                lines: (sec.lines || []).map((l: string) => stripPronunciationMarks(romanizeIndic(l))),
+              }));
+              const cleanAnalysis = {
+                ...parsed.analysis,
+                standoutGems: (parsed.analysis?.standoutGems || []).map((g: string) => stripPronunciationMarks(romanizeIndic(g))),
+              };
               return {
-                title: parsed.title || "Midnight Scribbles",
-                analysis: parsed.analysis,
-                sections: parsed.sections,
+                title: cleanTitle,
+                analysis: cleanAnalysis,
+                sections: cleanSections,
                 rawScribble: trimmed,
                 mode,
                 createdAt: Date.now(),
@@ -300,13 +313,18 @@ Make sense of this scribble and return the structured JSON object.`;
   }
 
   // Offline fallback
-  const lines = trimmed.split("\n").filter((l) => l.trim().length > 0);
-  const analysis = analyzeOfflineScribbles(trimmed);
-  const sections = synthesizeOfflineLyrics(lines, analysis, mode);
+  const cleanTrimmed = stripPronunciationMarks(romanizeIndic(trimmed));
+  const lines = cleanTrimmed.split("\n").filter((l) => l.trim().length > 0);
+  const analysis = analyzeOfflineScribbles(cleanTrimmed);
+  const rawSections = synthesizeOfflineLyrics(lines, analysis, mode);
+  const sections = rawSections.map((sec) => ({
+    type: sec.type,
+    lines: sec.lines.map((l) => stripPronunciationMarks(romanizeIndic(l))),
+  }));
   const title = lines[0] ? lines[0].slice(0, 24).replace(/[^a-zA-Z0-9 ]/g, "").trim() : "Uncut Scribble";
 
   return {
-    title: title || "Uncut Scribbles",
+    title: stripPronunciationMarks(romanizeIndic(title || "Uncut Scribbles")),
     analysis,
     sections,
     rawScribble: trimmed,

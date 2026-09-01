@@ -96,6 +96,7 @@ function languageBlueprint(region?: string): string {
   if (reg.includes("hinglish")) {
     return `\n\nLANGUAGE & CULTURAL STYLE GUIDELINES (DESI HIP-HOP / HINGLISH):
 - WRITE IN ROMANIZED HINDI / HINGLISH (Latin script only).
+- CRITICAL: ZERO PRONUNCIATION MARKS. Absolutely DO NOT use any macrons (ā, ī, ū, ē, ō), accents (á, é), retroflex dots (ṭ, ḍ, ṇ, ḷ, ṛ), or diacritics. Write pure colloquial Latin letters only (e.g. write "kya baat hai", "macha", "guru", "apna", "shanti", NOT "kyā bāt hai", "macā", "gurū", "śānti").
 - DICTIONARY & POS STRUCTURE: Use proper POS combinations (Noun + Adjective + Verb + Multisyllabic Rhyme).
   - Nouns: naseeb (destiny), zeher (poison), chehra (face), raabta (connection), aks (reflection), lafz (words).
   - Verbs: mitaoon (erase), bataoon (explain), badalta (changing), tehelta (strolling), chalaoon (operate).
@@ -107,6 +108,7 @@ function languageBlueprint(region?: string): string {
   if (reg.includes("kanglish")) {
     return `\n\nLANGUAGE & CULTURAL STYLE GUIDELINES (KANNADA RAP / KANGLISH):
 - WRITE IN ROMANIZED KANNADA / KANGLISH (Latin script only, extracted from KEED dictionary).
+- CRITICAL: ZERO PRONUNCIATION MARKS. Absolutely DO NOT use any macrons (ā, ī, ū, ē, ō), accents (á, é), retroflex dots (ṭ, ḍ, ṇ, ḷ, ṛ), or diacritics. Write pure colloquial Latin letters only (e.g. write "bengaluru", "macha", "guru", "sariyaagi", NOT "bengalūru", "macā", "gurū", "sariyāgi").
 - DICTIONARY & POS STRUCTURE: Use proper Kannada POS flow (Noun + Adjective + Verb + Multisyllabic Rhyme).
   - Nouns: bengaluru, paata (lesson), haadu (song), preeti (love), kopa (anger), huduga (boy), hudugi (girl).
   - Verbs: kaltivi (learned), maado (doing), barli (let come), kelo (listen), kettodhga (ruined).
@@ -413,12 +415,13 @@ function group(title: string, lines: string[], cadence: LocalCadence): LocalLyri
 
 function fillToCadence(parsed: WriteShape | null, cadence: LocalCadence): LocalLyrics {
   const flatRaw = parsed ? parsed.sections.flatMap((s) => s.lines) : [];
-  const flat = flatRaw.map((l) => l.trim()).filter(Boolean);
+  const flat = flatRaw.map((l) => stripPronunciationMarks(romanizeIndic(l.trim()))).filter(Boolean);
   const needed = cadence.bars.length;
   while (flat.length < needed) flat.push(cadence.bars[flat.length]?.text || "Locked in the pocket");
-  return group(parsed?.title ?? "Untitled", flat.slice(0, needed), cadence);
+  return group(stripPronunciationMarks(romanizeIndic(parsed?.title ?? "Untitled")), flat.slice(0, needed), cadence);
 }
 
+import { romanizeIndic, stripPronunciationMarks } from "./indic-romanizer";
 import { recallHybridStyleExamples } from "./style-hybrid-rag";
 import { synthesizeMetaphors } from "./metaphor-synthesizer";
 import { planRhymeLadders } from "./rhyme-planner";

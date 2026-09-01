@@ -124,16 +124,17 @@ async function cmudictLookup(word: string): Promise<RhymeHit[]> {
 }
 
 import { findRhymesWithPos } from "./indic-dictionary";
+import { romanizeIndic, normalizeIndicWord } from "./indic-romanizer";
 
 export function lookupIndicRhymes(word: string): RhymeHit[] {
-  const w = word.toLowerCase().trim().replace(/[^a-z]/g, "");
+  const w = normalizeIndicWord(word);
   if (!w) return [];
   const hits: RhymeHit[] = [];
 
   const matches = findRhymesWithPos(w, "auto");
   for (const m of matches) {
     hits.push({
-      word: `${m.word} (${m.pos}: ${m.definition})`,
+      word: `${m.display_word || m.word} (${m.pos}: ${m.definition})`,
       score: m.score,
       syllables: m.syllables,
       kind: m.score >= 90 ? "perfect" : "near",
@@ -146,7 +147,8 @@ export function lookupIndicRhymes(word: string): RhymeHit[] {
 // ---------- Public API ----------
 
 export async function lookupRhymes(word: string, cfg: RhymeProviderConfig = loadRhymeProvider()): Promise<RhymeHit[]> {
-  const clean = word.trim().toLowerCase().replace(/[^a-z' -]/g, "");
+  const romanized = romanizeIndic(word);
+  const clean = romanized.trim().toLowerCase().replace(/[^a-z' -]/g, "");
   if (!clean) return [];
   const key = await hashInputs(["rhyme", cfg.id, cfg.endpoint ?? "", clean]);
   const cached = await cacheGet<RhymeHit[]>("chat", key);

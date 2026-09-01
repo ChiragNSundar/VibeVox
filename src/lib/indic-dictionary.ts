@@ -6,6 +6,7 @@
 
 import { KANNADA_DICTIONARY, type DictEntry } from "./data/kannada-dict";
 import { HINDI_DICTIONARY } from "./data/hindi-dict";
+import { romanizeIndic, stripPronunciationMarks, normalizeIndicWord } from "./indic-romanizer";
 
 export type { DictEntry };
 
@@ -24,13 +25,14 @@ function getHindiDictSync(): DictEntry[] {
 
 /**
  * Find words matching a rime key or end sound with optional Part of Speech filter.
+ * Supports native Kannada, Devanagari, and Romanized Kanglish/Hinglish without pronunciation marks.
  */
 export function findRhymesWithPos(
   targetWord: string,
   language: "kannada" | "hinglish" | "auto" = "auto",
   filterPos?: string,
 ): WordMatch[] {
-  const clean = targetWord.toLowerCase().replace(/[^a-z]/g, "");
+  const clean = normalizeIndicWord(targetWord);
   if (!clean) return [];
 
   const dataset: { data: DictEntry[]; lang: "kannada" | "hinglish" }[] = [];
@@ -73,6 +75,9 @@ export function findRhymesWithPos(
       if (score > 0) {
         matches.push({
           ...entry,
+          word: stripPronunciationMarks(entry.word),
+          display_word: stripPronunciationMarks(entry.display_word || entry.word),
+          definition: stripPronunciationMarks(entry.definition),
           score,
           language: lang,
         });
@@ -86,12 +91,13 @@ export function findRhymesWithPos(
 
 /**
  * Search dictionary entries by Romanized word or English definition.
+ * Strips all pronunciation marks.
  */
 export function searchDictionaryWords(
   query: string,
   language: "kannada" | "hinglish" | "auto" = "auto",
 ): WordMatch[] {
-  const q = query.toLowerCase().trim();
+  const q = normalizeIndicWord(query);
   if (!q) return [];
 
   const dataset: { data: DictEntry[]; lang: "kannada" | "hinglish" }[] = [];
@@ -109,12 +115,36 @@ export function searchDictionaryWords(
 
   for (const { data, lang } of dataset) {
     for (const entry of data) {
-      if (entry.word.toLowerCase() === q) {
-        results.unshift({ ...entry, score: 100, language: lang });
-      } else if (entry.word.toLowerCase().includes(q)) {
-        results.push({ ...entry, score: 80, language: lang });
-      } else if (entry.definition.toLowerCase().includes(q)) {
-        results.push({ ...entry, score: 60, language: lang });
+      const cleanWord = stripPronunciationMarks(entry.word).toLowerCase();
+      const cleanDef = stripPronunciationMarks(entry.definition).toLowerCase();
+
+      if (cleanWord === q) {
+        results.unshift({
+          ...entry,
+          word: cleanWord,
+          display_word: stripPronunciationMarks(entry.display_word || entry.word),
+          definition: cleanDef,
+          score: 100,
+          language: lang,
+        });
+      } else if (cleanWord.includes(q)) {
+        results.push({
+          ...entry,
+          word: cleanWord,
+          display_word: stripPronunciationMarks(entry.display_word || entry.word),
+          definition: cleanDef,
+          score: 80,
+          language: lang,
+        });
+      } else if (cleanDef.includes(q)) {
+        results.push({
+          ...entry,
+          word: cleanWord,
+          display_word: stripPronunciationMarks(entry.display_word || entry.word),
+          definition: cleanDef,
+          score: 60,
+          language: lang,
+        });
       }
     }
   }
@@ -126,16 +156,30 @@ export function searchDictionaryWords(
  * Get word info (POS, English meaning, syllable count, rime key) for bar inspector tooltips.
  */
 export function getWordMetadata(word: string): DictEntry | null {
-  const clean = word.toLowerCase().replace(/[^a-z]/g, "");
+  const clean = normalizeIndicWord(word);
   if (!clean) return null;
 
   const hindi = getHindiDictSync();
-  const foundHindi = hindi.find((e) => e.word === clean);
-  if (foundHindi) return foundHindi;
+  const foundHindi = hindi.find((e) => stripPronunciationMarks(e.word) === clean);
+  if (foundHindi) {
+    return {
+      ...foundHindi,
+      word: stripPronunciationMarks(foundHindi.word),
+      display_word: stripPronunciationMarks(foundHindi.display_word || foundHindi.word),
+      definition: stripPronunciationMarks(foundHindi.definition),
+    };
+  }
 
   const kannada = getKannadaDictSync();
-  const foundKannada = kannada.find((e) => e.word === clean);
-  if (foundKannada) return foundKannada;
+  const foundKannada = kannada.find((e) => stripPronunciationMarks(e.word) === clean);
+  if (foundKannada) {
+    return {
+      ...foundKannada,
+      word: stripPronunciationMarks(foundKannada.word),
+      display_word: stripPronunciationMarks(foundKannada.display_word || foundKannada.word),
+      definition: stripPronunciationMarks(foundKannada.definition),
+    };
+  }
 
   return null;
 }
