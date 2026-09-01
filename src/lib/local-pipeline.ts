@@ -422,6 +422,7 @@ function fillToCadence(parsed: WriteShape | null, cadence: LocalCadence): LocalL
 import { recallHybridStyleExamples } from "./style-hybrid-rag";
 import { synthesizeMetaphors } from "./metaphor-synthesizer";
 import { planRhymeLadders } from "./rhyme-planner";
+import { getBrainPromptDirectives } from "./brain-indexer";
 
 async function writeOneChunk(
   config: LlmConfig,
@@ -434,6 +435,7 @@ async function writeOneChunk(
   const lang = brief?.slangRegion?.includes("hinglish") ? "hinglish" : brief?.slangRegion?.includes("kanglish") ? "kannada" : "auto";
   const metaphorBp = synthesizeMetaphors(brief?.topic, brief?.attitude, brief?.slangRegion);
   const rhymePlan = planRhymeLadders(cadence, lang);
+  const brainDirectives = getBrainPromptDirectives(brief);
 
   const sys = `You are an elite ghostwriter for punch-in rappers/vocalists. Write high-artistry finished bars that sit perfectly on beat.
 
@@ -443,7 +445,7 @@ ${metaphorBp.promptInstructions}
 
 ${rhymePlan.promptInstructions}
 
-CADENCE LOCK: for each cadence bar produce ONE finished bar with target syllables (±1) and target endSound. Group by section.
+${brainDirectives.personaBlock}${brainDirectives.guidelinesBlock}CADENCE LOCK: for each cadence bar produce ONE finished bar with target syllables (±1) and target endSound. Group by section.
 
 ${briefBlock(brief)}${styleExamplesPromptBlock(examples)}
 
