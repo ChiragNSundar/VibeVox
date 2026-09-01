@@ -255,47 +255,48 @@ Make sense of this scribble and return the structured JSON object.`;
     try {
       const target = resolveTarget(chatTarget(config));
 
-    if (target.baseUrl && target.model) {
-      const body: Record<string, unknown> = {
-        model: target.model,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.75,
-        max_tokens: 4096,
-      };
+      if (target.baseUrl && target.model) {
+        const body: Record<string, unknown> = {
+          model: target.model,
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: userPrompt },
+          ],
+          temperature: 0.75,
+          max_tokens: 4096,
+        };
 
-      const compatBody = applyBodyCompat(body, target);
-      const res = await fetch(`${target.baseUrl.replace(/\/+$/, "")}/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...target.headers,
-        },
-        body: JSON.stringify(compatBody),
-      });
+        const compatBody = applyBodyCompat(body, target);
+        const res = await fetch(`${target.baseUrl.replace(/\/+$/, "")}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            ...target.headers,
+          },
+          body: JSON.stringify(compatBody),
+        });
 
-      if (res.ok) {
-        const json = await res.json();
-        const content = json.choices?.[0]?.message?.content;
-        if (content) {
-          const parsed = parseModelJsonResponse(content);
-          if (parsed) {
-            return {
-              title: parsed.title || "Midnight Scribbles",
-              analysis: parsed.analysis,
-              sections: parsed.sections,
-              rawScribble: trimmed,
-              mode,
-              createdAt: Date.now(),
-            };
+        if (res.ok) {
+          const json = await res.json();
+          const content = json.choices?.[0]?.message?.content;
+          if (content) {
+            const parsed = parseModelJsonResponse(content);
+            if (parsed) {
+              return {
+                title: parsed.title || "Midnight Scribbles",
+                analysis: parsed.analysis,
+                sections: parsed.sections,
+                rawScribble: trimmed,
+                mode,
+                createdAt: Date.now(),
+              };
+            }
           }
         }
       }
+    } catch (err) {
+      // Fall through to offline heuristic synthesis
     }
-  } catch (err) {
-    // Fall through to offline heuristic synthesis
   }
 
   // Offline fallback

@@ -60,6 +60,7 @@ function ScribblePage() {
   const [scribbleText, setScribbleText] = useState("");
   const [mode, setMode] = useState<ScribbleMode>("full-song");
   const [autoSync, setAutoSync] = useState(true);
+  const [zeroAiMode, setZeroAiMode] = useState(false);
   const [result, setResult] = useState<ScribbleResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [syncedPaths, setSyncedPaths] = useState<{ lyricsPath?: string; rhymesPath?: string } | null>(null);
@@ -116,9 +117,9 @@ function ScribblePage() {
 
     startTransition(async () => {
       try {
-        const res = await makeSenseOfScribble(scribbleText, mode);
+        const res = await makeSenseOfScribble(scribbleText, mode, { offlineOnly: zeroAiMode });
         setResult(res);
-        toast.success("Synthesized scribbles!", {
+        toast.success(zeroAiMode ? "Synthesized via Zero-AI RAG Engine!" : "Synthesized scribbles!", {
           description: `Detected: ${res.analysis.mood} · ${res.analysis.vibe}`,
         });
 
@@ -193,7 +194,19 @@ function ScribblePage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 flex-wrap shrink-0">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-card/60 backdrop-blur-sm">
+            <Zap className={`h-3.5 w-3.5 ${zeroAiMode ? "text-emerald-400" : "text-muted-foreground"}`} />
+            <span className="text-xs font-medium">Zero-AI RAG</span>
+            <Switch
+              checked={zeroAiMode}
+              onCheckedChange={(val) => {
+                setZeroAiMode(val);
+                toast.info(val ? "Zero-AI RAG mode active (pure cadence segmentation & brain memory)" : "Standard mode active (uses LLM if connected)");
+              }}
+            />
+          </div>
+
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-card/60 backdrop-blur-sm">
             <Brain className="h-3.5 w-3.5 text-amber-400" />
             <span className="text-xs font-medium">Auto-Sync to Brain</span>
