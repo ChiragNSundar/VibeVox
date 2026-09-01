@@ -100,9 +100,9 @@ async function callCriticGemini(
   system: string,
   prompt: string,
 ): Promise<z.infer<typeof CriticResponseSchema>> {
-  const { createLovableGateway } = await import("./ai-gateway.server");
+  const { createAiGateway } = await import("./ai-gateway.server");
   const { generateText } = await import("ai");
-  const gateway = createLovableGateway(apiKey);
+  const gateway = createAiGateway(apiKey);
   const hint = "\n\nReturn ONLY one valid JSON object. No markdown, no fences. Shape: {\"scores\":{\"foo\":7},\"overall\":7.5,\"weakestBars\":[{\"index\":3,\"line\":\"...\",\"why\":\"...\",\"rewrite\":\"...\"}],\"notes\":[\"...\"]}";
 
   // Critics use the cheap/fast model — they only score, never write the song.
@@ -254,9 +254,9 @@ export async function rewriteSingleBar(
     schemeLetter?: string;
   },
 ): Promise<string> {
-  const { createLovableGateway } = await import("./ai-gateway.server");
+  const { createAiGateway } = await import("./ai-gateway.server");
   const { generateText } = await import("ai");
-  const gateway = createLovableGateway(apiKey);
+  const gateway = createAiGateway(apiKey);
 
   const constraints: string[] = [];
   if (args.targetSyllables) constraints.push(`Syllables: exactly ${args.targetSyllables} (±1)`);

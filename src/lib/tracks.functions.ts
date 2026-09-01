@@ -138,9 +138,9 @@ async function callGemini<T>(
   prompt: string,
   jsonShape = "Return a JSON object with the fields requested in the system prompt.",
 ): Promise<T> {
-  const { createLovableGateway } = await import("./ai-gateway.server");
+  const { createAiGateway } = await import("./ai-gateway.server");
   const { generateText } = await import("ai");
-  const gateway = createLovableGateway(apiKey);
+  const gateway = createAiGateway(apiKey);
   const schemaHint = `\n\nReturn ONLY one valid JSON object. No markdown, no code fences, no commentary. ${jsonShape}`;
   let lastErr: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -614,8 +614,8 @@ async function runPipeline(
   burnedPhrases: string[] = [],
   burnedVowels: string[] = [],
 ): Promise<{ lyrics: Lyrics; cadence: CadenceMap; quality: QualityScore; notes: string[] }> {
-  const apiKey = process.env.LOVABLE_API_KEY;
-  if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
+  const apiKey = process.env.AI_GATEWAY_KEY || process.env.API_KEY;
+  if (!apiKey) throw new Error("Missing AI_GATEWAY_KEY or API_KEY");
 
   const cadence = await buildCadenceMap(apiKey, transcript);
   const draft = await writeLyrics(apiKey, transcript, cadence, brief, styleExamples, burnedPhrases, burnedVowels);
@@ -712,8 +712,8 @@ export const createTrack = createServerFn({ method: "POST" })
     const trackId = inserted.id;
 
     try {
-      const apiKey = process.env.LOVABLE_API_KEY;
-      if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
+      const apiKey = process.env.AI_GATEWAY_KEY || process.env.API_KEY;
+      if (!apiKey) throw new Error("Missing AI_GATEWAY_KEY or API_KEY");
       const { transcribeAudio } = await import("./ai-gateway.server");
       const audioBlob = new Blob([new Uint8Array(binary)], { type: data.mimeType });
       const transcript = await transcribeAudio(apiKey, audioBlob, data.filename);
@@ -766,8 +766,8 @@ export const regenerateLyrics = createServerFn({ method: "POST" })
     if (track.device_id !== data.deviceId) throw new Error("Not your track");
 
     const briefToUse = (data.styleBrief ?? (track.style_brief as StyleBrief | null) ?? undefined) as StyleBrief | undefined;
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
+    const apiKey = process.env.AI_GATEWAY_KEY || process.env.API_KEY;
+    if (!apiKey) throw new Error("Missing AI_GATEWAY_KEY or API_KEY");
 
     try {
       let transcript = track.raw_transcript as string | null;
@@ -945,8 +945,8 @@ export const rewriteBar = createServerFn({ method: "POST" })
     const sectionScheme = rhymeScheme(sectionBars).slice(0, 16);
     const schemeLetter = sectionScheme[relIdx] || undefined;
 
-    const apiKey = process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
+    const apiKey = process.env.AI_GATEWAY_KEY || process.env.API_KEY;
+    if (!apiKey) throw new Error("Missing AI_GATEWAY_KEY or API_KEY");
     const { rewriteSingleBar } = await import("./critics");
 
     const count = Math.max(1, Math.min(4, data.count ?? 1));

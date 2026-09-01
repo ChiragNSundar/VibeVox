@@ -1,7 +1,7 @@
 // Client-side embedding facade with persistent cache.
 //
 // Two backends:
-//   - "cloud" → calls the `embedTexts` server function (Lovable AI Gateway,
+//   - "cloud" → calls the `embedTexts` server function (Cloud AI Gateway,
 //     gemini-embedding-001 by default, 3072 dims).
 //   - "direct" → POSTs to an OpenAI-compatible /v1/embeddings endpoint. That
 //     may be local (Ollama, LM Studio — nomic-embed-text, 768 dims) or a

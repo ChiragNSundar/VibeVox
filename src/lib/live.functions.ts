@@ -40,8 +40,8 @@ const TranscribeInput = z.object({
 export const transcribeBar = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => TranscribeInput.parse(input))
   .handler(async ({ data }): Promise<{ text: string }> => {
-    const apiKey = process.env.AI_GATEWAY_KEY || process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("Missing AI_GATEWAY_KEY");
+    const apiKey = process.env.AI_GATEWAY_KEY || process.env.API_KEY;
+    if (!apiKey) throw new Error("Missing AI_GATEWAY_KEY or API_KEY");
     const binary = Buffer.from(data.base64, "base64");
     if (binary.length < 256) return { text: "" }; // silence guard
     if (binary.length > 3 * 1024 * 1024) throw new Error("Bar chunk too large");
@@ -64,8 +64,8 @@ const GenerateBarInput = z.object({
 export const generateLiveBar = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => GenerateBarInput.parse(input))
   .handler(async ({ data }): Promise<{ line: string; syllables: number; endSound: string }> => {
-    const apiKey = process.env.AI_GATEWAY_KEY || process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("Missing AI_GATEWAY_KEY");
+    const apiKey = process.env.AI_GATEWAY_KEY || process.env.API_KEY;
+    if (!apiKey) throw new Error("Missing AI_GATEWAY_KEY or API_KEY");
     const { rewriteSingleBar } = await import("./critics");
 
     const targetSyllables = Math.max(2, countSyllables(data.mumble));

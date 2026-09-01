@@ -107,8 +107,9 @@ export function StyleTrainingPanel({
       });
       try {
         const examples = sampleStyleExamples(3, { vibe: seed.vibe });
+        const isServerSide = getProvider(config.providerId).serverSide;
         let result;
-        if (config.providerId !== "lovable") {
+        if (!isServerSide) {
           result = await runLocalPipeline(config, seed.transcript, undefined, (e) =>
             setTrainProgress((p) => ({ ...p, lastMessage: `Round ${i + 1}/${trainRounds}: ${e.message}` })),
           );
@@ -124,7 +125,7 @@ export function StyleTrainingPanel({
         if (score > topScore) topScore = score;
         completed += 1;
         const bars = result.lyrics.sections.flatMap((s) => s.lines);
-        const minThreshold = config.providerId !== "lovable" ? harvestThresholdFor(config) : 8.0;
+        const minThreshold = !isServerSide ? harvestThresholdFor(config) : 8.0;
         if (score >= minThreshold) {
           addToStyleMemory({
             title: result.lyrics.title,

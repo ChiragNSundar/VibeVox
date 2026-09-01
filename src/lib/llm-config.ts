@@ -107,7 +107,7 @@ function inferProvider(baseUrl: string): ProviderId {
 
 /**
  * Upgrade a pre-registry config in place. The old shape had a single
- * `mode: "cloud" | "local"` where "cloud" meant the Lovable gateway, plus
+ * `mode: "cloud" | "local"` where "cloud" meant the Cloud gateway, plus
  * `local*` fields that actually held whatever endpoint was configured.
  */
 function migrate(raw: LegacyLlmConfig & Partial<LlmConfig>): LlmConfig {
@@ -129,7 +129,7 @@ function migrate(raw: LegacyLlmConfig & Partial<LlmConfig>): LlmConfig {
     apiKeys,
     contextTokens: raw.localContextTokens,
     inBrowserModel: raw.inBrowserModel,
-    // Old "cloud" mode meant Lovable-hosted embeddings.
+    // Old "cloud" mode meant Cloud gateway hosted embeddings.
     embedProviderId: wasCloud ? "lovable" : inferProvider(legacyUrl),
     embedBaseUrl: wasCloud ? "" : legacyUrl || DEFAULT_LLM_CONFIG.embedBaseUrl,
     embedModel: wasCloud ? "google/gemini-embedding-001" : DEFAULT_LLM_CONFIG.embedModel,

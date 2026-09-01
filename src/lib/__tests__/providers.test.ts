@@ -173,7 +173,7 @@ describe("config migration", () => {
     expect(keyFor(cfg)).toBe("ollama");
   });
 
-  it("maps the legacy cloud mode onto the Lovable gateway", () => {
+  it("maps the legacy cloud mode onto the Cloud gateway", () => {
     localStorage.setItem("voxscript:llm-config", JSON.stringify({ mode: "cloud" }));
     const cfg = loadLlmConfig();
     expect(cfg.providerId).toBe("lovable");

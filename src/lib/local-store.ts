@@ -8,7 +8,7 @@
 // Everything here runs 100% in the browser. No server, no Supabase, no
 // network. Callers pick this store when the user is in "local-only" mode
 // (Settings → Fully local), or as a mirror alongside cloud sync so the app
-// keeps working offline and survives a Lovable Cloud outage.
+// keeps working offline and survives an external cloud outage.
 //
 // Bundle export/import roundtrips everything to a single .json (with audio
 // inlined as base64) so the user can back up or move between machines.
