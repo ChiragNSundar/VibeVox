@@ -219,7 +219,6 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
 export const PROVIDER_LIST: Provider[] = Object.values(PROVIDERS);
 
 export function getProvider(id: ProviderId | string): Provider {
-  if (id === "lovable") return PROVIDERS.gateway;
   return (PROVIDERS as Record<string, Provider>)[id] ?? PROVIDERS.custom;
 }
 
