@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppScribbleRouteImport } from './routes/_app/scribble'
 import { Route as AppReferencesRouteImport } from './routes/_app/references'
 import { Route as AppOnboardingRouteImport } from './routes/_app/onboarding'
 import { Route as AppNewRouteImport } from './routes/_app/new'
@@ -33,6 +34,11 @@ const IndexRoute = IndexRouteImport.update({
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppScribbleRoute = AppScribbleRouteImport.update({
+  id: '/scribble',
+  path: '/scribble',
   getParentRoute: () => AppRoute,
 } as any)
 const AppReferencesRoute = AppReferencesRouteImport.update({
@@ -85,6 +91,7 @@ export interface FileRoutesByFullPath {
   '/new': typeof AppNewRoute
   '/onboarding': typeof AppOnboardingRoute
   '/references': typeof AppReferencesRoute
+  '/scribble': typeof AppScribbleRoute
   '/settings': typeof AppSettingsRoute
   '/track/$id': typeof AppTrackIdRoute
 }
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/new': typeof AppNewRoute
   '/onboarding': typeof AppOnboardingRoute
   '/references': typeof AppReferencesRoute
+  '/scribble': typeof AppScribbleRoute
   '/settings': typeof AppSettingsRoute
   '/track/$id': typeof AppTrackIdRoute
 }
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/_app/new': typeof AppNewRoute
   '/_app/onboarding': typeof AppOnboardingRoute
   '/_app/references': typeof AppReferencesRoute
+  '/_app/scribble': typeof AppScribbleRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/track/$id': typeof AppTrackIdRoute
 }
@@ -125,6 +134,7 @@ export interface FileRouteTypes {
     | '/new'
     | '/onboarding'
     | '/references'
+    | '/scribble'
     | '/settings'
     | '/track/$id'
   fileRoutesByTo: FileRoutesByTo
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/new'
     | '/onboarding'
     | '/references'
+    | '/scribble'
     | '/settings'
     | '/track/$id'
   id:
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/_app/new'
     | '/_app/onboarding'
     | '/_app/references'
+    | '/_app/scribble'
     | '/_app/settings'
     | '/_app/track/$id'
   fileRoutesById: FileRoutesById
@@ -180,6 +192,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/scribble': {
+      id: '/_app/scribble'
+      path: '/scribble'
+      fullPath: '/scribble'
+      preLoaderRoute: typeof AppScribbleRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/references': {
@@ -249,6 +268,7 @@ interface AppRouteChildren {
   AppNewRoute: typeof AppNewRoute
   AppOnboardingRoute: typeof AppOnboardingRoute
   AppReferencesRoute: typeof AppReferencesRoute
+  AppScribbleRoute: typeof AppScribbleRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppTrackIdRoute: typeof AppTrackIdRoute
 }
@@ -261,6 +281,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppNewRoute: AppNewRoute,
   AppOnboardingRoute: AppOnboardingRoute,
   AppReferencesRoute: AppReferencesRoute,
+  AppScribbleRoute: AppScribbleRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppTrackIdRoute: AppTrackIdRoute,
 }

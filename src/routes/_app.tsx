@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Mic, Library as LibraryIcon, Plus, Settings as SettingsIcon,
-  Cpu, Fingerprint as FingerprintIcon, Radio, Menu, X, Brain as BrainIcon,
+  Cpu, Fingerprint as FingerprintIcon, Radio, Menu, X, Brain as BrainIcon, PenLine as ScribbleIcon,
 } from "lucide-react";
 import { LocalStatusPill } from "@/components/LocalStatusPill";
 import { KeyboardShortcutsOverlay } from "@/components/KeyboardShortcutsOverlay";
@@ -17,6 +17,7 @@ export const Route = createFileRoute("/_app")({
 
 const NAV_ITEMS = [
   { to: "/library",    icon: LibraryIcon,      label: "Library" },
+  { to: "/scribble",   icon: ScribbleIcon,     label: "Scribble" },
   { to: "/brain",      icon: BrainIcon,        label: "Brain" },
   { to: "/references", icon: FingerprintIcon,  label: "References" },
   { to: "/connect",    icon: Cpu,              label: "Connect" },
