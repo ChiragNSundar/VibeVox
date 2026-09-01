@@ -15,10 +15,10 @@ const Input = z.object({
 export const embedTexts = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => Input.parse(input))
   .handler(async ({ data }): Promise<{ model: string; vectors: number[][] }> => {
-    const apiKey = process.env.AI_GATEWAY_KEY || process.env.LOVABLE_API_KEY;
-    if (!apiKey) throw new Error("Missing AI_GATEWAY_KEY");
+    const apiKey = process.env.AI_GATEWAY_KEY || process.env.API_KEY;
+    if (!apiKey) throw new Error("Missing AI_GATEWAY_KEY or API_KEY");
     const model = data.model || "google/gemini-embedding-001";
-    const gatewayUrl = process.env.AI_GATEWAY_URL || "https://ai.gateway.lovable.dev/v1";
+    const gatewayUrl = process.env.AI_GATEWAY_URL || "https://api.openai.com/v1";
 
     const res = await fetch(`${gatewayUrl.replace(/\/+$/, "")}/embeddings`, {
       method: "POST",
