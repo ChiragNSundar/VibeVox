@@ -34,8 +34,7 @@ import { highlightLyrics, getStanzaRhymeScheme, detectFlowInsight, type RhymeVis
 import { RhymeLookup } from "@/components/RhymeLookup";
 import { ComplexityGauge } from "@/components/track/ComplexityGauge";
 import { SemanticDriftBar } from "@/components/track/SemanticDriftBar";
-import { scoreComplexity, detectSemanticDrift } from "@/lib/diagnostics";
-import { getLineStressAnalysis } from "@/lib/cadence-flow";
+import { getLineStressAnalysis, calculateMatra, detectFlowMetric, detectCodeSwitch } from "@/lib/cadence-flow";
 import { countSyllables } from "@/lib/phonetics";
 
 const DRAFT_KEY = "vibevox:scribble-draft";
@@ -71,6 +70,7 @@ function ScribblePage() {
   const [editingLineIdx, setEditingLineIdx] = useState<number | null>(null);
   const [rhymeLookupWord, setRhymeLookupWord] = useState("");
   const [rhymeLookupOpen, setRhymeLookupOpen] = useState(false);
+  const [showMatra, setShowMatra] = useState(false);
   const [mode, setMode] = useState<ScribbleMode>("full-song");
   const [autoSync, setAutoSync] = useState(true);
   const [zeroAiMode, setZeroAiMode] = useState(false);
@@ -459,64 +459,124 @@ because i got quite cries"
                   <div className="flex items-center gap-1.5">
                     <Sparkles className="h-3.5 w-3.5 text-amber-400" />
                     <span className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">
-                      Phonetic Sound Family Clusters
+                      DHH Phonetic & Flow Studio
                     </span>
                   </div>
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    Click any word to inspect rhymes
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowMatra(!showMatra)}
+                      className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors border cursor-pointer ${
+                        showMatra
+                          ? "bg-amber-500/20 text-amber-300 border-amber-500/40 font-bold"
+                          : "bg-muted/40 text-muted-foreground border-border/50 hover:text-foreground"
+                      }`}
+                      title="Toggle Classical Indic Matra (Laghu/Guru) vs. Western Syllable Count"
+                    >
+                      {showMatra ? "Mātrā (L/G)" : "Syllables"}
+                    </button>
+                    <span className="text-[10px] text-muted-foreground font-mono hidden sm:inline">
+                      Click word to inspect
+                    </span>
+                  </div>
                 </div>
 
                 <div className="max-h-[580px] overflow-y-auto studio-scroll pr-1.5 space-y-2 font-mono text-sm leading-relaxed p-1">
                   {liveHighlighted.length > 0 && scribbleLines.some((l) => l.trim()) ? (
-                    liveHighlighted.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-start justify-between gap-3 group hover:bg-card/60 px-2 py-1.5 rounded transition-colors"
-                      >
-                        <div className="flex items-baseline gap-2 flex-1 min-w-0 flex-wrap">
-                          {item.schemeLetter && (
-                            <span
-                              className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 shrink-0 self-center ${
-                                item.rhymeGroupClass || "text-muted-foreground bg-muted/20"
-                              }`}
-                            >
-                              {item.schemeLetter}
-                            </span>
-                          )}
-                          <span
-                            className="select-text cursor-pointer break-words leading-relaxed text-sm font-medium"
-                            onClick={(e) => {
-                              const target = (e.target as HTMLElement).closest(".word-hover") as HTMLElement | null;
-                              if (target) {
-                                const w = target.getAttribute("data-word") || target.textContent || "";
-                                if (w.trim()) {
-                                  setRhymeLookupWord(w.trim());
-                                  setRhymeLookupOpen(true);
-                                }
-                              }
-                            }}
-                            dangerouslySetInnerHTML={{ __html: item.html || "&nbsp;" }}
-                          />
-                        </div>
-                        {scribbleLines[idx]?.trim() && (
-                          <div className="flex items-center gap-1.5 shrink-0 font-mono pt-0.5">
-                            {scribbleStress[idx]?.chars.length > 0 && (
-                              <span className="hidden sm:flex items-center gap-0.5 text-[8px]" title={`Cadence: ${scribbleStress[idx]?.rawPattern}`}>
-                                {scribbleStress[idx]?.chars.slice(0, 10).map((c, ci) => (
-                                  <span key={ci} className={c === "/" ? "text-primary font-bold" : "text-muted-foreground/60"}>
-                                    {c === "/" ? "●" : "○"}
-                                  </span>
-                                ))}
+                    liveHighlighted.map((item, idx) => {
+                      const line = scribbleLines[idx] || "";
+                      const stress = scribbleStress[idx];
+                      const flow = detectFlowMetric(line, stress?.chars);
+                      const cs = detectCodeSwitch(line);
+                      const matra = showMatra ? calculateMatra(line) : null;
+                      const isAnaphora = item.anaphora;
+
+                      return (
+                        <div
+                          key={idx}
+                          className={`flex items-start justify-between gap-3 group hover:bg-card/60 px-2 py-1.5 rounded transition-colors ${
+                            isAnaphora ? "anaphora-bracket" : ""
+                          }`}
+                        >
+                          <div className="flex items-baseline gap-2 flex-1 min-w-0 flex-wrap">
+                            {item.schemeLetter && (
+                              <span
+                                className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 shrink-0 self-center ${
+                                  item.rhymeGroupClass || "text-muted-foreground bg-muted/20"
+                                }`}
+                              >
+                                {item.schemeLetter}
                               </span>
                             )}
-                            <span className="text-[10px] text-muted-foreground/60">
-                              {item.syllables} syl
-                            </span>
+                            {isAnaphora && (
+                              <span
+                                className="text-[9px] font-mono px-1 py-0.2 rounded bg-sky-500/10 text-sky-400 border border-sky-500/30 shrink-0 self-center"
+                                title={`Parallel framing / Anaphora (${item.anaphora?.phrase})`}
+                              >
+                                ↳ {item.anaphora?.phrase}
+                              </span>
+                            )}
+                            <span
+                              className="select-text cursor-pointer break-words leading-relaxed text-sm font-medium"
+                              onClick={(e) => {
+                                const target = (e.target as HTMLElement).closest(".word-hover") as HTMLElement | null;
+                                if (target) {
+                                  const w = target.getAttribute("data-word") || target.textContent || "";
+                                  if (w.trim()) {
+                                    setRhymeLookupWord(w.trim());
+                                    setRhymeLookupOpen(true);
+                                  }
+                                }
+                              }}
+                              dangerouslySetInnerHTML={{ __html: item.html || "&nbsp;" }}
+                            />
                           </div>
-                        )}
-                      </div>
-                    ))
+                          {line.trim() && (
+                            <div className="flex items-center gap-1.5 shrink-0 font-mono pt-0.5">
+                              {/* Code-switch ratio pill if bilingual */}
+                              {cs.isCodeSwitched && (
+                                <span
+                                  className="text-[8px] font-mono px-1 py-0.2 rounded bg-sky-500/10 text-sky-300 border border-sky-500/25 hidden xl:inline"
+                                  title="Bilingual language balance"
+                                >
+                                  {cs.label}
+                                </span>
+                              )}
+
+                              {/* Polyrhythmic Triplet / 16th flow tag */}
+                              {flow.badge && (
+                                <span
+                                  className={`text-[8px] font-mono px-1 py-0.2 rounded border ${
+                                    flow.metricType === "triplet"
+                                      ? "bg-amber-500/15 text-amber-300 border-amber-500/35 font-bold"
+                                      : "bg-muted/30 text-muted-foreground/80 border-border/30"
+                                  }`}
+                                  title={flow.label}
+                                >
+                                  {flow.badge}
+                                </span>
+                              )}
+
+                              {/* Cadence stress dots */}
+                              {!showMatra && stress?.chars.length > 0 && (
+                                <span className="hidden sm:flex items-center gap-0.5 text-[8px]" title={`Cadence: ${stress.rawPattern}`}>
+                                  {stress.chars.slice(0, 8).map((c, ci) => (
+                                    <span key={ci} className={c === "/" ? "text-primary font-bold" : "text-muted-foreground/60"}>
+                                      {c === "/" ? "●" : "○"}
+                                    </span>
+                                  ))}
+                                </span>
+                              )}
+
+                              {/* Matra or Syllable display */}
+                              <span className="text-[10px] text-muted-foreground/80 w-14 text-right">
+                                {showMatra && matra ? `${matra.totalMatra} mtr` : `${item.syllables} syl`}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
                   ) : (
                     <div className="p-8 text-center text-muted-foreground space-y-2 border border-dashed border-border/50 rounded-lg">
                       <Sparkles className="h-6 w-6 text-muted-foreground/40 mx-auto" />

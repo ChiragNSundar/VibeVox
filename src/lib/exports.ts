@@ -67,7 +67,7 @@ export function toLrc(lyrics: Lyrics, cadence: CadenceMap | null, bpm = 90): str
   const lines = flatLines(lyrics);
   const secondsPerBeat = 60 / bpm;
   let acc = 0;
-  const header = `[ti:${lyrics.title}]\n[ar:Vocal Muse]\n[by:VoxScript AI]\n[re:Vocal Muse Studio]\n[ve:1.0]\n\n`;
+  const header = `[ti:${lyrics.title}]\n[ar:VibeVox]\n[by:VibeVox AI]\n[re:VibeVox Studio]\n[ve:1.0]\n\n`;
   const stamped = lines.map((line, i) => {
     const bar = cadence?.bars[i];
     const syll = bar?.syllables ?? Math.max(4, Math.round(line.split(/\s+/).length * 1.3));
@@ -105,7 +105,7 @@ export function toPrintableHtml(lyrics: Lyrics): string {
     lyrics.title,
   )}</title><style>${css}</style></head><body><h1>${escapeHtml(
     lyrics.title,
-  )}</h1>${body}<footer>Generated with VoxScript</footer></body></html>`;
+  )}</h1>${body}<footer>Generated with VibeVox</footer></body></html>`;
 }
 
 function escapeHtml(s: string) {

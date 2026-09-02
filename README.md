@@ -105,7 +105,7 @@ flowchart TD
 
 ## 📸 Interface Showcase & Visual Tour
 
-Explore the core studios and modules of **Vocal Muse**:
+Explore the core studios and modules of **VibeVox**:
 
 ### 1. Landing Page (`/`)
 *Gradient-backed hero section highlighting 100% local-first features and quickstart options.*
@@ -152,7 +152,7 @@ Explore the core studios and modules of **Vocal Muse**:
 ## 📁 Codebase Directory Structure
 
 ```
-Vocal Muse
+VibeVox
 ├── data/                               # Dictionary raw assets & PDFs
 │   └── KEED_2018-29-971.pdf            # KEED 2018 Kannada-English Dictionary source PDF
 ├── public/

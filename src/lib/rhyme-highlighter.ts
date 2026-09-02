@@ -942,6 +942,8 @@ export function highlightLyrics(
         });
         continue;
       }
+    }
+
     // Check for "quite cries"
     if (lineLower.endsWith("quite cries") && indices.length >= 2) {
       const phrase = indices.slice(indices.length - 2).map((i) => allTokens[i].original).join(" ");
