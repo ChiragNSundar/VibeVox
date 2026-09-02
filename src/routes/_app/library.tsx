@@ -19,7 +19,7 @@ import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/library")({
-  head: () => ({ meta: [{ title: "Your library · VoxScript" }] }),
+  head: () => ({ meta: [{ title: "Your library · VibeVox" }] }),
   component: LibraryPage,
   errorComponent: ({ error }) => {
     console.error("Library page error:", error);

@@ -39,7 +39,7 @@ import { runLocalPipeline, type LocalPipelineResult } from "@/lib/local-pipeline
 
 
 export const Route = createFileRoute("/_app/live")({
-  head: () => ({ meta: [{ title: "Live punch-in · VoxScript" }] }),
+  head: () => ({ meta: [{ title: "Live punch-in · VibeVox" }] }),
   component: LivePage,
 });
 
@@ -52,7 +52,7 @@ type BarRow = {
   endSound?: string;
 };
 
-const BRIEF_KEY = "voxscript:style-brief";
+const BRIEF_KEY = "vibevox:style-brief";
 
 function LivePage() {
   const navigate = useNavigate();

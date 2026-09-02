@@ -51,7 +51,7 @@ const trackSearchSchema = z.object({
 });
 
 export const Route = createFileRoute("/_app/track/$id")({
-  head: () => ({ meta: [{ title: "Track · VoxScript" }] }),
+  head: () => ({ meta: [{ title: "Track · VibeVox" }] }),
   validateSearch: trackSearchSchema,
   component: TrackPage,
   errorComponent: ({ error }) => {

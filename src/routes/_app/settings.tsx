@@ -30,7 +30,7 @@ import { StyleTrainingPanel } from "@/components/settings/StyleTrainingPanel";
 import { StyleMemoryPanel } from "@/components/settings/StyleMemoryPanel";
 
 export const Route = createFileRoute("/_app/settings")({
-  head: () => ({ meta: [{ title: "Settings · VoxScript" }] }),
+  head: () => ({ meta: [{ title: "Settings · VibeVox" }] }),
   component: SettingsPage,
 });
 

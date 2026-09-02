@@ -38,15 +38,8 @@ import { scoreComplexity, detectSemanticDrift } from "@/lib/diagnostics";
 import { getLineStressAnalysis } from "@/lib/cadence-flow";
 import { countSyllables } from "@/lib/phonetics";
 
-const DRAFT_KEY = "voxscript:scribble-draft";
-const AUTO_SYNC_KEY = "voxscript:scribble-auto-sync";
-
-const QUICK_SPARKS = [
-  { label: "Midnight Drive", text: "driving past empty neon lights, windows down cold air hitting my face\nthree in the morning thoughts running wild\nremember when nobody answered the calls" },
-  { label: "Paper Chase", text: "sixty floors up counting up the backend\nevery secret in the city bought and sold\nstay quiet in the room full of loud talkers\nbuilt it from the pavement now the circle small" },
-  { label: "Vulnerable & Real", text: "tired of putting on the armor every morning\nfake smiles in crowded rooms\nscared to lose what i barely just found\nsometimes the truth hurts worse than the lie" },
-  { label: "Battle Ready", text: "never fold never flinch when the pressure rise\nsharpen the pen like a blade in the dark\nwatching them switch up soon as the money talk\nkept my head high in the middle of the storm" },
-];
+const DRAFT_KEY = "vibevox:scribble-draft";
+const AUTO_SYNC_KEY = "vibevox:scribble-auto-sync";
 
 const SCRIBBLE_MODES = [
   { id: "full-song", label: "Full Song", icon: Music },
@@ -58,7 +51,7 @@ const SCRIBBLE_MODES = [
 export const Route = createFileRoute("/_app/scribble")({
   head: () => ({
     meta: [
-      { title: "Scribble Studio & Sense-Maker — VoxScript" },
+      { title: "VibeLyrics Studio — VibeVox" },
       {
         name: "description",
         content: "Scribble messy thoughts, fragmented bars, and voice memos. The AI makes sense of it and syncs to your local brain.",
@@ -88,9 +81,9 @@ function ScribblePage() {
   // Restore draft and settings on mount
   useEffect(() => {
     if (typeof localStorage !== "undefined") {
-      const savedDraft = localStorage.getItem(DRAFT_KEY);
+      const savedDraft = localStorage.getItem(DRAFT_KEY) || localStorage.getItem("voxscript:scribble-draft");
       if (savedDraft) setScribbleText(savedDraft);
-      const savedAutoSync = localStorage.getItem(AUTO_SYNC_KEY);
+      const savedAutoSync = localStorage.getItem(AUTO_SYNC_KEY) || localStorage.getItem("voxscript:scribble-auto-sync");
       if (savedAutoSync !== null) setAutoSync(savedAutoSync === "true");
     }
   }, []);
@@ -359,87 +352,52 @@ function ScribblePage() {
 
       <SemanticDriftBar drift={scribbleDrift} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left 7 Columns: Combined In-Place Studio Canvas */}
-        <div className="lg:col-span-7 space-y-4">
-          <div className="grid grid-cols-4 gap-1.5 p-1 bg-card/60 border border-border/70 rounded-xl">
-            {SCRIBBLE_MODES.map((item) => {
-              const Icon = item.icon;
-              const active = mode === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setMode(item.id as ScribbleMode)}
-                  className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                    active
-                      ? "bg-primary text-primary-foreground shadow-sm font-semibold"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </button>
-              );
-            })}
+      {/* Top Mode Selector & Sparks */}
+      <div className="space-y-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-card/60 border border-border/70 rounded-xl">
+          {SCRIBBLE_MODES.map((item) => {
+            const Icon = item.icon;
+            const active = mode === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setMode(item.id as ScribbleMode)}
+                className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  active
+                    ? "bg-primary text-primary-foreground shadow-sm font-semibold"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Active Word Quick Rhyme Link if typing */}
+        {activeTrailingWord && (
+          <div className="flex items-center justify-between text-[11px] font-mono px-1">
+            <span className="text-muted-foreground">Active bar ending: <strong className="text-primary">&quot;{activeTrailingWord}&quot;</strong></span>
+            <button
+              type="button"
+              onClick={() => {
+                setRhymeLookupWord(activeTrailingWord);
+                setRhymeLookupOpen(true);
+              }}
+              className="text-amber-400 hover:text-amber-300 flex items-center gap-1 underline cursor-pointer"
+            >
+              🔍 Explore rhymes for &quot;{activeTrailingWord}&quot;
+            </button>
           </div>
+        )}
+      </div>
 
-          {/* Dynamic Rhyme Continuations & Quick Lookup */}
-          <div className="space-y-1.5">
-            <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium flex-wrap gap-1">
-              {dynamicSuggestions && activeTrailingWord ? (
-                <span className="flex items-center gap-1.5 text-primary font-mono font-semibold">
-                  <Sparkles className="h-3 w-3 text-amber-400" />
-                  Rhyme Continuations for &quot;{activeTrailingWord}&quot;
-                </span>
-              ) : (
-                <span className="flex items-center gap-1">
-                  <Lightbulb className="h-3 w-3 text-amber-400" /> Starter Themes (Load inspiration)
-                </span>
-              )}
-
-              {activeTrailingWord && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRhymeLookupWord(activeTrailingWord);
-                    setRhymeLookupOpen(true);
-                  }}
-                  className="text-[10px] text-amber-400 hover:text-amber-300 font-mono flex items-center gap-1 underline cursor-pointer"
-                >
-                  🔍 Explore rhymes for &quot;{activeTrailingWord}&quot;
-                </button>
-              )}
-            </div>
-
-            <div className="flex gap-1.5 flex-wrap">
-              {dynamicSuggestions ? (
-                dynamicSuggestions.map((sug, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => handleApplySpark(sug.line)}
-                    className="px-2.5 py-1 rounded-md text-[11px] bg-primary/10 hover:bg-primary/20 border border-primary/30 transition-colors text-primary font-mono cursor-pointer"
-                  >
-                    + &quot;{sug.label}&quot;
-                  </button>
-                ))
-              ) : (
-                QUICK_SPARKS.map((spark) => (
-                  <button
-                    key={spark.label}
-                    type="button"
-                    onClick={() => handleApplySpark(spark.text)}
-                    className="px-2.5 py-1 rounded-md text-[11px] bg-secondary/40 hover:bg-secondary border border-border/60 transition-colors text-muted-foreground hover:text-foreground cursor-pointer"
-                  >
-                    + {spark.label}
-                  </button>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* LEFT: 100% NORMALLY TYPABLE WRITING PAD */}
+      {/* STRICT SIDE-BY-SIDE DUAL STUDIO (50% / 50%) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+        {/* LEFT COLUMN: 100% NORMALLY TYPABLE WRITING PAD */}
+        <div className="space-y-3">
           <Card className="p-4 bg-card/70 border-border/80 space-y-3 shadow-sm">
             <div className="flex items-center justify-between pb-2 border-b border-border/50 flex-wrap gap-2">
               <div className="flex items-center gap-2">
@@ -492,8 +450,8 @@ because i got quite cries"
           </Button>
         </div>
 
-        {/* RIGHT COLUMN: Live Phonetic Sound Family Clusters (Side-by-Side) */}
-        <div className="lg:col-span-6 space-y-4">
+        {/* RIGHT COLUMN: Live Phonetic Clusters (Side-by-Side) */}
+        <div className="space-y-4">
           {!result ? (
             <div className="space-y-4">
               <Card className="p-4 bg-card/70 border-border/80 space-y-3 shadow-sm">
@@ -624,83 +582,6 @@ because i got quite cries"
                   </div>
                 </div>
               )}
-          {!result ? (
-            <div className="space-y-4">
-              {/* Flow Architecture Insight Card */}
-              {liveFlowInsight && (
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 text-xs text-amber-200/90 font-mono space-y-2 animate-in fade-in shadow-sm">
-                  <div className="flex items-center gap-1.5 font-semibold text-amber-400">
-                    <Sparkles className="h-4 w-4" />
-                    <span>{liveFlowInsight.title}</span>
-                  </div>
-                  <p className="text-[11px] leading-relaxed opacity-90">{liveFlowInsight.message}</p>
-                  <div className="flex flex-wrap gap-1.5 pt-1">
-                    {liveFlowInsight.suggestions.map((sug, si) => (
-                      <button
-                        key={si}
-                        type="button"
-                        onClick={() => {
-                          const lines = [...scribbleLines];
-                          lines[liveFlowInsight.lineIdx] = sug.replace(/\s*\([^)]*\)/, "");
-                          handleTextChange(lines.join("\n"));
-                        }}
-                        className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] transition-colors cursor-pointer"
-                      >
-                        {sug}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 6-Channel DHH Color Map Guide */}
-              <Card className="p-4 bg-card/70 border-border/80 space-y-3 shadow-sm">
-                <div className="flex items-center gap-2 pb-2 border-b border-border/50">
-                  <Target className="h-4 w-4 text-emerald-400" />
-                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">
-                    6-Channel Phonetic Legend
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
-                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-yellow-400/10 border border-yellow-400/30">
-                    <span className="w-3 h-3 rounded bg-yellow-400/50 border border-yellow-400 shrink-0" />
-                    <span className="text-yellow-300 font-medium">/aɪ/ Diphthong</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-cyan-400/10 border border-cyan-400/30">
-                    <span className="w-3 h-3 rounded bg-cyan-400/50 border border-cyan-400 shrink-0" />
-                    <span className="text-cyan-300 font-medium">Consonance & Nasal</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-red-400/10 border border-red-400/30">
-                    <span className="w-3 h-3 rounded bg-red-400/50 border border-red-400 shrink-0" />
-                    <span className="text-red-300 font-medium">/eː/ Rhyme Verbs</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-green-400/10 border border-green-400/30">
-                    <span className="w-3 h-3 rounded bg-green-400/50 border border-green-400 shrink-0" />
-                    <span className="text-green-300 font-medium">/ɑː/ Rhythm Anchor</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-pink-400/10 border border-pink-400/30">
-                    <span className="w-3 h-3 rounded bg-pink-400/50 border border-pink-400 shrink-0" />
-                    <span className="text-pink-300 font-medium">/iː/ High-Front</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-orange-400/10 border border-orange-400/30">
-                    <span className="w-3 h-3 rounded bg-orange-400/50 border border-orange-400 shrink-0" />
-                    <span className="text-orange-300 font-medium">/oʊ/ Back Vowels</span>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Ready to Synthesize Prompt */}
-              <Card className="p-5 text-center text-muted-foreground space-y-3 border-dashed bg-card/30">
-                <div className="p-2.5 rounded-full bg-emerald-500/10 text-emerald-400 w-fit mx-auto">
-                  <Brain className="h-6 w-6" />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="font-semibold text-foreground text-xs">Ready to Synthesize into a Song</h3>
-                  <p className="text-[11px] leading-relaxed text-muted-foreground">
-                    Click &ldquo;Make Sense of This&rdquo; when your scribble is ready to structure it into locked verses and hook.
-                  </p>
-                </div>
-              </Card>
             </div>
           ) : (
             <div className="space-y-4 animate-in fade-in-50 duration-300">

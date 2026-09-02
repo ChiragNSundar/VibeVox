@@ -26,12 +26,12 @@ import { runLocalPipeline, type LocalLyrics, type ProgressEvent, type LocalCaden
 import { putTrack, putBars, putBlob, isLocalOnly, getDeviceId as getLocalDeviceId } from "@/lib/local-store";
 
 export const Route = createFileRoute("/_app/new")({
-  head: () => ({ meta: [{ title: "New track · VoxScript" }] }),
+  head: () => ({ meta: [{ title: "New track · VibeVox" }] }),
   component: NewTrack,
 });
 
 const MAX_BYTES = 25 * 1024 * 1024;
-const BRIEF_KEY = "voxscript:style-brief";
+const BRIEF_KEY = "vibevox:style-brief";
 const TARGET_SAMPLE_RATE = 16000;
 
 function blobToBase64(blob: Blob): Promise<string> {

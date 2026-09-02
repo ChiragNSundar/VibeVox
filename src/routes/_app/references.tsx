@@ -35,7 +35,7 @@ import { Trash2, Sparkles, FileText, Search, Globe, Check, Loader2, Music, Brain
 export const Route = createFileRoute("/_app/references")({
   head: () => ({
     meta: [
-      { title: "Reference & Style Intelligence — VoxScript" },
+      { title: "Reference & Style Intelligence — VibeVox" },
       { name: "description", content: "Fetch reference track lyrics from the web — extract cadence fingerprints and ingest into AI style memory." },
     ],
   }),
