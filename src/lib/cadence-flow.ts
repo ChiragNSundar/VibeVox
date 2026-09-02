@@ -135,30 +135,11 @@ export function getIndicWordStress(word: string, lang: "kn" | "hi" = "kn"): stri
     return "/";
   }
 
-  const stresses = matches.map((v) => (INDIC_LONG_VOWELS.has(v) ? "/" : "x"));
+  const longVowels = lang === "hi"
+    ? new Set(["aa", "ii", "uu", "e", "ai", "o", "au"])
+    : new Set(["aa", "ii", "uu", "ee", "oo", "ai", "au"]);
 
-  // In Indic poetry / rap meters, a short vowel followed by a conjunct (double consonant) is treated as Guru
-  const chars = romanized.split("");
-  let vIdx = 0;
-  for (let i = 0; i < chars.length && vIdx < stresses.length; i++) {
-    if (/[aeiou]/.test(chars[i])) {
-      // Check if followed by conjunct consonants
-      const rem = romanized.slice(i + 1);
-      const consMatch = rem.match(/^([^aeiou]{2,})/);
-      if (consMatch && stresses[vIdx] === "x") {
-        stresses[vIdx] = "/";
-      }
-      // Anusvara/visarga (m/h at end of syllable) acts as Guru
-      if (/^[mh](?:[^aeiou]|$)/.test(rem) && stresses[vIdx] === "x") {
-        stresses[vIdx] = "/";
-      }
-      // Skip the rest of double vowel letters (e.g. 'aa')
-      if (rem.startsWith("a") || rem.startsWith("i") || rem.startsWith("u") || rem.startsWith("e") || rem.startsWith("o")) {
-        i++;
-      }
-      vIdx++;
-    }
-  }
+  const stresses = matches.map((v) => (longVowels.has(v) ? "/" : "x"));
 
   // Ensure at least one stressed syllable in multisyllabic words
   if (!stresses.includes("/") && stresses.length > 0) {
@@ -239,11 +220,11 @@ export function calculateRhythmicScore(
     if (sylDiff === 0) {
       score *= 1.0;
     } else if (sylDiff === 1) {
-      score *= 0.82;
+      score *= 0.88;
     } else if (sylDiff === 2) {
-      score *= 0.55;
+      score *= 0.65;
     } else {
-      score *= Math.max(0.1, 1.0 - sylDiff * 0.25);
+      score *= Math.max(0.1, 1.0 - sylDiff * 0.2);
     }
   }
 
@@ -253,18 +234,19 @@ export function calculateRhythmicScore(
     const cleanCand = candStress.replace(/\s+/g, "");
 
     if (cleanTarget && cleanCand) {
-      // Compare suffix stresses first (cadence rhymes fall on end pulses)
       const minLen = Math.min(cleanTarget.length, cleanCand.length);
-      let matchCount = 0;
+      let prefixMatches = 0;
+      let suffixMatches = 0;
 
+      for (let i = 0; i < minLen; i++) {
+        if (cleanTarget[i] === cleanCand[i]) prefixMatches++;
+      }
       for (let i = 1; i <= minLen; i++) {
-        if (cleanTarget[cleanTarget.length - i] === cleanCand[cleanCand.length - i]) {
-          matchCount++;
-        }
+        if (cleanTarget[cleanTarget.length - i] === cleanCand[cleanCand.length - i]) suffixMatches++;
       }
 
-      const suffixRatio = matchCount / minLen;
-      score *= 0.5 + 0.5 * suffixRatio;
+      const matchRatio = Math.max(prefixMatches, suffixMatches) / minLen;
+      score *= 0.6 + 0.4 * matchRatio;
     }
   }
 
