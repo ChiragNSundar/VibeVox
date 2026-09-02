@@ -40,6 +40,8 @@ import { TrackToolbar } from "@/components/track/TrackToolbar";
 import { BulkRewriteBar, type BulkOpts, DEFAULT_BULK_OPTS } from "@/components/track/BulkRewriteBar";
 import { RhymeLookup } from "@/components/RhymeLookup";
 import { highlightLyrics, getStanzaRhymeScheme, type RhymeVisionMode } from "@/lib/rhyme-highlighter";
+import { getLineStressAnalysis } from "@/lib/cadence-flow";
+import { scoreComplexity, detectSemanticDrift } from "@/lib/diagnostics";
 
 type Lyrics = { title: string; sections: { type: string; lines: string[] }[] };
 
@@ -79,12 +81,13 @@ type BarLocalState = {
   locked: Record<number, boolean>;
   proposal: Record<number, BarProposal | undefined>;
   history: Record<number, BarVersion[]>;
+  stressOverrides: Record<number, Record<number, "/" | "x">>;
 };
 function loadLocal(trackId: string): BarLocalState {
-  if (typeof localStorage === "undefined") return { locked: {}, proposal: {}, history: {} };
+  if (typeof localStorage === "undefined") return { locked: {}, proposal: {}, history: {}, stressOverrides: {} };
   try {
     const raw = localStorage.getItem(`voxscript:track-local:${trackId}`);
-    if (!raw) return { locked: {}, proposal: {}, history: {} };
+    if (!raw) return { locked: {}, proposal: {}, history: {}, stressOverrides: {} };
     const parsed = JSON.parse(raw);
     // Back-compat: old shape stored proposal as { original, proposed }.
     const proposal: Record<number, BarProposal | undefined> = {};
@@ -97,8 +100,13 @@ function loadLocal(trackId: string): BarLocalState {
         proposal[Number(k)] = { original: p.original ?? "", proposals: [p.proposed], selectedIdx: 0 };
       }
     }
-    return { locked: parsed.locked ?? {}, proposal, history: parsed.history ?? {} };
-  } catch { return { locked: {}, proposal: {}, history: {} }; }
+    return {
+      locked: parsed.locked ?? {},
+      proposal,
+      history: parsed.history ?? {},
+      stressOverrides: parsed.stressOverrides ?? {},
+    };
+  } catch { return { locked: {}, proposal: {}, history: {}, stressOverrides: {} }; }
 }
 function saveLocal(trackId: string, state: BarLocalState) {
   if (typeof localStorage === "undefined") return;
@@ -109,9 +117,14 @@ function saveLocal(trackId: string, state: BarLocalState) {
 
 // Undo/redo. A bar-scoped action captures the slice of local state for one
 // bar plus the server text before/after, so we can re-apply or invert without
-// re-running any pipeline. Stacks live in memory only (intentional â€” refresh
+// re-running any pipeline. Stacks live in memory only (intentional — refresh
 // is its own kind of reset).
-type BarSlice = { proposal?: BarProposal; history: BarVersion[]; locked: boolean };
+type BarSlice = {
+  proposal?: BarProposal;
+  history: BarVersion[];
+  locked: boolean;
+  stressOverride?: Record<number, "/" | "x">;
+};
 type UndoAction = {
   label: string;
   barIndex: number;
@@ -121,7 +134,12 @@ type UndoAction = {
   sliceAfter: BarSlice;
 };
 function getSlice(s: BarLocalState, i: number): BarSlice {
-  return { proposal: s.proposal[i], history: s.history[i] ?? [], locked: !!s.locked[i] };
+  return {
+    proposal: s.proposal[i],
+    history: s.history[i] ?? [],
+    locked: !!s.locked[i],
+    stressOverride: s.stressOverrides?.[i],
+  };
 }
 function applySlice(s: BarLocalState, i: number, slice: BarSlice): BarLocalState {
   const proposal = { ...s.proposal };
@@ -129,7 +147,9 @@ function applySlice(s: BarLocalState, i: number, slice: BarSlice): BarLocalState
   const history = { ...s.history, [i]: slice.history };
   const locked = { ...s.locked };
   if (slice.locked) locked[i] = true; else delete locked[i];
-  return { proposal, history, locked };
+  const stressOverrides = { ...(s.stressOverrides ?? {}) };
+  if (slice.stressOverride) stressOverrides[i] = slice.stressOverride; else delete stressOverrides[i];
+  return { proposal, history, locked, stressOverrides };
 }
 
 
@@ -311,6 +331,76 @@ function TrackPage() {
   const isProcessing = trackData ? (trackData.status !== "done" && trackData.status !== "error") : true;
 
   const flatLines = useMemo(() => lyrics ? lyrics.sections.flatMap((s) => s.lines) : [], [lyrics]);
+
+  const lineStressMap = useMemo(() => {
+    return flatLines.map((l) => getLineStressAnalysis(l));
+  }, [flatLines]);
+
+  const complexityResult = useMemo(() => {
+    if (flatLines.length < 2) return null;
+    return scoreComplexity(flatLines);
+  }, [flatLines]);
+
+  const semanticDrift = useMemo(() => {
+    if (flatLines.length < 6) return null;
+    return detectSemanticDrift(flatLines, lyrics?.title || styleBrief?.topic || "");
+  }, [flatLines, lyrics?.title, styleBrief?.topic]);
+
+  const handleToggleStressOverride = (barIndex: number, sylIdx: number) => {
+    const currentOverrides = local.stressOverrides?.[barIndex] ?? {};
+    const originalChar = lineStressMap[barIndex]?.chars[sylIdx] || "x";
+    const currentChar = currentOverrides[sylIdx] || originalChar;
+    const toggled = currentChar === "/" ? "x" : "/";
+
+    const nextOverrides = { ...currentOverrides, [sylIdx]: toggled };
+    const before = local;
+    const sliceBefore = getSlice(before, barIndex);
+
+    const nextLocal: BarLocalState = {
+      ...before,
+      stressOverrides: {
+        ...(before.stressOverrides ?? {}),
+        [barIndex]: nextOverrides,
+      },
+    };
+    saveLocal(id, nextLocal);
+    setLocal(nextLocal);
+
+    const sliceAfter = getSlice(nextLocal, barIndex);
+    pushAction({
+      label: `Toggle stress pulse bar #${barIndex + 1}`,
+      barIndex,
+      serverBefore: flatLines[barIndex] || "",
+      serverAfter: flatLines[barIndex] || "",
+      sliceBefore,
+      sliceAfter,
+    });
+  };
+
+  const handleResetStressOverrides = (barIndex: number) => {
+    const before = local;
+    const sliceBefore = getSlice(before, barIndex);
+    const nextOverrides = { ...(before.stressOverrides ?? {}) };
+    delete nextOverrides[barIndex];
+
+    const nextLocal: BarLocalState = {
+      ...before,
+      stressOverrides: nextOverrides,
+    };
+    saveLocal(id, nextLocal);
+    setLocal(nextLocal);
+
+    const sliceAfter = getSlice(nextLocal, barIndex);
+    pushAction({
+      label: `Reset stress pattern bar #${barIndex + 1}`,
+      barIndex,
+      serverBefore: flatLines[barIndex] || "",
+      serverAfter: flatLines[barIndex] || "",
+      sliceBefore,
+      sliceAfter,
+    });
+  };
+
   const barPocketItems = useMemo<BarPocketItem[]>(() => {
     if (!flatLines.length) return [];
     return flatLines.map((line, idx) => ({
@@ -318,8 +408,9 @@ function TrackPage() {
       text: line,
       syllables: countSyllables(line),
       endSound: endRhymeKey(line),
+      stressPattern: lineStressMap[idx]?.rawPattern,
     }));
-  }, [flatLines]);
+  }, [flatLines, lineStressMap]);
   const scheme = useMemo(() => classifyScheme(rhymeScheme(flatLines)), [flatLines]);
   const warnings = useMemo(() => analyzeRepetition(flatLines), [flatLines]);
   const badBarSet = useMemo(() => {
@@ -507,20 +598,29 @@ function TrackPage() {
   const runBarRewrite = async (
     barIndex: number,
     original: string,
-    opts: { keepEndSound: boolean; swapMetaphor: boolean; raiseDensity: boolean; custom: string; count: number },
+    opts: RewriteOpts,
     mode: "replace" | "append" = "replace",
   ) => {
     setRewritingIdx(barIndex);
     try {
       let proposals: string[];
+      let effectiveCustom = opts.custom || "";
+      if (opts.stressPattern || opts.targetSyllables) {
+        const cadenceConstraints = [
+          opts.targetSyllables ? `Strict cadence constraint: exactly ${opts.targetSyllables} syllables.` : "",
+          opts.stressPattern ? `Follow rhythmic stress pattern '${opts.stressPattern}' (/ = stressed beat pulse, x = unstressed).` : "",
+        ].filter(Boolean);
+        if (cadenceConstraints.length) {
+          effectiveCustom = effectiveCustom ? `${effectiveCustom} | ${cadenceConstraints.join(" ")}` : cadenceConstraints.join(" ");
+        }
+      }
+
       if (isLocalTrack) {
         // Local rewrite using local pipeline
         const config = loadLlmConfig();
         const transcript = (trackData as any)?.transcript || (trackData as any)?.raw_transcript || "";
         const brief = (trackData as any)?.styleBrief || (trackData as any)?.style_brief || undefined;
         const result = await runLocalPipeline(config, transcript, brief);
-        // For simplicity, use the rewritten lyrics as proposals
-        // In a real implementation, we'd have a more targeted rewrite
         proposals = result.lyrics.sections.flatMap((s) => s.lines).slice(barIndex, barIndex + opts.count);
       } else {
         const r = await rewriteFn({
@@ -529,7 +629,7 @@ function TrackPage() {
             trackId: id,
             barIndex,
             count: opts.count,
-            options: { keepEndSound: opts.keepEndSound, swapMetaphor: opts.swapMetaphor, raiseDensity: opts.raiseDensity, custom: opts.custom },
+            options: { keepEndSound: opts.keepEndSound, swapMetaphor: opts.swapMetaphor, raiseDensity: opts.raiseDensity, custom: effectiveCustom },
             burnedPhrases: loadBurnedPhrases().slice(0, 40),
             burnedVowels: loadBurnedVowels().slice(0, 30),
           },
@@ -1060,6 +1160,8 @@ function TrackPage() {
               selectMode={selectMode}
               rhymeVision={rhymeVision}
               stanzaSchemeName={stanzaScheme.name}
+              complexityResult={complexityResult}
+              semanticDrift={semanticDrift}
               onSetRhymeVision={setRhymeVision}
               onUndo={doUndo}
               onRedo={doRedo}
@@ -1099,6 +1201,7 @@ function TrackPage() {
                           key={li}
                           line={line}
                           bar={bar}
+                          barIndex={idx}
                           got={got}
                           gotEnd={gotEnd}
                           ok={ok}
@@ -1114,6 +1217,8 @@ function TrackPage() {
                           schemeLetter={highlightedResults[idx]?.schemeLetter}
                           rhymeGroupClass={highlightedResults[idx]?.rhymeGroupClass}
                           hasInternalRhyme={highlightedResults[idx]?.hasInternalRhyme}
+                          stressPattern={lineStressMap[idx]?.rawPattern}
+                          stressOverride={local.stressOverrides?.[idx]}
                           onFocus={() => setFocusedBar(idx)}
                           onToggleSelect={() => toggleBarSelected(idx)}
                           onRewrite={(opts) => runBarRewrite(idx, line, opts, "replace")}
@@ -1128,6 +1233,8 @@ function TrackPage() {
                             setRhymeLookupOpen(true);
                           }}
                           onUpdateLine={(newLine) => updateBarText(idx, newLine)}
+                          onToggleStressOverride={handleToggleStressOverride}
+                          onResetStressOverrides={handleResetStressOverrides}
                         />
                       );
                     })}
@@ -1140,6 +1247,8 @@ function TrackPage() {
               open={rhymeLookupOpen}
               onOpenChange={setRhymeLookupOpen}
               defaultWord={rhymeLookupWord}
+              targetSyllables={focusedBar !== null ? (cadence?.bars[focusedBar]?.syllables ?? countSyllables(flatLines[focusedBar] || "")) : undefined}
+              targetStress={focusedBar !== null ? lineStressMap[focusedBar]?.rawPattern : undefined}
             />
           </Card>
         )}
