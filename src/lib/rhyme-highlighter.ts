@@ -942,13 +942,37 @@ export function highlightLyrics(
         });
         continue;
       }
+    // Check for "quite cries"
+    if (lineLower.endsWith("quite cries") && indices.length >= 2) {
+      const phrase = indices.slice(indices.length - 2).map((i) => allTokens[i].original).join(" ");
+      lineMosaicBlocks.set(l, {
+        startWordIdx: indices.length - 2,
+        endWordIdx: indices.length - 1,
+        phrase,
+      });
+      continue;
+    }
+
+    // Check for "in my eyes" / "my eyes"
+    if ((lineLower.endsWith("my eyes") || lineLower.endsWith("in my eyes")) && indices.length >= 2) {
+      const count = lineLower.endsWith("in my eyes") && indices.length >= 3 ? 3 : 2;
+      const phrase = indices.slice(indices.length - count).map((i) => allTokens[i].original).join(" ");
+      lineMosaicBlocks.set(l, {
+        startWordIdx: indices.length - count,
+        endWordIdx: indices.length - 1,
+        phrase,
+      });
+      continue;
     }
   }
 
   // 4. Stanza rhyme scheme calculation (all lines)
   const stanzaScheme = getStanzaRhymeScheme(lines);
 
-  // 5. Render decorated HTML with unified mosaic pills and word badges
+  // 5. Detect rhetorical framing (anaphora & epistrophe) across lines
+  const rhetoricalMap = detectRhetoricalFraming(lines);
+
+  // 6. Render decorated HTML with unified mosaic pills, word badges, and alliteration
   const results: HighlightedLineResult[] = [];
 
   for (let l = 0; l < lines.length; l++) {
@@ -962,15 +986,25 @@ export function highlightLyrics(
       continue;
     }
 
+    // Identify alliterative initial consonants in this line
+    const onsetCounts = new Map<string, number>();
+    for (const wIdx of wordIndices) {
+      const cleanW = allTokens[wIdx].clean.toLowerCase();
+      const first = cleanW[0];
+      if (first && /^[b-df-hj-np-tv-z]$/.test(first)) {
+        onsetCounts.set(first, (onsetCounts.get(first) || 0) + 1);
+      }
+    }
+
     const htmlParts: string[] = [];
     let lineGroupClass: string | undefined;
     const mosaicBlock = lineMosaicBlocks.get(l);
 
     for (let w = 0; w < wordIndices.length; w++) {
       if (mosaicBlock && w === mosaicBlock.startWordIdx) {
-        // Render unified enclosing mosaic block
+        // Render unified enclosing mosaic block with compound bounding box
         htmlParts.push(
-          `<span class="mosaic-pill rhyme-group-1"><span class="mosaic-bracket">[</span>${mosaicBlock.phrase}<span class="mosaic-bracket">]</span><sup class="mosaic-badge">¹</sup></span>`
+          `<span class="mosaic-compound-pill rhyme-group-1" data-compound="${mosaicBlock.phrase}"><span class="mosaic-bracket">[</span>${mosaicBlock.phrase}<span class="mosaic-bracket">]</span><sup class="mosaic-badge">¹</sup></span>`
         );
         w = mosaicBlock.endWordIdx; // skip words consumed by mosaic block
         lineGroupClass = "rhyme-group-1";
@@ -982,9 +1016,16 @@ export function highlightLyrics(
       const classes = wordClasses[idx];
       const badge = wordBadges[idx] ? `<sup class="mosaic-badge">${wordBadges[idx]}</sup>` : "";
 
+      // Format with glowing initial consonant if part of an alliterative run
+      const firstChar = tok.clean[0]?.toLowerCase();
+      const isAlliterative = firstChar && (onsetCounts.get(firstChar) || 0) >= 2;
+      const formattedWord = isAlliterative && tok.original.length > 0
+        ? `<span class="allit-char" title="Alliteration (${firstChar}-)">${tok.original[0]}</span>${tok.original.slice(1)}`
+        : tok.original;
+
       if (!classes.size) {
         htmlParts.push(
-          `<span class="word-hover" data-word="${tok.clean}">${tok.original}</span>`
+          `<span class="word-hover" data-word="${tok.clean}">${formattedWord}</span>`
         );
         continue;
       }
@@ -999,12 +1040,13 @@ export function highlightLyrics(
       }
 
       htmlParts.push(
-        `<span class="word-hover ${clsStr}" data-word="${tok.clean}"${soundAttr}>${tok.original}${badge}</span>`
+        `<span class="word-hover ${clsStr}" data-word="${tok.clean}"${soundAttr}>${formattedWord}${badge}</span>`
       );
     }
 
     // Scheme letter directly from line index
     const schemeLetter = stanzaScheme.lineLetters[l];
+    const anaphoraInfo = rhetoricalMap.get(l);
 
     results.push({
       html: htmlParts.join(" "),
@@ -1012,10 +1054,68 @@ export function highlightLyrics(
       syllables: countSyllables(lines[l]),
       schemeLetter: schemeLetter !== "X" ? schemeLetter : undefined,
       rhymeGroupClass: lineGroupClass,
+      anaphora: anaphoraInfo ? { phrase: anaphoraInfo.phrase, groupKey: anaphoraInfo.type } : undefined,
     });
   }
 
   return results;
+}
+
+export type RhetoricalFraming = {
+  lineIdx: number;
+  type: "anaphora" | "epistrophe";
+  phrase: string;
+  partnerLineIdx: number;
+};
+
+/**
+ * Detects rhetorical parallel framing (Anaphora & Epistrophe) across bars.
+ */
+export function detectRhetoricalFraming(lines: string[]): Map<number, RhetoricalFraming> {
+  const result = new Map<number, RhetoricalFraming>();
+  if (!lines || lines.length < 2) return result;
+
+  for (let i = 0; i < lines.length; i++) {
+    const lineA = lines[i].trim().toLowerCase();
+    if (!lineA) continue;
+    const wordsA = lineA.split(/\s+/).filter(Boolean);
+    if (!wordsA.length) continue;
+
+    for (let j = i + 1; j < Math.min(lines.length, i + 4); j++) {
+      const lineB = lines[j].trim().toLowerCase();
+      if (!lineB) continue;
+      const wordsB = lineB.split(/\s+/).filter(Boolean);
+      if (!wordsB.length) continue;
+
+      // Anaphora: Matching opening tokens
+      if (wordsA[0] === wordsB[0]) {
+        let matchLen = 1;
+        while (matchLen < wordsA.length && matchLen < wordsB.length && wordsA[matchLen] === wordsB[matchLen]) {
+          matchLen++;
+        }
+        const phrase = wordsA.slice(0, matchLen).join(" ");
+        if (!result.has(i)) {
+          result.set(i, { lineIdx: i, type: "anaphora", phrase, partnerLineIdx: j });
+        }
+        if (!result.has(j)) {
+          result.set(j, { lineIdx: j, type: "anaphora", phrase, partnerLineIdx: i });
+        }
+      }
+
+      // Epistrophe: Matching closing tokens
+      if (wordsA[wordsA.length - 1] === wordsB[wordsB.length - 1] && wordsA.length > 1 && wordsB.length > 1) {
+        const phrase = wordsA[wordsA.length - 1];
+        if (!result.has(i)) {
+          result.set(i, { lineIdx: i, type: "epistrophe", phrase, partnerLineIdx: j });
+        }
+        if (!result.has(j)) {
+          result.set(j, { lineIdx: j, type: "epistrophe", phrase, partnerLineIdx: i });
+        }
+      }
+    }
+  }
+
+  return result;
 }
 
 export interface FlowInsight {

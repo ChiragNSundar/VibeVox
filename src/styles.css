@@ -197,6 +197,47 @@
 .mosaic-bracket {
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   user-select: none;
+  opacity: 0.6;
+}
+
+/* Alliterative Run Onset Glowing Letter */
+.allit-char {
+  color: #facc15;
+  font-weight: 800;
+  text-shadow: 0 0 6px rgba(250, 204, 21, 0.5);
+  border-bottom: 2px dotted #facc15;
+  padding-bottom: 1px;
+}
+
+/* Multi-Word Compound Bounding Box */
+.mosaic-compound-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 2px;
+  padding: 1px 5px;
+  border-radius: 5px;
+  border: 1px solid rgba(250, 204, 21, 0.65);
+  background: rgba(250, 204, 21, 0.15);
+  box-shadow: 0 0 8px rgba(250, 204, 21, 0.25);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Anaphora Parallel Framing Left Bracket */
+.anaphora-bracket {
+  border-left: 3px solid #38bdf8;
+  padding-left: 6px;
+  margin-left: -6px;
+}
+
+/* Micro-Caesura Breath Pause Marker */
+.caesura-mark {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 700;
+  margin: 0 6px;
+  user-select: none;
+  font-size: 13px;
 }
 
 /* Sleek Modern Studio Scrollbar */

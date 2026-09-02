@@ -54,6 +54,185 @@ const INDIC_LONG_VOWELS = new Set([
 ]);
 
 /**
+ * Matra (Mātrā) weight calculation for Classical Indic and DHH prosody.
+ * Laghu (L = 1 mātrā) for short vowels; Guru (G = 2 mātrās) for long vowels,
+ * diphthongs, and syllables with coda clusters / anusvara.
+ */
+export function calculateMatra(line: string): {
+  totalMatra: number;
+  pattern: ("L" | "G")[];
+  weights: number[];
+} {
+  if (!line || !line.trim()) return { totalMatra: 0, pattern: [], weights: [] };
+
+  const clean = romanizeIndic(line).toLowerCase().replace(/[^a-z\s]/g, "");
+  const words = clean.split(/\s+/).filter(Boolean);
+  const pattern: ("L" | "G")[] = [];
+  const weights: number[] = [];
+
+  for (const w of words) {
+    // Break word into approximate vowel nuclei
+    const nuclei = w.match(/(?:aa|ii|uu|ee|oo|ai|au|ay|ey|oy|[aeiouy])/g) || [];
+    for (let i = 0; i < nuclei.length; i++) {
+      const nuc = nuclei[i];
+      const isLong = nuc.length >= 2 || nuc === "e" || nuc === "o"; // 'e' and 'o' are always Guru in Sanskrit/Hindi
+      // Check if followed by conjunct consonants before next vowel
+      const nextNucIndex = i < nuclei.length - 1 ? w.indexOf(nuclei[i + 1], w.indexOf(nuc) + nuc.length) : w.length;
+      const consonantCluster = w.slice(w.indexOf(nuc) + nuc.length, nextNucIndex).replace(/[^a-z]/g, "");
+      const isHeavyByCluster = consonantCluster.length >= 2 || /[nm]$/i.test(consonantCluster);
+
+      if (isLong || isHeavyByCluster) {
+        pattern.push("G");
+        weights.push(2);
+      } else {
+        pattern.push("L");
+        weights.push(1);
+      }
+    }
+  }
+
+  const totalMatra = weights.reduce((sum, w) => sum + w, 0);
+  return { totalMatra, pattern, weights };
+}
+
+export type FlowMetricResult = {
+  metricType: "triplet" | "straight-16th" | "syncopated" | "staccato";
+  badge: string;
+  label: string;
+};
+
+/**
+ * Detects polyrhythmic flow pockets (triplet rolls / Migos pockets vs straight-16th).
+ */
+export function detectFlowMetric(line: string, chars: ("/" | "x")[] = []): FlowMetricResult {
+  const syl = chars.length || countSyllables(line);
+  if (syl < 3) {
+    return { metricType: "staccato", badge: "Staccato", label: "Short punchy bar" };
+  }
+
+  // Triplet detection: syllable counts clustering in 3s (6, 9, 12, 15) or 3-syllable stress rolls
+  const stressStr = chars.join("");
+  const hasTripletRoll =
+    /(?:\/xx|\/xx\/|xx\/|x\/x){2,}/.test(stressStr) ||
+    (syl >= 6 && syl % 3 === 0 && /(?:ing|tion|ty|ly|te|na|ke|re|ya)\s+(?:ing|tion|te|na)/i.test(line));
+
+  if (hasTripletRoll || syl === 9 || syl === 15) {
+    return {
+      metricType: "triplet",
+      badge: "┌3┐ [3:2]",
+      label: "Triplet flow / 3-syllable roll",
+    };
+  }
+
+  // Syncopation check: alternating stresses with caesura breaks
+  if (syl >= 7 && (syl % 2 !== 0 || /[,|\-]/.test(line))) {
+    return {
+      metricType: "syncopated",
+      badge: "Syncopated",
+      label: "Off-beat syncopated pocket",
+    };
+  }
+
+  return {
+    metricType: "straight-16th",
+    badge: "16th Grid",
+    label: "Straight 16th-note pocket",
+  };
+}
+
+export type CaesuraResult = {
+  hasCaesura: boolean;
+  pauseIndex: number;
+  before: string;
+  after: string;
+};
+
+/**
+ * Detects micro-caesuras (natural breath pauses or syntactic breaks) in longer bars.
+ */
+export function detectCaesura(line: string): CaesuraResult {
+  if (!line || line.trim().length < 15) {
+    return { hasCaesura: false, pauseIndex: -1, before: line, after: "" };
+  }
+
+  // Explicit punctuation pause (comma, semicolon, dash, pipe)
+  const punctMatch = /^(.*?[,;—\-|])\s+(.*)$/.exec(line);
+  if (punctMatch) {
+    return {
+      hasCaesura: true,
+      pauseIndex: punctMatch[1].length,
+      before: punctMatch[1].trim(),
+      after: punctMatch[2].trim(),
+    };
+  }
+
+  // Natural conjunction breath breaks in DHH (e.g. "but you dont see", "aur hum yahan", "par tu nahi")
+  const conjMatch = /^(.*?\b(?:but|and|yet|cause|cuz|par|aur|lekin|magar|toh|kyunki)\b)\s*(.*)$/i.exec(line);
+  if (conjMatch && conjMatch[1].split(/\s+/).length >= 3 && conjMatch[2].split(/\s+/).length >= 2) {
+    return {
+      hasCaesura: true,
+      pauseIndex: conjMatch[1].length,
+      before: conjMatch[1].trim(),
+      after: conjMatch[2].trim(),
+    };
+  }
+
+  return { hasCaesura: false, pauseIndex: -1, before: line, after: "" };
+}
+
+export type CodeSwitchResult = {
+  hindiPct: number;
+  englishPct: number;
+  label: string;
+  isCodeSwitched: boolean;
+};
+
+/**
+ * Computes bilingual code-switching language ratio for DHH lines.
+ */
+export function detectCodeSwitch(line: string): CodeSwitchResult {
+  if (!line || !line.trim()) {
+    return { hindiPct: 0, englishPct: 100, label: "100% EN", isCodeSwitched: false };
+  }
+
+  const words = line.toLowerCase().replace(/[^a-z\u0900-\u097F\u0C80-\u0CFF\s]/g, "").split(/\s+/).filter(Boolean);
+  if (!words.length) return { hindiPct: 0, englishPct: 100, label: "100% EN", isCodeSwitched: false };
+
+  let indicCount = 0;
+  let englishCount = 0;
+
+  const INDIC_PARTICLES = new Set([
+    "jo", "woh", "wo", "tu", "tera", "teri", "mere", "mera", "meri", "hum", "main", "hai", "hain",
+    "kare", "karta", "karti", "karte", "muskuraate", "gungunaate", "chahe", "gaaye", "laye", "hoti", "hota",
+    "bhai", "gully", "apna", "apni", "pyaar", "duniya", "raasta", "sahi", "nahi", "kabhi", "bhi",
+    "dekhu", "dekha", "dekh", "sun", "bol", "kar", "baat", "dil", "jaan", "bhavi", "ek", "do", "teen",
+    "side", "par", "pe", "se", "ke", "ko", "me", "mein", "ka", "ki"
+  ]);
+
+  for (const w of words) {
+    if (/[\u0900-\u097F\u0C80-\u0CFF]/.test(w) || INDIC_PARTICLES.has(w) || /(?:te|ta|ti|ra|ri|ke|se|pe|de|ne)$/i.test(w)) {
+      indicCount++;
+    } else {
+      englishCount++;
+    }
+  }
+
+  const total = indicCount + englishCount;
+  const hindiPct = Math.round((indicCount / total) * 100);
+  const englishPct = 100 - hindiPct;
+  const isCodeSwitched = hindiPct >= 20 && englishPct >= 20;
+
+  let label = `${englishPct}% EN`;
+  if (isCodeSwitched) {
+    label = `${hindiPct}% HI · ${englishPct}% EN`;
+  } else if (hindiPct > 80) {
+    label = `${hindiPct}% HI`;
+  }
+
+  return { hindiPct, englishPct, label, isCodeSwitched };
+}
+
+/**
  * Detect language heuristics from string.
  */
 export function detectLanguage(text: string): "en" | "kn" | "hi" {
