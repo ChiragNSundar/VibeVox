@@ -22,15 +22,25 @@ import {
   Pencil, Link2,
 } from "lucide-react";
 import { BarDiff } from "@/components/BarDiff";
+import { StressTimeline } from "./StressTimeline";
 import type { CadenceMap } from "@/lib/lyrics-analysis";
 
 export type BarVersion = { text: string; ts: number; source: "original" | "rewrite" | "manual" };
-export type RewriteOpts = { keepEndSound: boolean; swapMetaphor: boolean; raiseDensity: boolean; custom: string; count: number };
+export type RewriteOpts = {
+  keepEndSound: boolean;
+  swapMetaphor: boolean;
+  raiseDensity: boolean;
+  custom: string;
+  count: number;
+  stressPattern?: string;
+  targetSyllables?: number;
+};
 export type BarProposal = { original: string; proposals: string[]; selectedIdx: number };
 
 export type BarRowProps = {
   line: string;
   bar: CadenceMap["bars"][number] | undefined;
+  barIndex?: number;
   got: number;
   gotEnd: string;
   ok: boolean;
@@ -46,6 +56,8 @@ export type BarRowProps = {
   schemeLetter?: string;
   rhymeGroupClass?: string;
   hasInternalRhyme?: boolean;
+  stressPattern?: string;
+  stressOverride?: Record<number, "/" | "x">;
   onToggleSelect?: () => void;
   onFocus?: () => void;
   onRewrite: (opts: RewriteOpts) => void;
@@ -57,15 +69,19 @@ export type BarRowProps = {
   onRestore: (v: BarVersion) => void;
   onWordClick?: (word: string) => void;
   onUpdateLine?: (newLine: string) => void;
+  onToggleStressOverride?: (barIdx: number, sylIdx: number) => void;
+  onResetStressOverrides?: (barIdx: number) => void;
 };
 
 export function BarRow({
-  line, bar, got, gotEnd, ok, locked, proposal, history, rewriting,
+  line, bar, barIndex = 0, got, gotEnd, ok, locked, proposal, history, rewriting,
   selectMode = false, selected: barSelected = false, focused = false, repeatWarn = false,
   highlightedHtml, schemeLetter, rhymeGroupClass, hasInternalRhyme = false,
+  stressPattern, stressOverride,
   onToggleSelect, onFocus,
   onRewrite, onMoreAlternates, onSelectAlternate, onAccept, onRevert, onToggleLock, onRestore,
   onWordClick, onUpdateLine,
+  onToggleStressOverride, onResetStressOverrides,
 }: BarRowProps) {
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -127,7 +143,15 @@ export function BarRow({
     }
   };
 
-  const opts: RewriteOpts = { keepEndSound, swapMetaphor, raiseDensity, custom, count };
+  const opts: RewriteOpts = {
+    keepEndSound,
+    swapMetaphor,
+    raiseDensity,
+    custom,
+    count,
+    stressPattern,
+    targetSyllables: bar?.syllables,
+  };
   const total = proposal?.proposals.length ?? 0;
   const selectedAlt = proposal?.proposals[proposal.selectedIdx] ?? "";
   const canSelect = selectMode && !locked && !!line.trim();
@@ -160,6 +184,19 @@ export function BarRow({
           >
             {schemeLetter}
           </span>
+        )}
+
+        {stressPattern && !focused && (
+          <div
+            className="hidden sm:flex items-center gap-0.5 self-center opacity-60 hover:opacity-100 transition-opacity cursor-default"
+            title={`Cadence Stress: ${stressPattern}`}
+          >
+            {stressPattern.replace(/[^/x]/g, "").slice(0, 10).split("").map((c, i) => (
+              <span key={i} className={`text-[8px] leading-none ${c === "/" ? "text-primary font-bold" : "text-muted-foreground/60"}`}>
+                {c === "/" ? "●" : "○"}
+              </span>
+            ))}
+          </div>
         )}
 
         {isEditing ? (
