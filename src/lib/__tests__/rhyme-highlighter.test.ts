@@ -177,4 +177,25 @@ describe("Rhyme Highlighter Engine", () => {
     expect(res[0].html).toContain("rhyme-group-4"); // mera
     expect(res[2].html).toContain("rhyme-group-4"); // na
   });
+
+  it("rhymes 'eyes' and 'cries' as exact perfect rhymes in the /aɪ/ family", () => {
+    const lines = [
+      "pot gungunaate but you dont see",
+      "it in my eyes",
+      "because i got quite cries",
+    ];
+
+    const res = highlightLyrics(lines, "standard");
+    expect(res.length).toBe(3);
+
+    // Both lines should highlight 'eyes' and 'cries' in the same rhyme group
+    expect(res[1].html).toContain("data-word=\"eyes\"");
+    expect(res[2].html).toContain("data-word=\"cries\"");
+    expect(res[1].html).toContain("rhyme-word");
+    expect(res[2].html).toContain("rhyme-word");
+
+    // 'pot' and 'got' also rhyme
+    expect(res[0].html).toContain("data-word=\"pot\"");
+    expect(res[2].html).toContain("data-word=\"got\"");
+  });
 });

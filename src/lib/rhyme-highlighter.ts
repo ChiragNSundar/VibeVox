@@ -99,6 +99,52 @@ export function wordToPhones(word: string): string[] {
   const clean = word.toLowerCase().replace(/[^a-z]/g, "");
   if (!clean) return [];
 
+  const COMMON_PHONETIC_DICT: Record<string, string[]> = {
+    eye: ["AY1"],
+    eyes: ["AY1", "Z"],
+    cry: ["K", "R", "AY1"],
+    cries: ["K", "R", "AY1", "Z"],
+    lie: ["L", "AY1"],
+    lies: ["L", "AY1", "Z"],
+    tie: ["T", "AY1"],
+    ties: ["T", "AY1", "Z"],
+    die: ["D", "AY1"],
+    dies: ["D", "AY1", "Z"],
+    try: ["T", "R", "AY1"],
+    tries: ["T", "R", "AY1", "Z"],
+    fly: ["F", "L", "AY1"],
+    flies: ["F", "L", "AY1", "Z"],
+    sky: ["S", "K", "AY1"],
+    skies: ["S", "K", "AY1", "Z"],
+    spy: ["S", "P", "AY1"],
+    spies: ["S", "P", "AY1", "Z"],
+    fry: ["F", "R", "AY1"],
+    fries: ["F", "R", "AY1", "Z"],
+    dry: ["D", "R", "AY1"],
+    dries: ["D", "R", "AY1", "Z"],
+    guy: ["G", "AY1"],
+    guys: ["G", "AY1", "Z"],
+    buy: ["B", "AY1"],
+    buys: ["B", "AY1", "Z"],
+    quite: ["K", "W", "AY1", "T"],
+    white: ["W", "AY1", "T"],
+    night: ["N", "AY1", "T"],
+    light: ["L", "AY1", "T"],
+    right: ["R", "AY1", "T"],
+    pot: ["P", "AA1", "T"],
+    got: ["G", "AA1", "T"],
+    hot: ["HH", "AA1", "T"],
+    shot: ["SH", "AA1", "T"],
+    not: ["N", "AA1", "T"],
+    lot: ["L", "AA1", "T"],
+    see: ["S", "IY1"],
+    sea: ["S", "IY1"],
+  };
+
+  if (COMMON_PHONETIC_DICT[clean]) {
+    return COMMON_PHONETIC_DICT[clean];
+  }
+
   // Check common hip-hop suffix patterns first
   for (const [re, phones] of G2P_RULES) {
     if (re.test(clean)) {
@@ -708,9 +754,27 @@ export function highlightLyrics(
       continue;
     }
 
-    // Channel 1: Orange (rhyme-group-1) -> Long /aɪ/ (Core Vowel)
-    // Matches: die, hai, side, life, homicide, suicide, bhai, lai, jaaye, laaye
+    // Channel 1: Long /aɪ/ (Core Vowel)
+    // Matches: die, hai, side, life, homicide, suicide, bhai, lai, jaaye, laaye, eye, eyes, cry, cries, skies, lies, ties, etc.
     if (
+      clean === "eye" ||
+      clean === "eyes" ||
+      clean === "cry" ||
+      clean === "cries" ||
+      clean === "lie" ||
+      clean === "lies" ||
+      clean === "tie" ||
+      clean === "ties" ||
+      clean === "sky" ||
+      clean === "skies" ||
+      clean === "try" ||
+      clean === "tries" ||
+      clean === "fly" ||
+      clean === "flies" ||
+      clean === "spy" ||
+      clean === "spies" ||
+      clean === "quite" ||
+      clean === "white" ||
       clean === "die" ||
       clean === "hai" ||
       clean === "side" ||
@@ -725,6 +789,8 @@ export function highlightLyrics(
       clean.endsWith("hai") ||
       clean.endsWith("ai") ||
       clean.endsWith("aye") ||
+      rp === "AY1 Z" ||
+      rp.endsWith("AY1 Z") ||
       (vBase === "AY" && !clean.endsWith("ind") && !clean.endsWith("uys"))
     ) {
       tokenPhonetics.push({
