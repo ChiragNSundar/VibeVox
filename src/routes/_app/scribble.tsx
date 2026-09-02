@@ -524,23 +524,57 @@ The engine will sort the pieces, pull out the gems, and structure it into clean 
                 </div>
 
                 <div className="space-y-4">
-                  {result.sections.map((section, sIdx) => (
-                    <div key={sIdx} className="space-y-1.5">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                        [{section.type}]
+                  {result.sections.map((section, sIdx) => {
+                    const prevLinesCount = result.sections
+                      .slice(0, sIdx)
+                      .reduce((acc, s) => acc + s.lines.length, 0);
+
+                    return (
+                      <div key={sIdx} className="space-y-1.5">
+                        <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                          [{section.type}]
+                        </div>
+                        <div className="bg-background/80 p-3 rounded-md border border-border/50 space-y-1.5 font-mono text-xs leading-relaxed">
+                          {section.lines.map((line, lIdx) => {
+                            const globalIdx = prevLinesCount + lIdx;
+                            const hItem = resultHighlighted[globalIdx];
+                            return (
+                              <div key={lIdx} className="flex items-center justify-between gap-3 text-muted-foreground">
+                                <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                                  {hItem?.schemeLetter && (
+                                    <span
+                                      className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 shrink-0 ${
+                                        hItem.rhymeGroupClass || "text-muted-foreground bg-muted/20"
+                                      }`}
+                                    >
+                                      {hItem.schemeLetter}
+                                    </span>
+                                  )}
+                                  <span
+                                    className="text-foreground select-text cursor-pointer"
+                                    onClick={(e) => {
+                                      const target = (e.target as HTMLElement).closest(".word-hover") as HTMLElement | null;
+                                      if (target) {
+                                        const w = target.getAttribute("data-word") || target.textContent || "";
+                                        if (w.trim()) {
+                                          setRhymeLookupWord(w.trim());
+                                          setRhymeLookupOpen(true);
+                                        }
+                                      }
+                                    }}
+                                    dangerouslySetInnerHTML={{ __html: hItem?.html || line }}
+                                  />
+                                </div>
+                                <span className="text-[10px] opacity-60 shrink-0 font-mono">
+                                  {countSyllables(line)} syl
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                      <div className="bg-background/80 p-3 rounded-md border border-border/50 space-y-1 font-mono text-xs leading-relaxed">
-                        {section.lines.map((line, lIdx) => (
-                          <div key={lIdx} className="flex items-baseline justify-between gap-3 text-muted-foreground">
-                            <span className="text-foreground">{line}</span>
-                            <span className="text-[10px] opacity-60 shrink-0 font-mono">
-                              {countSyllables(line)} syl
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 {/* Actions & Brain Status */}
@@ -567,6 +601,12 @@ The engine will sort the pieces, pull out the gems, and structure it into clean 
           )}
         </div>
       </div>
+
+      <RhymeLookup
+        open={rhymeLookupOpen}
+        onOpenChange={setRhymeLookupOpen}
+        defaultWord={rhymeLookupWord}
+      />
     </div>
   );
 }
