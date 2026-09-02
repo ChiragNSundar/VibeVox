@@ -38,6 +38,8 @@ import { BarRow, type BarVersion, type BarProposal, type RewriteOpts } from "@/c
 import { TrackScorecard, type TrackQuality } from "@/components/track/TrackScorecard";
 import { TrackToolbar } from "@/components/track/TrackToolbar";
 import { BulkRewriteBar, type BulkOpts, DEFAULT_BULK_OPTS } from "@/components/track/BulkRewriteBar";
+import { RhymeLookup } from "@/components/RhymeLookup";
+import { highlightLyrics, getStanzaRhymeScheme, type RhymeVisionMode } from "@/lib/rhyme-highlighter";
 
 type Lyrics = { title: string; sections: { type: string; lines: string[] }[] };
 
