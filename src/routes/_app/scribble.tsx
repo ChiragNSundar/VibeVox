@@ -321,10 +321,43 @@ function ScribblePage() {
         </div>
       </div>
 
+      {/* VibeLyrics Flagship 4-Superpowers Banner */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 text-[11px]">
+        <div className="p-2.5 rounded-lg bg-card/60 border border-border/70 flex items-start gap-2 shadow-xs">
+          <span className="p-1 rounded bg-amber-500/10 text-amber-400 shrink-0 text-sm">💡</span>
+          <div>
+            <span className="font-semibold text-foreground block">Narrative Extraction</span>
+            <span className="text-muted-foreground text-[10px] leading-tight block">Detects raw themes, mood & emotions</span>
+          </div>
+        </div>
+        <div className="p-2.5 rounded-lg bg-card/60 border border-border/70 flex items-start gap-2 shadow-xs">
+          <span className="p-1 rounded bg-cyan-500/10 text-cyan-400 shrink-0 text-sm">💎</span>
+          <div>
+            <span className="font-semibold text-foreground block">Gem Mining</span>
+            <span className="text-muted-foreground text-[10px] leading-tight block">Preserves punchlines & standout bars</span>
+          </div>
+        </div>
+        <div className="p-2.5 rounded-lg bg-card/60 border border-border/70 flex items-start gap-2 shadow-xs">
+          <span className="p-1 rounded bg-emerald-500/10 text-emerald-400 shrink-0 text-sm">⚡</span>
+          <div>
+            <span className="font-semibold text-foreground block">Cadence Lock</span>
+            <span className="text-muted-foreground text-[10px] leading-tight block">6-channel DHH phonemes & pocket flow</span>
+          </div>
+        </div>
+        <div className="p-2.5 rounded-lg bg-card/60 border border-border/70 flex items-start gap-2 shadow-xs">
+          <span className="p-1 rounded bg-purple-500/10 text-purple-400 shrink-0 text-sm">📁</span>
+          <div>
+            <span className="font-semibold text-foreground block">Brain Auto-Sync</span>
+            <span className="text-muted-foreground text-[10px] leading-tight block">Zero-cloud local memory indexing</span>
+          </div>
+        </div>
+      </div>
+
       <SemanticDriftBar drift={scribbleDrift} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        <div className="lg:col-span-6 space-y-4">
+        {/* Left 7 Columns: Combined In-Place Studio Canvas */}
+        <div className="lg:col-span-7 space-y-4">
           <div className="grid grid-cols-4 gap-1.5 p-1 bg-card/60 border border-border/70 rounded-xl">
             {SCRIBBLE_MODES.map((item) => {
               const Icon = item.icon;
@@ -334,7 +367,7 @@ function ScribblePage() {
                   key={item.id}
                   type="button"
                   onClick={() => setMode(item.id as ScribbleMode)}
-                  className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                  className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                     active
                       ? "bg-primary text-primary-foreground shadow-sm font-semibold"
                       : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
@@ -347,6 +380,7 @@ function ScribblePage() {
             })}
           </div>
 
+          {/* Dynamic Rhyme Continuations & Quick Lookup */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium flex-wrap gap-1">
               {dynamicSuggestions && activeTrailingWord ? (
@@ -401,58 +435,184 @@ function ScribblePage() {
             </div>
           </div>
 
+          {/* COMBINED IN-PLACE CANVAS */}
           <Card className="p-4 bg-card/70 border-border/80 space-y-3 relative shadow-sm">
             <div className="flex items-center justify-between pb-2 border-b border-border/50 flex-wrap gap-2">
               <div className="flex items-center gap-2">
                 <span className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <PenLine className="h-3.5 w-3.5 text-primary" /> Lyric Writing Pad
+                  <Sparkles className="h-3.5 w-3.5 text-amber-400" /> VibeLyrics Unified Studio
+                </span>
+                <span className="text-[10px] text-muted-foreground/60 hidden sm:inline font-mono">
+                  (Type & highlight in the same place)
                 </span>
               </div>
 
-              {liveScheme.name && (
-                <span className="inline-flex items-center text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary">
-                  🎵 {liveScheme.name}
-                </span>
-              )}
+              <div className="flex items-center gap-2">
+                {liveScheme.name && (
+                  <span className="inline-flex items-center text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary">
+                    🎵 {liveScheme.name}
+                  </span>
+                )}
+                <div className="flex items-center gap-1 bg-background/60 p-0.5 rounded-lg border border-border/60 text-[11px]">
+                  <button
+                    type="button"
+                    onClick={() => setCanvasMode("combined")}
+                    className={`px-2 py-0.5 rounded font-mono transition-all cursor-pointer ${
+                      canvasMode === "combined"
+                        ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    In-Place Canvas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCanvasMode("scratchpad")}
+                    className={`px-2 py-0.5 rounded font-mono transition-all cursor-pointer ${
+                      canvasMode === "scratchpad"
+                        ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Bulk Paste
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <Textarea
-              placeholder="Dump whatever is in your head...
-- 4 bars you mumbled in the car
-- fragmented punchlines
-- emotional thoughts about your day
-- rhyme schemes you want to connect
-The live studio on the right will track your cadence and sound families in real-time."
-              value={scribbleText}
-              onChange={(e) => handleTextChange(e.target.value)}
-              rows={Math.max(12, linesCount + 2)}
-              className="font-mono text-sm leading-relaxed resize-none bg-background/50 border border-border/40 focus-visible:ring-1 focus-visible:ring-primary/50 p-3 rounded-md w-full"
-            />
+            {/* In-Place Combined Mode */}
+            {canvasMode === "combined" ? (
+              <div className="space-y-1 font-mono text-sm leading-relaxed">
+                {scribbleLines.length > 0 && scribbleLines.some((l) => l.trim()) ? (
+                  scribbleLines.map((lineText, idx) => {
+                    const item = liveHighlighted[idx];
+                    const isEditing = editingLineIdx === idx;
+                    const stress = scribbleStress[idx];
 
-            {liveFlowInsight && (
-              <div className="bg-amber-500/10 border border-amber-500/30 rounded-md p-2.5 text-xs text-amber-200/90 font-mono space-y-1.5 animate-in fade-in">
-                <div className="flex items-center gap-1.5 font-semibold text-amber-400">
-                  <Sparkles className="h-3.5 w-3.5" />
-                  <span>{liveFlowInsight.title}</span>
-                </div>
-                <p className="text-[11px] leading-relaxed opacity-90">{liveFlowInsight.message}</p>
-                <div className="flex flex-wrap gap-1.5 pt-0.5">
-                  {liveFlowInsight.suggestions.map((sug, si) => (
-                    <button
-                      key={si}
-                      type="button"
-                      onClick={() => {
-                        const lines = [...scribbleLines];
-                        lines[liveFlowInsight.lineIdx] = sug.replace(/\s*\([^)]*\)/, "");
-                        handleTextChange(lines.join("\n"));
-                      }}
-                      className="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] transition-colors cursor-pointer"
-                    >
-                      {sug}
-                    </button>
-                  ))}
+                    return (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between gap-3 group px-2 py-1 rounded-md hover:bg-muted/40 transition-colors border border-transparent hover:border-border/40"
+                      >
+                        {/* Scheme Badge Gutter */}
+                        <div className="w-7 shrink-0 flex items-center justify-start">
+                          {item?.schemeLetter ? (
+                            <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 ${item.rhymeGroupClass || "text-muted-foreground bg-muted/20"}`}>
+                              {item.schemeLetter}
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-muted-foreground/40 pl-1">{idx + 1}</span>
+                          )}
+                        </div>
+
+                        {/* In-Place Editor / Live Highlighted Bar */}
+                        <div className="flex-1 min-w-0">
+                          {isEditing ? (
+                            <input
+                              type="text"
+                              autoFocus
+                              value={lineText}
+                              onChange={(e) => {
+                                const newLines = [...scribbleLines];
+                                newLines[idx] = e.target.value;
+                                handleTextChange(newLines.join("\n"));
+                              }}
+                              onBlur={() => setEditingLineIdx(null)}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  const newLines = [...scribbleLines];
+                                  newLines.splice(idx + 1, 0, "");
+                                  handleTextChange(newLines.join("\n"));
+                                  setEditingLineIdx(idx + 1);
+                                } else if (e.key === "Backspace" && !lineText && scribbleLines.length > 1) {
+                                  e.preventDefault();
+                                  const newLines = [...scribbleLines];
+                                  newLines.splice(idx, 1);
+                                  handleTextChange(newLines.join("\n"));
+                                  setEditingLineIdx(Math.max(0, idx - 1));
+                                } else if (e.key === "ArrowUp" && idx > 0) {
+                                  e.preventDefault();
+                                  setEditingLineIdx(idx - 1);
+                                } else if (e.key === "ArrowDown" && idx < scribbleLines.length - 1) {
+                                  e.preventDefault();
+                                  setEditingLineIdx(idx + 1);
+                                }
+                              }}
+                              className="w-full bg-background border border-primary/60 px-2 py-0.5 rounded text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary shadow-inner"
+                            />
+                          ) : (
+                            <div
+                              onClick={() => setEditingLineIdx(idx)}
+                              className="cursor-text select-text break-words py-0.5"
+                              dangerouslySetInnerHTML={{
+                                __html: item?.html || (lineText.trim() ? lineText : "<span class='text-muted-foreground/40 italic'>Empty bar... click to write</span>"),
+                              }}
+                            />
+                          )}
+                        </div>
+
+                        {/* Right Margin: Cadence Dots & Syllables */}
+                        <div className="flex items-center gap-2 shrink-0 font-mono text-[11px] text-muted-foreground/70">
+                          {stress?.chars.length > 0 && (
+                            <span className="hidden sm:flex items-center gap-0.5 text-[8px]" title={`Cadence: ${stress.rawPattern}`}>
+                              {stress.chars.slice(0, 10).map((c, ci) => (
+                                <span key={ci} className={c === "/" ? "text-primary font-bold" : "text-muted-foreground/50"}>
+                                  {c === "/" ? "●" : "○"}
+                                </span>
+                              ))}
+                            </span>
+                          )}
+                          <span className="w-12 text-right text-[10px] text-muted-foreground/70">
+                            {item?.syllables || countSyllables(lineText)} syl
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div
+                    onClick={() => {
+                      if (!scribbleText.trim()) {
+                        handleTextChange(" ");
+                        setEditingLineIdx(0);
+                      }
+                    }}
+                    className="p-8 text-center text-muted-foreground space-y-2 border border-dashed border-border/50 rounded-lg cursor-pointer hover:border-primary/50 transition-colors"
+                  >
+                    <Sparkles className="h-6 w-6 text-muted-foreground/40 mx-auto" />
+                    <p className="text-xs leading-relaxed">
+                      Click here to write your first bar, or pick a Quick Spark above.
+                    </p>
+                  </div>
+                )}
+
+                <div className="pt-2 flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newLines = [...scribbleLines, ""];
+                      handleTextChange(newLines.join("\n"));
+                      setEditingLineIdx(newLines.length - 1);
+                    }}
+                    className="text-xs text-primary hover:text-primary/80 font-mono flex items-center gap-1.5 px-2 py-1 rounded bg-primary/10 hover:bg-primary/20 border border-primary/30 transition-colors cursor-pointer"
+                  >
+                    + Add Next Bar (Enter)
+                  </button>
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    Click any word to explore rhymes
+                  </span>
                 </div>
               </div>
+            ) : (
+              /* Scratchpad / Bulk Paste Mode */
+              <Textarea
+                placeholder="Paste full lyrics or dump multi-line freestyle here..."
+                value={scribbleText}
+                onChange={(e) => handleTextChange(e.target.value)}
+                rows={Math.max(12, linesCount + 2)}
+                className="font-mono text-sm leading-relaxed resize-none bg-background/50 border border-border/40 focus-visible:ring-1 focus-visible:ring-primary/50 p-3 rounded-md w-full"
+              />
             )}
 
             <div className="flex items-center justify-between pt-2 border-t text-[11px] text-muted-foreground">
@@ -461,7 +621,7 @@ The live studio on the right will track your cadence and sound families in real-
                 <span>•</span>
                 <span>{linesCount} lines</span>
               </div>
-              <div className="text-[10px] text-muted-foreground">
+              <div className="text-[10px] text-muted-foreground font-mono">
                 Auto-saved locally
               </div>
             </div>
@@ -478,110 +638,86 @@ The live studio on the right will track your cadence and sound families in real-
           </Button>
         </div>
 
-        {/* Right Column: Live Rhyme & Cadence Stream Studio OR Sense-Making Output */}
-        <div className="lg:col-span-6 space-y-4">
+        {/* Right 5 Columns: Flow Diagnostic, Rhyme Inspector & Sense-Making Output */}
+        <div className="lg:col-span-5 space-y-4">
           {!result ? (
-            <Card className="p-4 bg-card/70 border-border/80 space-y-3 relative shadow-sm">
-              <div className="flex items-center justify-between pb-2 border-b border-border/50 flex-wrap gap-2">
-                <div className="flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-amber-400" />
-                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">
-                    Live Rhyme & Cadence Studio
-                  </span>
-                </div>
-                <span className="text-[10px] text-muted-foreground font-mono">
-                  Click any word to explore rhymes
-                </span>
-              </div>
-
-              {scribbleText.trim() ? (
-                <div className="space-y-1.5 font-mono text-sm leading-relaxed">
-                  {liveHighlighted.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="flex items-start justify-between gap-3 group hover:bg-card/60 px-2 py-1.5 rounded transition-colors"
-                    >
-                      <div className="flex items-baseline gap-2 flex-1 min-w-0 flex-wrap">
-                        {item.schemeLetter && (
-                          <span
-                            className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 shrink-0 self-center ${
-                              item.rhymeGroupClass || "text-muted-foreground bg-muted/20"
-                            }`}
-                          >
-                            {item.schemeLetter}
-                          </span>
-                        )}
-                        <span
-                          className="select-text cursor-pointer break-words leading-relaxed text-sm font-medium"
-                          onClick={(e) => {
-                            const target = (e.target as HTMLElement).closest(".word-hover") as HTMLElement | null;
-                            if (target) {
-                              const w = target.getAttribute("data-word") || target.textContent || "";
-                              if (w.trim()) {
-                                setRhymeLookupWord(w.trim());
-                                setRhymeLookupOpen(true);
-                              }
-                            }
-                          }}
-                          dangerouslySetInnerHTML={{ __html: item.html || "&nbsp;" }}
-                        />
-                      </div>
-                      {scribbleLines[idx]?.trim() && (
-                        <div className="flex items-center gap-1.5 shrink-0 font-mono pt-0.5">
-                          {scribbleStress[idx]?.chars.length > 0 && (
-                            <span className="hidden sm:flex items-center gap-0.5 text-[8px]" title={`Cadence: ${scribbleStress[idx]?.rawPattern}`}>
-                              {scribbleStress[idx]?.chars.slice(0, 10).map((c, ci) => (
-                                <span key={ci} className={c === "/" ? "text-primary font-bold" : "text-muted-foreground/60"}>
-                                  {c === "/" ? "●" : "○"}
-                                </span>
-                              ))}
-                            </span>
-                          )}
-                          <span className="text-[10px] text-muted-foreground/60">
-                            {item.syllables} syl
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="p-8 text-center text-muted-foreground space-y-3 border border-dashed border-border/50 rounded-lg bg-background/30">
-                  <Sparkles className="h-6 w-6 text-muted-foreground/40 mx-auto" />
-                  <p className="text-xs leading-relaxed max-w-xs mx-auto">
-                    Type on the left or click a Quick Spark to watch multi-syllable rhyme schemes, phoneme clusters, and rhythm cadence dots illuminate live.
-                  </p>
+            <div className="space-y-4">
+              {/* Flow Architecture Insight Card */}
+              {liveFlowInsight && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 text-xs text-amber-200/90 font-mono space-y-2 animate-in fade-in shadow-sm">
+                  <div className="flex items-center gap-1.5 font-semibold text-amber-400">
+                    <Sparkles className="h-4 w-4" />
+                    <span>{liveFlowInsight.title}</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed opacity-90">{liveFlowInsight.message}</p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {liveFlowInsight.suggestions.map((sug, si) => (
+                      <button
+                        key={si}
+                        type="button"
+                        onClick={() => {
+                          const lines = [...scribbleLines];
+                          lines[liveFlowInsight.lineIdx] = sug.replace(/\s*\([^)]*\)/, "");
+                          handleTextChange(lines.join("\n"));
+                        }}
+                        className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] transition-colors cursor-pointer"
+                      >
+                        {sug}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 
-              {/* 6-Channel DHH Color Legend */}
-              <div className="pt-3 border-t border-border/40 grid grid-cols-3 sm:grid-cols-6 gap-1.5 text-[9px] font-mono">
-                <div className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded bg-yellow-400/40 border border-yellow-400/70 shrink-0" />
-                  <span className="truncate text-muted-foreground">/aɪ/ Vowel</span>
+              {/* 6-Channel DHH Color Map Guide */}
+              <Card className="p-4 bg-card/70 border-border/80 space-y-3 shadow-sm">
+                <div className="flex items-center gap-2 pb-2 border-b border-border/50">
+                  <Target className="h-4 w-4 text-emerald-400" />
+                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">
+                    6-Channel Phonetic Legend
+                  </span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded bg-cyan-400/40 border border-cyan-400/70 shrink-0" />
-                  <span className="truncate text-muted-foreground">Consonance</span>
+                <div className="grid grid-cols-2 gap-2 text-[11px] font-mono">
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-yellow-400/10 border border-yellow-400/30">
+                    <span className="w-3 h-3 rounded bg-yellow-400/50 border border-yellow-400 shrink-0" />
+                    <span className="text-yellow-300 font-medium">/aɪ/ Diphthong</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-cyan-400/10 border border-cyan-400/30">
+                    <span className="w-3 h-3 rounded bg-cyan-400/50 border border-cyan-400 shrink-0" />
+                    <span className="text-cyan-300 font-medium">Consonance & Nasal</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-red-400/10 border border-red-400/30">
+                    <span className="w-3 h-3 rounded bg-red-400/50 border border-red-400 shrink-0" />
+                    <span className="text-red-300 font-medium">/eː/ Rhyme Verbs</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-green-400/10 border border-green-400/30">
+                    <span className="w-3 h-3 rounded bg-green-400/50 border border-green-400 shrink-0" />
+                    <span className="text-green-300 font-medium">/ɑː/ Rhythm Anchor</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-pink-400/10 border border-pink-400/30">
+                    <span className="w-3 h-3 rounded bg-pink-400/50 border border-pink-400 shrink-0" />
+                    <span className="text-pink-300 font-medium">/iː/ High-Front</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-orange-400/10 border border-orange-400/30">
+                    <span className="w-3 h-3 rounded bg-orange-400/50 border border-orange-400 shrink-0" />
+                    <span className="text-orange-300 font-medium">/oʊ/ Back Vowels</span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded bg-red-400/40 border border-red-400/70 shrink-0" />
-                  <span className="truncate text-muted-foreground">/eː/ Verbs</span>
+              </Card>
+
+              {/* Ready to Synthesize Prompt */}
+              <Card className="p-5 text-center text-muted-foreground space-y-3 border-dashed bg-card/30">
+                <div className="p-2.5 rounded-full bg-emerald-500/10 text-emerald-400 w-fit mx-auto">
+                  <Brain className="h-6 w-6" />
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded bg-green-400/40 border border-green-400/70 shrink-0" />
-                  <span className="truncate text-muted-foreground">/ɑː/ Anchor</span>
+                <div className="space-y-1">
+                  <h3 className="font-semibold text-foreground text-xs">Ready to Synthesize into a Song</h3>
+                  <p className="text-[11px] leading-relaxed text-muted-foreground">
+                    Click &ldquo;Make Sense of This&rdquo; when your scribble is ready to structure it into locked verses and hook.
+                  </p>
                 </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded bg-pink-400/40 border border-pink-400/70 shrink-0" />
-                  <span className="truncate text-muted-foreground">/iː/ High</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <span className="w-2.5 h-2.5 rounded bg-orange-400/40 border border-orange-400/70 shrink-0" />
-                  <span className="truncate text-muted-foreground">/oʊ/ Back</span>
-                </div>
-              </div>
-            </Card>
+              </Card>
+            </div>
           ) : (
             <div className="space-y-4 animate-in fade-in-50 duration-300">
               {/* Sense-Making Executive Card */}
