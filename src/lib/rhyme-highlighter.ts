@@ -193,6 +193,8 @@ export function wordToPhones(word: string): string[] {
     if (c === "i") {
       if (i + 2 < len && clean[i + 2] === "e" && (i + 3 === len || clean[i + 3] === "s")) {
         tokens.push("AY1");
+      } else if (rem.startsWith("ind") || rem.startsWith("ign") || rem.startsWith("ild")) {
+        tokens.push("AY1");
       } else {
         tokens.push("IH1");
       }
