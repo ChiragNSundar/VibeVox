@@ -353,7 +353,7 @@ function ScribblePage() {
             {scribbleViewMode === "live" ? (
               <div className="space-y-3">
                 {scribbleText.trim() ? (
-                  <div className="bg-background/80 p-3 rounded-md border border-border/60 space-y-1.5 font-mono text-sm leading-relaxed max-h-56 overflow-y-auto">
+                  <div className="bg-background/80 p-3 rounded-md border border-border/60 space-y-1.5 font-mono text-sm leading-relaxed max-h-72 overflow-y-auto">
                     <div className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground/80 mb-1 flex justify-between items-center">
                       <span>Live Rhyme & Cadence Stream</span>
                       <span className="text-[9px] opacity-70">Click word to explore rhymes</span>
@@ -361,12 +361,12 @@ function ScribblePage() {
                     {liveHighlighted.map((item, idx) => (
                       <div
                         key={idx}
-                        className="flex items-center justify-between gap-2.5 group hover:bg-card/40 px-1 py-0.5 rounded transition-colors"
+                        className="flex items-start justify-between gap-3 group hover:bg-card/40 px-2 py-1.5 rounded transition-colors"
                       >
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                        <div className="flex items-baseline gap-2 flex-1 min-w-0 flex-wrap">
                           {item.schemeLetter && (
                             <span
-                              className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 shrink-0 ${
+                              className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 shrink-0 self-center ${
                                 item.rhymeGroupClass || "text-muted-foreground bg-muted/20"
                               }`}
                             >
@@ -374,7 +374,7 @@ function ScribblePage() {
                             </span>
                           )}
                           <span
-                            className="truncate select-text cursor-pointer"
+                            className="select-text cursor-pointer break-words leading-relaxed text-sm font-medium"
                             onClick={(e) => {
                               const target = (e.target as HTMLElement).closest(".word-hover") as HTMLElement | null;
                               if (target) {
@@ -389,10 +389,10 @@ function ScribblePage() {
                           />
                         </div>
                         {scribbleLines[idx]?.trim() && (
-                          <div className="flex items-center gap-1.5 shrink-0 font-mono">
+                          <div className="flex items-center gap-1.5 shrink-0 font-mono pt-0.5">
                             {scribbleStress[idx]?.chars.length > 0 && (
                               <span className="hidden sm:flex items-center gap-0.5 text-[8px]" title={`Cadence: ${scribbleStress[idx]?.rawPattern}`}>
-                                {scribbleStress[idx]?.chars.slice(0, 8).map((c, ci) => (
+                                {scribbleStress[idx]?.chars.slice(0, 10).map((c, ci) => (
                                   <span key={ci} className={c === "/" ? "text-primary font-bold" : "text-muted-foreground/60"}>
                                     {c === "/" ? "●" : "○"}
                                   </span>

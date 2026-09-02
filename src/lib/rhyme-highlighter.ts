@@ -126,7 +126,18 @@ export function wordToPhones(word: string): string[] {
     // Multi-letter vowel graphemes
     if (rem.startsWith("igh")) { tokens.push("AY1"); i += 3; continue; }
     if (rem.startsWith("ight")) { tokens.push("AY1"); tokens.push("T"); i += 4; continue; }
-    if (rem.startsWith("ai") || rem.startsWith("ay")) { tokens.push("EY1"); i += 2; continue; }
+    // Diphthong "ai" in words like "bhai", "lai", "shai" vs English "rain"
+    if (rem.startsWith("ai")) {
+      // In short or Indic words (e.g. bhai, lai, kai, thai), "ai" is AY1 ("eye")
+      if (len <= 4 || i >= len - 2) {
+        tokens.push("AY1");
+      } else {
+        tokens.push("EY1");
+      }
+      i += 2;
+      continue;
+    }
+    if (rem.startsWith("ay")) { tokens.push("EY1"); i += 2; continue; }
     if (rem.startsWith("ee") || rem.startsWith("ea") || rem.startsWith("ie")) { tokens.push("IY1"); i += 2; continue; }
     if (rem.startsWith("oa") || rem.startsWith("oe")) { tokens.push("OW1"); i += 2; continue; }
     if (rem.startsWith("oo")) { tokens.push("UW1"); i += 2; continue; }
@@ -142,6 +153,9 @@ export function wordToPhones(word: string): string[] {
       // Magic e check (e.g. game, late)
       if (i + 2 < len && clean[i + 2] === "e" && (i + 3 === len || clean[i + 3] === "s")) {
         tokens.push("EY1");
+      } else if (i === len - 1 && len > 1) {
+        // Trailing unstressed 'a' in multisyllabic words (pasha, nasha, hogayela)
+        tokens.push("AH0");
       } else {
         tokens.push("AE1");
       }
@@ -149,10 +163,19 @@ export function wordToPhones(word: string): string[] {
       continue;
     }
     if (c === "e") {
-      if (i === len - 1 && len > 2 && clean[i - 1] !== "l") {
-        // silent e at the end
-        i++;
-        continue;
+      if (i === len - 1 && len > 2) {
+        // In Indic words (e.g. bolte, kholte, sapne, apne, rahe, gale), trailing 'e' is vocalic (EY1/EH1)
+        // Only silent in standard English words with single consonant before e (e.g. late, bite)
+        const isIndicEnding = /[bcdfghjklmnpqrstvwxyz]{2,}$|[ltndkrsmpb]e$/.test(clean) && !/(?:ate|ite|ote|ake|ike|oke|ame|ime|ome|ave|ive|ove|ade|ide|ode)$/.test(clean);
+        if (isIndicEnding) {
+          tokens.push("EY1");
+          i++;
+          continue;
+        } else if (clean[i - 1] !== "l") {
+          // silent e at the end for English words
+          i++;
+          continue;
+        }
       }
       tokens.push("EH1");
       i++;
@@ -171,7 +194,7 @@ export function wordToPhones(word: string): string[] {
       if (i + 2 < len && clean[i + 2] === "e" && (i + 3 === len || clean[i + 3] === "s")) {
         tokens.push("OW1");
       } else {
-        tokens.push("AA1");
+        tokens.push("OW1");
       }
       i++;
       continue;
@@ -201,25 +224,55 @@ export function wordToPhones(word: string): string[] {
 }
 
 /**
- * Returns the rhyming part of phonemes (from the last stressed vowel to end).
+ * Returns the rhyming part of phonemes (from the primary stressed vowel to end).
  * E.g. ["S", "K", "AA1", "R", "Z"] -> "AA1 R Z"
+ * E.g. ["P", "AE1", "SH", "AH0"] -> "AE1 SH AH0" (asha)
+ * E.g. ["N", "AE1", "SH", "AH0"] -> "AE1 SH AH0" (asha)
  */
 export function getRhymingPart(phones: string[]): string {
   if (!phones.length) return "";
-  // Find last stressed vowel or last vowel
-  let lastVowelIdx = -1;
+
+  // 1. Search for last stressed vowel (stress 1 or 2)
+  let lastStressedIdx = -1;
   for (let i = phones.length - 1; i >= 0; i--) {
-    const base = phones[i].replace(/\d/, "");
-    if (ARPABET_VOWELS.has(base)) {
-      lastVowelIdx = i;
-      break;
+    const p = phones[i];
+    if (/[12]$/.test(p)) {
+      const base = p.replace(/\d/, "");
+      if (ARPABET_VOWELS.has(base)) {
+        lastStressedIdx = i;
+        break;
+      }
     }
   }
 
-  if (lastVowelIdx === -1) {
-    return phones.slice(-2).join(" ");
+  if (lastStressedIdx !== -1) {
+    return phones.slice(lastStressedIdx).join(" ");
   }
-  return phones.slice(lastVowelIdx).join(" ");
+
+  // 2. If no stress digits, check if word has multiple vowels and ends in unstressed vowel
+  const vowelIndices: number[] = [];
+  for (let i = 0; i < phones.length; i++) {
+    const base = phones[i].replace(/\d/, "");
+    if (ARPABET_VOWELS.has(base)) {
+      vowelIndices.push(i);
+    }
+  }
+
+  if (vowelIndices.length >= 2) {
+    const lastVowel = vowelIndices[vowelIndices.length - 1];
+    if (lastVowel >= phones.length - 2) {
+      // Feminine rhyme: start at penultimate vowel
+      const penVowel = vowelIndices[vowelIndices.length - 2];
+      return phones.slice(penVowel).join(" ");
+    }
+  }
+
+  // 3. Fallback: last vowel to end
+  if (vowelIndices.length > 0) {
+    return phones.slice(vowelIndices[vowelIndices.length - 1]).join(" ");
+  }
+
+  return phones.slice(-2).join(" ");
 }
 
 /**
@@ -537,11 +590,13 @@ export function highlightLyrics(
   const wordClasses: Set<string>[] = Array.from({ length: n }, () => new Set<string>());
   const wordSoundLabels: string[] = Array(n).fill("");
 
-  // 2. Perfect end-rhymes (grouped across 2+ lines, strictly on end candidates)
+  // 2. Rhyme Groups (cross-line and internal rhymes)
   const soundGroups = new Map<string, number[]>();
   for (let i = 0; i < n; i++) {
-    if (!allTokens[i].isEndCandidate) continue;
-    const rp = allTokens[i].rhymePart;
+    const tok = allTokens[i];
+    if (COMMON_STOP_WORDS.has(tok.clean)) continue;
+    if (tok.clean.length < 2) continue;
+    const rp = tok.rhymePart;
     if (rp) {
       const grp = soundGroups.get(rp) || [];
       grp.push(i);
@@ -549,29 +604,39 @@ export function highlightLyrics(
     }
   }
 
-  // Filter groups: must span across at least 2 distinct lines
-  const perfectGroups = new Map<string, number[]>();
+  // Active groups: must appear 2+ times in lyrics
+  const activeGroups = new Map<string, number[]>();
   for (const [rp, indices] of soundGroups.entries()) {
     if (indices.length >= 2) {
-      const linesInvolved = new Set(indices.map((idx) => allTokens[idx].lineIdx));
-      if (linesInvolved.size >= 2) {
-        perfectGroups.set(rp, indices);
-      }
+      activeGroups.set(rp, indices);
     }
   }
 
-  // Assign 12 color groups (ordered by frequency)
+  // Prioritize groups that appear as end rhymes, then by frequency
+  const endRhymeParts = new Set<string>();
+  for (let i = 0; i < n; i++) {
+    if (allTokens[i].isEndCandidate && allTokens[i].rhymePart) {
+      endRhymeParts.add(allTokens[i].rhymePart);
+    }
+  }
+
+  const sortedRps = Array.from(activeGroups.entries()).sort((a, b) => {
+    const aIsEnd = endRhymeParts.has(a[0]);
+    const bIsEnd = endRhymeParts.has(b[0]);
+    if (aIsEnd && !bIsEnd) return -1;
+    if (!aIsEnd && bIsEnd) return 1;
+    return b[1].length - a[1].length;
+  });
+
   const groupColors = new Map<string, string>();
   let cIdx = 0;
-  const sortedRps = Array.from(perfectGroups.entries()).sort((a, b) => b[1].length - a[1].length);
-
   for (const [rp] of sortedRps) {
     const css = RHYME_GROUP_CLASSES[cIdx % RHYME_GROUP_CLASSES.length];
     groupColors.set(rp, css);
     cIdx++;
   }
 
-  for (const [rp, indices] of perfectGroups.entries()) {
+  for (const [rp, indices] of activeGroups.entries()) {
     const css = groupColors.get(rp)!;
     for (const idx of indices) {
       wordClasses[idx].add(css);
@@ -581,11 +646,11 @@ export function highlightLyrics(
   }
 
   // 3. Multi-syllable rhyme detection (adds subtle glow)
-  for (const [, indices] of perfectGroups.entries()) {
+  for (const [, indices] of activeGroups.entries()) {
     if (indices.length < 2) continue;
     const ref = allTokens[indices[0]].phones;
     for (let k = 1; k < indices.length; k++) {
-      if (isMultiSyllableRhyme(ref, allTokens[indices[k]].phones)) {
+      if (isMultiSyllableRhyme(ref, allTokens[indices[k]].phones) || allTokens[indices[0]].clean.length >= 4) {
         for (const idx of indices) {
           wordClasses[idx].add("multi-syl-rhyme");
         }
@@ -721,9 +786,10 @@ export function highlightLyrics(
     }
 
     // Determine scheme letter for this line if available
-    const offsetFromEnd = lines.length - 1 - l;
-    const stanzaIdx = 3 - (offsetFromEnd % 4);
-    const schemeLetter = stanzaScheme.lineLetters[stanzaIdx];
+    const targetLinesCount = Math.min(4, lines.length);
+    const lineFromEnd = lines.length - 1 - l;
+    const stanzaIdx = targetLinesCount - 1 - lineFromEnd;
+    const schemeLetter = stanzaIdx >= 0 && stanzaIdx < stanzaScheme.lineLetters.length ? stanzaScheme.lineLetters[stanzaIdx] : undefined;
 
     results.push({
       html: htmlParts.join(" "),

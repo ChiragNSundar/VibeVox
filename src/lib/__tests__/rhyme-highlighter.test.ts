@@ -69,4 +69,32 @@ describe("Rhyme Highlighter Engine", () => {
     expect(standard[1].html).toContain("rhyme-word");
     expect(standard[0].html).toContain("data-sound");
   });
+
+  it("highlights cross-line and multisyllabic rhymes in Romanized Hindi/street lyrics", () => {
+    const lines = [
+      "kya bolte pasha bhai hogayela nasha",
+      "ma bolte nasha lai margayela pasha",
+    ];
+
+    const res = highlightLyrics(lines, "standard");
+    expect(res.length).toBe(2);
+
+    // Both lines should have 'A' scheme letter
+    expect(res[0].schemeLetter).toBe("A");
+    expect(res[1].schemeLetter).toBe("A");
+
+    // Both lines should highlight pasha and nasha
+    expect(res[0].html).toContain("pasha");
+    expect(res[0].html).toContain("nasha");
+    expect(res[1].html).toContain("pasha");
+    expect(res[1].html).toContain("nasha");
+
+    // Check that rhyme-word classes are applied to rhyming pairs
+    expect(res[0].html).toContain("rhyme-word");
+    expect(res[1].html).toContain("rhyme-word");
+
+    // Check that hogayela and margayela share rhyme highlights
+    expect(res[0].html).toContain("hogay");
+    expect(res[1].html).toContain("margay");
+  });
 });
