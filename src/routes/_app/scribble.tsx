@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect, useTransition, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -42,6 +42,13 @@ const QUICK_SPARKS = [
   { label: "Vulnerable & Real", text: "tired of putting on the armor every morning\nfake smiles in crowded rooms\nscared to lose what i barely just found\nsometimes the truth hurts worse than the lie" },
   { label: "Battle Ready", text: "never fold never flinch when the pressure rise\nsharpen the pen like a blade in the dark\nwatching them switch up soon as the money talk\nkept my head high in the middle of the storm" },
 ];
+
+const SCRIBBLE_MODES = [
+  { id: "full-song", label: "Full Song", icon: Music },
+  { id: "verse-16", label: "16-Bar Verse", icon: Layers },
+  { id: "hook-anthem", label: "Hook & Anthem", icon: Flame },
+  { id: "rhyme-slang", label: "Rhyme & Slang", icon: Zap },
+] as const;
 
 export const Route = createFileRoute("/_app/scribble")({
   head: () => ({
