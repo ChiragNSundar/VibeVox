@@ -176,70 +176,74 @@ function ScribblePage() {
     navigate({ to: "/new" });
   }
 
-  // Live metrics from raw text
   const linesCount = scribbleText.split("\n").filter((l) => l.trim().length > 0).length;
   const wordsCount = scribbleText.trim() ? scribbleText.trim().split(/\s+/).length : 0;
 
+  const scribbleLines = useMemo(() => scribbleText.split("\n"), [scribbleText]);
+  const liveHighlighted = useMemo(
+    () => highlightLyrics(scribbleLines, rhymeVision),
+    [scribbleLines, rhymeVision]
+  );
+  const liveScheme = useMemo(
+    () => getStanzaRhymeScheme(scribbleLines.filter((l) => l.trim())),
+    [scribbleLines]
+  );
+
+  const resultFlatLines = useMemo(
+    () => (result ? result.sections.flatMap((s) => s.lines) : []),
+    [result]
+  );
+  const resultHighlighted = useMemo(
+    () => highlightLyrics(resultFlatLines, rhymeVision),
+    [resultFlatLines, rhymeVision]
+  );
+
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
-      {/* Header Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-5">
         <div>
           <div className="flex items-center gap-2 mb-1.5">
             <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
               <PenLine className="h-6 w-6" />
             </div>
-            <h1 className="text-2xl font-bold font-display tracking-tight">Scribble Studio</h1>
-            <Badge variant="outline" className="text-xs bg-emerald-500/5 text-emerald-400 border-emerald-500/30">
+            <h1 className="text-2xl font-bold font-display tracking-tight text-foreground">Scribble Studio</h1>
+            <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
               Stream-of-Consciousness
             </Badge>
           </div>
-          <p className="text-xs sm:text-sm text-muted-foreground max-w-2xl">
+          <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
             Scribble raw thoughts, fragmented bars, and voice memos. The engine extracts the core narrative,
             isolates punchlines, locks into cadence, and syncs directly into your local Brain backend.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap shrink-0">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-card/60 backdrop-blur-sm">
-            <Zap className={`h-3.5 w-3.5 ${zeroAiMode ? "text-emerald-400" : "text-muted-foreground"}`} />
-            <span className="text-xs font-medium">Zero-AI RAG</span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs">
+            <Zap className="h-3.5 w-3.5 text-amber-400" />
+            <span className="text-muted-foreground font-medium">Zero-AI RAG</span>
             <Switch
               checked={zeroAiMode}
-              onCheckedChange={(val) => {
-                setZeroAiMode(val);
-                toast.info(val ? "Zero-AI RAG mode active (pure cadence segmentation & brain memory)" : "Standard mode active (uses LLM if connected)");
-              }}
+              onCheckedChange={setZeroAiMode}
+              aria-label="Toggle Zero-AI RAG mode"
             />
           </div>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border bg-card/60 backdrop-blur-sm">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs">
             <Brain className="h-3.5 w-3.5 text-amber-400" />
-            <span className="text-xs font-medium">Auto-Sync to Brain</span>
-            <Switch checked={autoSync} onCheckedChange={handleAutoSyncToggle} />
+            <span className="text-muted-foreground font-medium">Auto-Sync to Brain</span>
+            <Switch
+              checked={autoSync}
+              onCheckedChange={handleAutoSyncToggle}
+              aria-label="Toggle Auto-sync to Brain"
+            />
           </div>
-
-          {scribbleText && (
-            <Button size="sm" variant="ghost" onClick={handleClear} className="text-xs text-muted-foreground hover:text-destructive">
-              <RotateCcw className="h-3.5 w-3.5 mr-1" />
-              Clear
-            </Button>
-          )}
         </div>
       </div>
 
-      {/* Main Split Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Left Column: The Scribble Pad Canvas */}
         <div className="lg:col-span-6 space-y-4">
-          {/* Mode Selector Segmented Control */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 rounded-xl bg-card/60 border border-border/70">
-            {[
-              { id: "full-song", label: "Full Song", icon: Music },
-              { id: "verse-16", label: "16-Bar Verse", icon: Layers },
-              { id: "hook-anthem", label: "Hook & Anthem", icon: Flame },
-              { id: "rhyme-slang", label: "Rhyme & Slang", icon: Zap },
-            ].map((item) => {
+          <div className="grid grid-cols-4 gap-1.5 p-1 bg-card/60 border border-border/70 rounded-xl">
+            {SCRIBBLE_MODES.map((item) => {
               const Icon = item.icon;
               const active = mode === item.id;
               return (
@@ -260,7 +264,6 @@ function ScribblePage() {
             })}
           </div>
 
-          {/* Quick Sparks Carousel */}
           <div className="space-y-1.5">
             <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
               <span className="flex items-center gap-1">
@@ -281,22 +284,113 @@ function ScribblePage() {
             </div>
           </div>
 
-          {/* Raw Textarea Canvas */}
-          <Card className="p-3.5 bg-card/70 border-border/80 space-y-2 relative shadow-sm">
-            <Textarea
-              placeholder="Dump whatever is in your head...
+          <Card className="p-3.5 bg-card/70 border-border/80 space-y-3 relative shadow-sm">
+            <div className="flex items-center justify-between pb-2 border-b border-border/50 flex-wrap gap-2">
+              <div className="flex items-center gap-1 bg-background/60 p-0.5 rounded-lg border border-border/60">
+                <button
+                  type="button"
+                  onClick={() => setScribbleViewMode("live")}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono transition-all ${
+                    scribbleViewMode === "live"
+                      ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <Sparkles className="h-3 w-3 text-amber-400" />
+                  Live Rhymes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScribbleViewMode("raw")}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-mono transition-all ${
+                    scribbleViewMode === "raw"
+                      ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <PenLine className="h-3 w-3" />
+                  Raw Text
+                </button>
+              </div>
+
+              {liveScheme.name && (
+                <span className="inline-flex items-center text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary">
+                  🎵 {liveScheme.name}
+                </span>
+              )}
+            </div>
+
+            {scribbleViewMode === "live" ? (
+              <div className="space-y-3">
+                {scribbleText.trim() ? (
+                  <div className="bg-background/80 p-3 rounded-md border border-border/60 space-y-1.5 font-mono text-sm leading-relaxed max-h-56 overflow-y-auto">
+                    <div className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground/80 mb-1 flex justify-between items-center">
+                      <span>Live Rhyme & Cadence Stream</span>
+                      <span className="text-[9px] opacity-70">Click word to explore rhymes</span>
+                    </div>
+                    {liveHighlighted.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between gap-2.5 group hover:bg-card/40 px-1 py-0.5 rounded transition-colors"
+                      >
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          {item.schemeLetter && (
+                            <span
+                              className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 shrink-0 ${
+                                item.rhymeGroupClass || "text-muted-foreground bg-muted/20"
+                              }`}
+                            >
+                              {item.schemeLetter}
+                            </span>
+                          )}
+                          <span
+                            className="truncate select-text cursor-pointer"
+                            onClick={(e) => {
+                              const target = (e.target as HTMLElement).closest(".word-hover") as HTMLElement | null;
+                              if (target) {
+                                const w = target.getAttribute("data-word") || target.textContent || "";
+                                if (w.trim()) {
+                                  setRhymeLookupWord(w.trim());
+                                  setRhymeLookupOpen(true);
+                                }
+                              }
+                            }}
+                            dangerouslySetInnerHTML={{ __html: item.html || "&nbsp;" }}
+                          />
+                        </div>
+                        {scribbleLines[idx]?.trim() && (
+                          <span className="text-[10px] text-muted-foreground/60 shrink-0 font-mono">
+                            {item.syllables} syl
+                          </span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : null}
+
+                <Textarea
+                  placeholder="Type your bars here to see rhymes and syllables highlight live..."
+                  value={scribbleText}
+                  onChange={(e) => handleTextChange(e.target.value)}
+                  rows={scribbleText.trim() ? 8 : 14}
+                  className="font-mono text-sm leading-relaxed resize-y bg-background/50 border border-border/40 focus-visible:ring-1 focus-visible:ring-primary/50 p-2.5 rounded-md"
+                />
+              </div>
+            ) : (
+              <Textarea
+                placeholder="Dump whatever is in your head...
 - 4 bars you mumbled in the car
 - fragmented punchlines
 - emotional thoughts about your day
 - rhyme schemes you want to connect
 The engine will sort the pieces, pull out the gems, and structure it into clean bars."
-              value={scribbleText}
-              onChange={(e) => handleTextChange(e.target.value)}
-              rows={15}
-              className="font-mono text-sm leading-relaxed resize-y bg-background/50 border-0 focus-visible:ring-0 p-1"
-            />
+                value={scribbleText}
+                onChange={(e) => handleTextChange(e.target.value)}
+                rows={15}
+                className="font-mono text-sm leading-relaxed resize-y bg-background/50 border-0 focus-visible:ring-0 p-1"
+              />
+            )}
 
-            {/* Canvas Footer Ribbon */}
             <div className="flex items-center justify-between pt-2 border-t text-[11px] text-muted-foreground">
               <div className="flex items-center gap-3 font-mono">
                 <span>{wordsCount} words</span>
@@ -309,7 +403,6 @@ The engine will sort the pieces, pull out the gems, and structure it into clean 
             </div>
           </Card>
 
-          {/* Primary Action Button */}
           <Button
             size="lg"
             className="w-full text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20"
