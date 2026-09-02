@@ -128,9 +128,5 @@ describe("Rhyme Highlighter Engine", () => {
     // Compound rhyme: 'do or die' highlights in unison with 'homicide'
     expect(res[0].html).toContain("rhyme-word");
     expect(res[1].html).toContain("rhyme-word");
-
-    console.log("\n--- LINE 1: ---\n", res[0].html);
-    console.log("\n--- LINE 2: ---\n", res[1].html);
-    console.log("\n--- LINE 3: ---\n", res[2].html);
   });
 });
