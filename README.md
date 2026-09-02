@@ -9,19 +9,21 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License MIT" />
 </p>
 
-An open-source, local-first studio workspace for vocalists, songwriters, and producers. **Vocal Muse** turns mumble freestyles into Drake/Kendrick/Seedhe Maut/Brodha V-tier polished lyrics, maps audio cadences in real-time, and builds a personalized style memory—all running **100% offline** on your local machine with zero cloud lock-in.
+An open-source, local-first studio workspace for vocalists, songwriters, and producers. **VibeVox** turns mumble freestyles and scribbles into Drake/Kendrick/Seedhe Maut/Brodha V-tier polished lyrics, maps audio cadences in real-time, and builds a personalized style memory—all running **100% offline** on your local machine with zero cloud lock-in.
 
 ---
 
 ## 💡 Inspiration: VoxSketch AI
 
-**Vocal Muse** is heavily inspired by **[VoxSketch AI](https://voxsketch.com/)**, pioneering the concept of turning raw vocal mumble recordings and spontaneous freestyles into structured, cadence-matched song lyrics.
+**VibeVox** is heavily inspired by **[VoxSketch AI](https://voxsketch.com/)**, pioneering the concept of turning raw vocal mumble recordings and spontaneous freestyles into structured, cadence-matched song lyrics.
 
-While cloud-based tools rely on remote APIs and subscription credits, **Vocal Muse** brings this workflow to the open-source community as a **100% local-first application**. Your audio recordings, vocal takes, and style memory never leave your device.
+While cloud-based tools rely on remote APIs and subscription credits, **VibeVox** brings this workflow to the open-source community as a **100% local-first application**. Your audio recordings, vocal takes, and style memory never leave your device.
 
 ---
 
 ## ✨ Features & Multilingual Intelligence
+
+- ✨ **VibeLyrics Studio & Side-by-Side Notepad**: Distraction-free typable notepad coupled side-by-side with live 6-channel DHH phonetic vision, Matra prosody counting, triplet pocket rolls, micro-caesura breath markers, and compound rhyme bounding boxes.
 
 - 🎙️ **Live Punch-In Studio**: Real-time voice capture with latency-compensated bar slicing, Web Audio oscilloscope waveform, and metronome pulse ring.
 - 🧠 **Ghostwriter & Zero-LLM RAG Engine**: Multi-pass cadence matching, anti-cliché burned-phrase filter, and Reciprocal Rank Fusion ($RRF$) hybrid vector recall. Works seamlessly with local LLMs (**LM Studio**, **Ollama**) or **100% Zero-LLM Offline RAG Mode** (POS-grammar cadence assembly via style memory + Indic phonetic rimes) when no LLM is connected.
