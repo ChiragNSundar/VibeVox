@@ -213,7 +213,7 @@
 .mosaic-compound-pill {
   display: inline-flex;
   align-items: baseline;
-  gap: 2px;
+  gap: 3px;
   padding: 1px 5px;
   border-radius: 5px;
   border: 1px solid rgba(250, 204, 21, 0.65);
@@ -221,6 +221,20 @@
   box-shadow: 0 0 8px rgba(250, 204, 21, 0.25);
   font-weight: 700;
   letter-spacing: -0.01em;
+  user-select: text;
+}
+
+.mosaic-compound-pill .word-hover {
+  cursor: pointer;
+  border-radius: 2px;
+  padding: 0 1.5px;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mosaic-compound-pill .word-hover:hover {
+  background: rgba(255, 255, 255, 0.25);
+  text-decoration: underline;
+  text-decoration-thickness: 1.5px;
 }
 
 /* Anaphora Parallel Framing Left Bracket */

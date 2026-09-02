@@ -546,15 +546,29 @@ export function getStanzaRhymeScheme(lines: string[]): StanzaSchemeResult {
     // 4-line stanza window
     const stanzaStart = Math.floor(l / 4) * 4;
 
-    for (let prev = stanzaStart; prev < l; prev++) {
-      const prevEnd = allEndings[prev];
-      if (!prevEnd) continue;
-      const vPrev = getStressedVowel(prevEnd);
-
-      if (vEnd && vPrev && isCompatibleRhymeVowel(vEnd, vPrev)) {
-        if (end === prevEnd || phonemeDistance(end, prevEnd) <= 1.0) {
+    // Check if matched by multisyllabic chain
+    const multiChains = analyzeMultisyllabicChains(lines);
+    const chainInfo = multiChains.get(l);
+    if (chainInfo) {
+      for (const prev of chainInfo.matchedLineIndices) {
+        if (prev < l && scheme[prev] && scheme[prev] !== "X") {
           foundChar = scheme[prev];
           break;
+        }
+      }
+    }
+
+    if (!foundChar) {
+      for (let prev = stanzaStart; prev < l; prev++) {
+        const prevEnd = allEndings[prev];
+        if (!prevEnd) continue;
+        const vPrev = getStressedVowel(prevEnd);
+
+        if (vEnd && vPrev && isCompatibleRhymeVowel(vEnd, vPrev)) {
+          if (end === prevEnd || phonemeDistance(end, prevEnd) <= 1.0) {
+            foundChar = scheme[prev];
+            break;
+          }
         }
       }
     }
@@ -1024,6 +1038,22 @@ export function highlightLyrics(
     }
   }
 
+  // Dynamically analyze multisyllabic n-gram syllable chains and self-learned patterns
+  const multiChains = analyzeMultisyllabicChains(lines);
+  for (const [lineIdx, chainInfo] of multiChains.entries()) {
+    if (chainInfo.compoundPhrase && !lineMosaicBlocks.has(lineIdx)) {
+      const wordsInLine = lineWordMap[lineIdx];
+      const count = chainInfo.compoundPhrase.split(/\s+/).length;
+      if (wordsInLine && wordsInLine.length >= count) {
+        lineMosaicBlocks.set(lineIdx, {
+          startWordIdx: wordsInLine.length - count,
+          endWordIdx: wordsInLine.length - 1,
+          phrase: chainInfo.compoundPhrase,
+        });
+      }
+    }
+  }
+
   // 4. Stanza rhyme scheme calculation (all lines)
   const stanzaScheme = getStanzaRhymeScheme(lines);
 
@@ -1060,10 +1090,29 @@ export function highlightLyrics(
 
     for (let w = 0; w < wordIndices.length; w++) {
       if (mosaicBlock && w === mosaicBlock.startWordIdx) {
-        // Render unified enclosing mosaic block with compound bounding box
-        const lastWordInBlock = allTokens[wordIndices[mosaicBlock.endWordIdx]]?.clean || "";
+        // Render unified enclosing mosaic block with compound bounding box & individually selectable words
+        const lastIdx = wordIndices[mosaicBlock.endWordIdx];
+        const lastWordInBlock = allTokens[lastIdx]?.clean || "";
+        const soundAttr = wordSoundLabels[lastIdx] ? ` data-sound="${wordSoundLabels[lastIdx]}"` : "";
+        const innerWordsHtml: string[] = [];
+
+        for (let mw = mosaicBlock.startWordIdx; mw <= mosaicBlock.endWordIdx; mw++) {
+          const mIdx = wordIndices[mw];
+          const mTok = allTokens[mIdx];
+          const mFirst = mTok.clean[0]?.toLowerCase();
+          const isAllit = mFirst && (onsetCounts.get(mFirst) || 0) >= 2;
+          const wordText = isAllit && mTok.original.length > 0
+            ? `<span class="allit-char" title="Alliteration (${mFirst}-)">${mTok.original[0]}</span>${mTok.original.slice(1)}`
+            : mTok.original;
+          const wSound = wordSoundLabels[mIdx] ? ` data-sound="${wordSoundLabels[mIdx]}"` : "";
+          innerWordsHtml.push(
+            `<span class="word-hover cursor-pointer" data-word="${mTok.clean}"${wSound}>${wordText}</span>`
+          );
+        }
+
+        const innerPhrase = innerWordsHtml.join(" ");
         htmlParts.push(
-          `<span class="mosaic-pill mosaic-compound-pill rhyme-group-1 rhyme-word" data-word="${lastWordInBlock}" data-compound="${mosaicBlock.phrase}"><span class="mosaic-bracket">[</span>${mosaicBlock.phrase}<span class="mosaic-bracket">]</span><sup class="mosaic-badge">¹</sup></span>`
+          `<span class="mosaic-pill mosaic-compound-pill rhyme-group-1 rhyme-word select-text" data-word="${lastWordInBlock}" data-compound="${mosaicBlock.phrase}"${soundAttr}><span class="mosaic-bracket">[</span>${innerPhrase}<span class="mosaic-bracket">]</span><sup class="mosaic-badge">¹</sup></span>`
         );
         w = mosaicBlock.endWordIdx; // skip words consumed by mosaic block
         lineGroupClass = "rhyme-group-1";
