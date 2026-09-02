@@ -181,6 +181,25 @@
   border-radius: 4px;
 }
 
+.mosaic-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  padding: 0.5px 4px;
+  border-radius: 4px;
+  border: 1px solid rgba(242, 166, 90, 0.5);
+  background: rgba(242, 166, 90, 0.16);
+  box-shadow: 0 0 10px rgba(242, 166, 90, 0.3);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.mosaic-bracket {
+  color: #f2a65a;
+  font-weight: 900;
+  opacity: 0.9;
+}
+
 .mosaic-badge {
   font-size: 9px;
   line-height: 1;

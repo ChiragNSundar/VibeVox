@@ -32,16 +32,25 @@ export function syllablesInWord(word: string): number {
   // remove final "es" / "ed" when preceded by consonant (silent in English)
   if (/[^aeiouy](?:es|ed)$/.test(s) && !isIndicActiveE) s = s.slice(0, -2);
 
-  // Split hiatus pairs common in Indic Romanization (e.g. ao in mitaoon, ia in duniya, ua in hua)
+  // Split hiatus pairs common in Indic Romanization while keeping English & Indic diphthongs intact
   const expanded = s.replace(/([aeiouy])([aeiouy])/g, (m, v1, v2) => {
     if (
       (v1 === "a" && v2 === "a") ||
       (v1 === "e" && v2 === "e") ||
       (v1 === "o" && v2 === "o") ||
       (v1 === "a" && v2 === "i") ||
-      (v1 === "a" && v2 === "u")
+      (v1 === "a" && v2 === "u") ||
+      (v1 === "a" && v2 === "y") ||
+      (v1 === "e" && v2 === "y") ||
+      (v1 === "o" && v2 === "y") ||
+      (v1 === "u" && v2 === "y") || // guys, buys, fuys, luys
+      (v1 === "e" && v2 === "a") ||
+      (v1 === "e" && v2 === "i") ||
+      (v1 === "i" && v2 === "e") ||
+      (v1 === "o" && v2 === "a") ||
+      (v1 === "o" && v2 === "u")
     ) {
-      return m; // keep aa, ee, oo, ai, au together as single vowel nucleus
+      return m; // keep as single vowel nucleus
     }
     return `${v1} ${v2}`;
   });
