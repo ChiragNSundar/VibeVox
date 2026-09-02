@@ -58,7 +58,8 @@ export function TrackToolbar({
   };
 
   return (
-    <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
+    <div className="space-y-1.5 mb-4">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
       <div className="flex items-center gap-2 flex-wrap">
         <h2 className="font-display font-semibold">Lyrics</h2>
         {stanzaSchemeName && (
@@ -182,6 +183,7 @@ export function TrackToolbar({
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      <SemanticDriftBar drift={semanticDrift} />
     </div>
   );
 }
