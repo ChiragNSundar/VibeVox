@@ -547,6 +547,32 @@ because i got quite cries"
 
                       const matra = showMatra ? calculateMatra(line) : null;
                       const isAnaphora = item.anaphora;
+                      const isSectionHeader = /^\[.+\]$/.test(line.trim());
+
+                      // Count bar number: track non-empty, non-header lines since last header
+                      let barNum = 0;
+                      if (!isSectionHeader && line.trim()) {
+                        let count = 0;
+                        for (let bi = idx; bi >= 0; bi--) {
+                          const bl = scribbleLines[bi]?.trim() || "";
+                          if (/^\[.+\]$/.test(bl)) break;
+                          if (bl) count++;
+                        }
+                        barNum = count;
+                      }
+
+                      if (isSectionHeader) {
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-center gap-2 px-2 py-2 mt-1"
+                          >
+                            <span className="text-[10px] font-mono font-bold px-2 py-1 rounded-md bg-sky-500/15 text-sky-400 border border-sky-500/30 tracking-wide uppercase">
+                              {line.trim().replace(/^\[|\]$/g, "")}
+                            </span>
+                          </div>
+                        );
+                      }
 
                       return (
                         <div
@@ -556,6 +582,14 @@ because i got quite cries"
                           }`}
                         >
                           <div className="flex items-baseline gap-2 flex-1 min-w-0 flex-wrap">
+                            {barNum > 0 && (
+                              <span
+                                className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0 self-center tabular-nums"
+                                title={`Bar ${barNum}`}
+                              >
+                                {String(barNum).padStart(2, "0")}
+                              </span>
+                            )}
                             {item.schemeLetter && (
                               <span
                                 className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 shrink-0 self-center ${
