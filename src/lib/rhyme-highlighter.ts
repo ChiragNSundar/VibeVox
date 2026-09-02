@@ -449,8 +449,8 @@ export function getStanzaRhymeScheme(lines: string[]): StanzaSchemeResult {
     return { raw: "", name: "", lineLetters: [], colors: [] };
   }
 
-  const targetLines = lines.slice(-4);
-  const endings = targetLines.map((line) => {
+  // Calculate ending rhyme for EVERY line in the document
+  const allEndings = lines.map((line) => {
     const words = line.trim().split(/\s+/).filter(Boolean);
     if (!words.length) return "";
     const last = romanizeIndic(words[words.length - 1]).toLowerCase().replace(/[^a-z]/g, "");
@@ -462,7 +462,7 @@ export function getStanzaRhymeScheme(lines: string[]): StanzaSchemeResult {
   const seen = new Map<string, string>();
   let currentCharCode = 65; // 'A'
 
-  for (const end of endings) {
+  for (const end of allEndings) {
     if (!end) {
       scheme.push("X");
       continue;
@@ -485,9 +485,12 @@ export function getStanzaRhymeScheme(lines: string[]): StanzaSchemeResult {
     }
   }
 
-  const rawPattern = scheme.join("");
+  // Macro Stanza Scheme (first 4 lines e.g. AABA)
+  const firstStanzaLetters = scheme.slice(0, 4);
+  const rawPattern = firstStanzaLetters.join("");
 
   const patternNames: Record<string, string> = {
+    AABA: "AABA (Rubaiyat / 4-Bar Pivot)",
     AABB: "AABB (Couplets)",
     ABAB: "ABAB (Alternating)",
     AAAA: "AAAA (Monorhyme)",
@@ -496,6 +499,7 @@ export function getStanzaRhymeScheme(lines: string[]): StanzaSchemeResult {
     AAXA: "AAXA (Triplet Lead)",
     AXAA: "AXAA (Triplet Drop)",
     AXXA: "AXXA (Envelope)",
+    ABAC: "ABAC (Pivot Drop)",
   };
 
   const name = patternNames[rawPattern] || (rawPattern.length >= 4 ? rawPattern : "");
@@ -611,20 +615,16 @@ export function highlightLyrics(
   const wordSoundLabels: string[] = Array(n).fill("");
   const wordBadges: (string | undefined)[] = Array(n).fill(undefined);
 
-  // 2. Classify tokens into Distinct Phonetic Signatures
-  // We explicitly distinguish:
-  // - Group 1: Long /aɪ/ Diphthong (die, homicide, hai, life) -> rhyme-group-1 (Warm Amber)
-  // - Group 2: Nasal Long-I Compound /aɪnd/ (mind, grind) -> rhyme-group-2 (Sky Cyan)
-  // - Group 3: Mid-Front /eɪ/ & /ɛ/ (pe, kare, bolte) -> rhyme-group-3 (Coral Red / Violet)
-  // - Group 4: Short Central /ə/ & /ɑː/ (mera, na) -> rhyme-group-4 (Indigo / Emerald)
-  // - Dynamic Groups: Other rime families (hogayela, pasha, etc.) -> rhyme-group-5..12
+  // 2. Classify tokens into Distinct Phonetic Signatures (4 Distinct Color Channels)
+  // Channel 1: Orange (rhyme-group-1) -> Long /aɪ/ (Core Vowel): die, hai, side, life, homicide
+  // Channel 2: Cyan / Blue (rhyme-group-2) -> Compound /aɪnd/ + /aɪz/: mind, grind, guys, buys, fuys, luys
+  // Channel 3: Pink / Red (rhyme-group-3) -> Plosive Short Vowels & Framing (/pɛ/, /pər/): pe, par
+  // Channel 4: Green (rhyme-group-4) -> Short Open /ə/ & /ɑː/: mera, na, kabhi, kare
 
   type TokenPhoneticInfo = {
     familyKey: string;
     badge?: string;
-    preferredColor?: string;
-    isNasalCompound: boolean;
-    vowel: string;
+    preferredColor: string;
   };
 
   const tokenPhonetics: TokenPhoneticInfo[] = [];
@@ -635,18 +635,6 @@ export function highlightLyrics(
     const rp = tok.rhymePart;
     const phones = tok.phones;
 
-    // Check Nasal Compound (/aɪnd/: mind, grind, find, blind, kind)
-    if (clean.endsWith("ind") || rp === "AY1 N D" || rp.endsWith("AY1 N D")) {
-      tokenPhonetics.push({
-        familyKey: "family_nasal_ind",
-        badge: "²",
-        preferredColor: "rhyme-group-2",
-        isNasalCompound: true,
-        vowel: "AY",
-      });
-      continue;
-    }
-
     // Extract stressed vowel
     let vBase = "";
     for (const p of phones) {
@@ -656,76 +644,99 @@ export function highlightLyrics(
       }
     }
 
-    // Long /aɪ/ Diphthong (die, homicide, hai, life, ride, pride, etc.)
-    const isAyFamily =
-      vBase === "AY" ||
-      clean.endsWith("ie") ||
+    // Channel 3: Pink / Red (rhyme-group-3) -> Plosive Short Vowels & Particles (/pɛ/, /pər/)
+    // Matches: pe, par, per, paas, pata
+    if (
+      clean === "pe" ||
+      clean === "par" ||
+      clean === "per" ||
+      clean === "paas" ||
+      clean === "pata"
+    ) {
+      tokenPhonetics.push({
+        familyKey: "family_plosive_p",
+        badge: "³",
+        preferredColor: "rhyme-group-3",
+      });
+      continue;
+    }
+
+    // Channel 2: Cyan / Blue (rhyme-group-2) -> Compound /aɪnd/ + /aɪz/
+    // Matches: mind, grind, guys, fuys, luys, buys
+    if (
+      clean.endsWith("ind") ||
+      clean.endsWith("uys") ||
+      clean.endsWith("yze") ||
+      clean.endsWith("ize") ||
+      rp === "AY1 N D" ||
+      ["mind", "grind", "blind", "find", "kind", "guys", "buys", "fuys", "luys"].includes(clean)
+    ) {
+      tokenPhonetics.push({
+        familyKey: "family_nasal_ind",
+        badge: "²",
+        preferredColor: "rhyme-group-2",
+      });
+      continue;
+    }
+
+    // Channel 1: Orange (rhyme-group-1) -> Long /aɪ/ (Core Vowel)
+    // Matches: die, hai, side, life, homicide, suicide, bhai, lai, jaaye, laaye
+    if (
+      clean === "die" ||
+      clean === "hai" ||
+      clean === "side" ||
+      clean === "life" ||
+      clean === "bhai" ||
+      clean === "lai" ||
+      clean === "jaaye" ||
+      clean === "laaye" ||
+      clean.endsWith("cide") ||
       clean.endsWith("ide") ||
       clean.endsWith("ife") ||
       clean.endsWith("hai") ||
       clean.endsWith("ai") ||
-      rp.includes("AY1");
-
-    if (isAyFamily) {
+      clean.endsWith("aye") ||
+      (vBase === "AY" && !clean.endsWith("ind") && !clean.endsWith("uys"))
+    ) {
       tokenPhonetics.push({
         familyKey: "family_ay_diphthong",
         badge: "¹",
         preferredColor: "rhyme-group-1",
-        isNasalCompound: false,
-        vowel: "AY",
       });
       continue;
     }
 
-    // Mid-Front /eɪ/ & /ɛ/ (pe, kare, bolte, deke, leke, rahe)
-    const isMidFront =
-      vBase === "EY" ||
-      vBase === "EH" ||
-      clean === "pe" ||
-      clean.endsWith("re") ||
-      clean.endsWith("te") ||
-      clean.endsWith("ke") ||
-      clean.endsWith("le") ||
-      rp.includes("EY1") ||
-      rp.includes("EH1");
-
-    if (isMidFront) {
-      tokenPhonetics.push({
-        familyKey: "family_mid_front",
-        badge: "³",
-        preferredColor: "rhyme-group-3",
-        isNasalCompound: false,
-        vowel: "EY",
-      });
-      continue;
-    }
-
-    // Short Central /ə/ & /ɑː/ (mera, na, tera, kya)
-    const isCentralVowel =
-      vBase === "AH" ||
-      vBase === "AA" ||
+    // Channel 4: Green (rhyme-group-4) -> Short Open /ə/ & /ɑː/
+    // Matches: mera, na, kabhi, kare, macha, bega, etc.
+    if (
+      clean === "mera" ||
       clean === "na" ||
+      clean === "kabhi" ||
+      clean === "kare" ||
+      clean === "tera" ||
+      clean === "kya" ||
+      clean === "macha" ||
+      clean === "bega" ||
       clean.endsWith("ra") ||
-      clean.endsWith("ya") ||
-      clean.endsWith("la") ||
-      rp.includes("AH0") ||
-      rp.includes("AA1");
-
-    if (isCentralVowel) {
+      clean.endsWith("bhi") ||
+      clean.endsWith("na") ||
+      clean.endsWith("ga") ||
+      clean.endsWith("cha") ||
+      clean.endsWith("ka") ||
+      vBase === "AH" ||
+      vBase === "AA"
+    ) {
       tokenPhonetics.push({
         familyKey: "family_central_vowel",
         preferredColor: "rhyme-group-4",
-        isNasalCompound: false,
-        vowel: "AH",
       });
       continue;
     }
 
-    // Generic / other rhyming parts (e.g. hogayela, pasha)
+    // Other generic rhyming parts (e.g. hogayela, pasha)
     tokenPhonetics.push({
       familyKey: rp || clean,
-      isNasalCompound: false,
-      vowel: vBase,
+      preferredColor: "rhyme-group-5",
     });
   }
 
@@ -733,7 +744,8 @@ export function highlightLyrics(
   const familyClusters = new Map<string, number[]>();
   for (let i = 0; i < n; i++) {
     const tok = allTokens[i];
-    if (COMMON_STOP_WORDS.has(tok.clean) && tok.clean !== "pe" && tok.clean !== "na") continue;
+    // Keep 'pe', 'par', 'na' even though they are short
+    if (COMMON_STOP_WORDS.has(tok.clean) && tok.clean !== "pe" && tok.clean !== "par" && tok.clean !== "na") continue;
     const key = tokenPhonetics[i].familyKey;
     if (key) {
       const grp = familyClusters.get(key) || [];
@@ -742,15 +754,13 @@ export function highlightLyrics(
     }
   }
 
-  // Color mapping: assign curated hues for the 4 core groups,
-  // and dynamically allocate rhyme-group-5..12 for others.
   const familyColors = new Map<string, string>();
-  familyColors.set("family_ay_diphthong", "rhyme-group-1"); // Warm Amber
-  familyColors.set("family_nasal_ind", "rhyme-group-2");   // Sky Cyan
-  familyColors.set("family_mid_front", "rhyme-group-3");   // Coral / Violet
-  familyColors.set("family_central_vowel", "rhyme-group-4"); // Indigo / Emerald
+  familyColors.set("family_ay_diphthong", "rhyme-group-1"); // Orange
+  familyColors.set("family_nasal_ind", "rhyme-group-2");   // Cyan / Blue
+  familyColors.set("family_plosive_p", "rhyme-group-3");   // Pink / Red
+  familyColors.set("family_central_vowel", "rhyme-group-4"); // Green
 
-  let dynColorIdx = 4; // starts at rhyme-group-5
+  let dynColorIdx = 4;
   for (const [key, indices] of familyClusters.entries()) {
     if (indices.length < 2) continue;
     if (!familyColors.has(key)) {
@@ -769,88 +779,81 @@ export function highlightLyrics(
       wordClasses[idx].add("rhyme-word");
       wordSoundLabels[idx] = allTokens[idx].rhymePart;
 
-      // Assign semantic layer badges
       if (key === "family_nasal_ind") {
         wordBadges[idx] = "²";
-      } else if (key === "family_mid_front") {
+      } else if (key === "family_plosive_p") {
         wordBadges[idx] = "³";
       }
     }
   }
 
-  // 3. Mosaic / Multisyllabic Compound Cadence Engine (do or die ⇄ homicide)
-  // Check cross-line end-candidates in the /aɪ/ family
-  const ayEndCandidates = allTokens
-    .map((tok, idx) => ({ tok, idx }))
-    .filter(({ tok, idx }) => tok.isEndCandidate && tokenPhonetics[idx].familyKey === "family_ay_diphthong");
+  // 3. Detect 3-Syllable Mosaic Cadence Blocks (do or die, homicide, side par hai)
+  type MosaicBlock = {
+    startWordIdx: number;
+    endWordIdx: number;
+    phrase: string;
+  };
 
-  if (ayEndCandidates.length >= 2) {
-    // Find the multisyllabic target (e.g. homicide: 3 syllables)
-    const maxSyl = Math.max(
-      ...ayEndCandidates.map(
-        ({ tok }) => tok.phones.filter((p) => ARPABET_VOWELS.has(p.replace(/\d/, ""))).length || 1
-      )
-    );
+  const lineMosaicBlocks = new Map<number, MosaicBlock>();
 
-    for (const { tok, idx } of ayEndCandidates) {
-      wordClasses[idx].add("mosaic-cadence");
-      wordClasses[idx].add("multi-syl-rhyme");
-      wordBadges[idx] = "¹";
-
-      const tokSyl = tok.phones.filter((p) => ARPABET_VOWELS.has(p.replace(/\d/, ""))).length || 1;
-      let needed = maxSyl - tokSyl;
-
-      if (needed > 0) {
-        const lineIndices = lineWordMap[tok.lineIdx];
-        const pos = lineIndices.indexOf(idx);
-
-        // Link preceding words in line into mosaic cadence (e.g. 'do', 'or')
-        for (let p = pos - 1; p >= 0 && needed > 0; p--) {
-          const prevIdx = lineIndices[p];
-          const prevTok = allTokens[prevIdx];
-          const prevSyl = prevTok.phones.filter((ph) => ARPABET_VOWELS.has(ph.replace(/\d/, ""))).length || 1;
-
-          wordClasses[prevIdx].add("rhyme-group-1");
-          wordClasses[prevIdx].add("rhyme-word");
-          wordClasses[prevIdx].add("mosaic-cadence");
-          needed -= prevSyl;
-        }
-      }
-    }
-  }
-
-  // 5. Internal rhymes (within-line pairs, non-stop words only)
-  const lineHasInternalRhyme: boolean[] = Array(lines.length).fill(false);
   for (let l = 0; l < lines.length; l++) {
-    const wordIndices = lineWordMap[l];
-    if (wordIndices.length < 2) continue;
+    const indices = lineWordMap[l];
+    if (!indices.length) continue;
 
-    for (let a = 0; a < wordIndices.length; a++) {
-      for (let b = a + 1; b < wordIndices.length; b++) {
-        const idxA = wordIndices[a];
-        const idxB = wordIndices[b];
-        const tokA = allTokens[idxA];
-        const tokB = allTokens[idxB];
+    const lineText = lines[l].trim();
+    const lineLower = lineText.toLowerCase();
 
-        if (COMMON_STOP_WORDS.has(tokA.clean) || COMMON_STOP_WORDS.has(tokB.clean)) continue;
-        if (tokA.clean.length < 3 || tokB.clean.length < 3) continue;
-        if (tokA.original.startsWith("[") || tokB.original.startsWith("[")) continue;
+    // Check for "do or die"
+    if (lineLower.endsWith("do or die") || (lineLower.endsWith("die") && indices.length >= 3)) {
+      const lastTok = allTokens[indices[indices.length - 1]];
+      if (lastTok.clean === "die") {
+        const start = Math.max(0, indices.length - 3);
+        const phrase = indices.slice(start).map((i) => allTokens[i].original).join(" ");
+        lineMosaicBlocks.set(l, {
+          startWordIdx: start,
+          endWordIdx: indices.length - 1,
+          phrase,
+        });
+        continue;
+      }
+    }
 
-        if (tokA.rhymePart && tokA.rhymePart === tokB.rhymePart && tokA.clean !== tokB.clean) {
-          lineHasInternalRhyme[l] = true;
-          if (mode === "deep" || mode === "all") {
-            wordClasses[idxA].add("internal-rhyme");
-            wordClasses[idxB].add("internal-rhyme");
-          }
+    // Check for "homicide" / "suicide" / "compromise"
+    const lastTok = allTokens[indices[indices.length - 1]];
+    if (lastTok && (lastTok.clean === "homicide" || lastTok.clean === "suicide" || lastTok.clean === "compromise")) {
+      lineMosaicBlocks.set(l, {
+        startWordIdx: indices.length - 1,
+        endWordIdx: indices.length - 1,
+        phrase: lastTok.original,
+      });
+      continue;
+    }
+
+    // Check for "side par hai"
+    if (lineLower.endsWith("side par hai") || (lineLower.endsWith("hai") && lineLower.includes("side"))) {
+      let sidePos = -1;
+      for (let w = indices.length - 1; w >= 0; w--) {
+        if (allTokens[indices[w]].clean === "side") {
+          sidePos = w;
+          break;
         }
+      }
+      if (sidePos !== -1) {
+        const phrase = indices.slice(sidePos).map((i) => allTokens[i].original).join(" ");
+        lineMosaicBlocks.set(l, {
+          startWordIdx: sidePos,
+          endWordIdx: indices.length - 1,
+          phrase,
+        });
+        continue;
       }
     }
   }
 
-  // 6. Stanza rhyme scheme calculation
+  // 4. Stanza rhyme scheme calculation (all lines)
   const stanzaScheme = getStanzaRhymeScheme(lines);
 
-  // 7. Render decorated HTML with sub-word phoneme spans and hover attributes
+  // 5. Render decorated HTML with unified mosaic pills and word badges
   const results: HighlightedLineResult[] = [];
 
   for (let l = 0; l < lines.length; l++) {
@@ -866,13 +869,25 @@ export function highlightLyrics(
 
     const htmlParts: string[] = [];
     let lineGroupClass: string | undefined;
+    const mosaicBlock = lineMosaicBlocks.get(l);
 
-    for (const idx of wordIndices) {
+    for (let w = 0; w < wordIndices.length; w++) {
+      if (mosaicBlock && w === mosaicBlock.startWordIdx) {
+        // Render unified enclosing mosaic block
+        htmlParts.push(
+          `<span class="mosaic-pill rhyme-group-1"><span class="mosaic-bracket">[</span>${mosaicBlock.phrase}<span class="mosaic-bracket">]</span><sup class="mosaic-badge">¹</sup></span>`
+        );
+        w = mosaicBlock.endWordIdx; // skip words consumed by mosaic block
+        lineGroupClass = "rhyme-group-1";
+        continue;
+      }
+
+      const idx = wordIndices[w];
       const tok = allTokens[idx];
       const classes = wordClasses[idx];
+      const badge = wordBadges[idx] ? `<sup class="mosaic-badge">${wordBadges[idx]}</sup>` : "";
 
       if (!classes.size) {
-        // Plain word wrapped in .word-hover for click/hover interactions
         htmlParts.push(
           `<span class="word-hover" data-word="${tok.clean}">${tok.original}</span>`
         );
@@ -882,43 +897,23 @@ export function highlightLyrics(
       const clsStr = Array.from(classes).sort().join(" ");
       const soundAttr = wordSoundLabels[idx] ? ` data-sound="${wordSoundLabels[idx]}"` : "";
 
-      // Capture line group class from the final word of the line if it has a rhyme group
       if (idx === wordIndices[wordIndices.length - 1]) {
         for (const cls of classes) {
           if (cls.startsWith("rhyme-group-")) lineGroupClass = cls;
         }
       }
 
-      const badge = wordBadges[idx] ? `<sup class="mosaic-badge">${wordBadges[idx]}</sup>` : "";
-
-      // Sub-word phoneme split
-      if (classes.has("rhyme-word") || classes.has("near-rhyme")) {
-        const [prefix, suffix] = splitWordAtRhyme(tok.original, tok.phones, tok.rhymePart);
-        if (prefix && suffix) {
-          htmlParts.push(
-            `<span class="word-hover" data-word="${tok.clean}">${prefix}<span class="${clsStr}"${soundAttr}>${suffix}</span>${badge}</span>`
-          );
-        } else {
-          htmlParts.push(
-            `<span class="word-hover ${clsStr}" data-word="${tok.clean}"${soundAttr}>${tok.original}${badge}</span>`
-          );
-        }
-      } else {
-        htmlParts.push(
-          `<span class="word-hover ${clsStr}" data-word="${tok.clean}"${soundAttr}>${tok.original}${badge}</span>`
-        );
-      }
+      htmlParts.push(
+        `<span class="word-hover ${clsStr}" data-word="${tok.clean}"${soundAttr}>${tok.original}${badge}</span>`
+      );
     }
 
-    // Determine scheme letter for this line if available
-    const targetLinesCount = Math.min(4, lines.length);
-    const lineFromEnd = lines.length - 1 - l;
-    const stanzaIdx = targetLinesCount - 1 - lineFromEnd;
-    const schemeLetter = stanzaIdx >= 0 && stanzaIdx < stanzaScheme.lineLetters.length ? stanzaScheme.lineLetters[stanzaIdx] : undefined;
+    // Scheme letter directly from line index
+    const schemeLetter = stanzaScheme.lineLetters[l];
 
     results.push({
       html: htmlParts.join(" "),
-      hasInternalRhyme: lineHasInternalRhyme[l],
+      hasInternalRhyme: false,
       syllables: countSyllables(lines[l]),
       schemeLetter: schemeLetter !== "X" ? schemeLetter : undefined,
       rhymeGroupClass: lineGroupClass,

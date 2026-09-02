@@ -29,7 +29,7 @@ import {
   type ScribbleMode,
   type ScribbleResult,
 } from "@/lib/scribble-synthesizer";
-import { highlightLyrics, getStanzaRhymeScheme, type RhymeVisionMode } from "@/lib/rhyme-highlighter";
+import { highlightLyrics, getStanzaRhymeScheme, detectFlowInsight, type RhymeVisionMode } from "@/lib/rhyme-highlighter";
 import { RhymeLookup } from "@/components/RhymeLookup";
 import { ComplexityGauge } from "@/components/track/ComplexityGauge";
 import { SemanticDriftBar } from "@/components/track/SemanticDriftBar";
