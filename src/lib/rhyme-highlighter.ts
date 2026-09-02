@@ -608,39 +608,75 @@ export function highlightLyrics(
   const wordClasses: Set<string>[] = Array.from({ length: n }, () => new Set<string>());
   const wordSoundLabels: string[] = Array(n).fill("");
 
-  // 2. Rhyme Groups (cross-line and internal rhymes)
-  const soundGroups = new Map<string, number[]>();
+  // 2. Rhyme Groups (Exact + Slant / Assonance Clusters)
+  const rawSoundGroups = new Map<string, number[]>();
   for (let i = 0; i < n; i++) {
     const tok = allTokens[i];
     if (COMMON_STOP_WORDS.has(tok.clean)) continue;
     if (tok.clean.length < 2) continue;
     const rp = tok.rhymePart;
     if (rp) {
-      const grp = soundGroups.get(rp) || [];
+      const grp = rawSoundGroups.get(rp) || [];
       grp.push(i);
-      soundGroups.set(rp, grp);
+      rawSoundGroups.set(rp, grp);
     }
   }
 
-  // Active groups: must appear 2+ times in lyrics
+  // Disjoint set union for phonemeDistance <= 1.0 (clusters slant & assonance rhymes across lines)
+  const rpList = Array.from(rawSoundGroups.keys());
+  const parent = new Map<string, string>();
+  const find = (x: string): string => {
+    const p = parent.get(x);
+    if (!p || p === x) return x;
+    const root = find(p);
+    parent.set(x, root);
+    return root;
+  };
+  const union = (a: string, b: string) => {
+    const rootA = find(a);
+    const rootB = find(b);
+    if (rootA !== rootB) parent.set(rootB, rootA);
+  };
+
+  for (let i = 0; i < rpList.length; i++) {
+    for (let j = i + 1; j < rpList.length; j++) {
+      const rpA = rpList[i];
+      const rpB = rpList[j];
+      if (phonemeDistance(rpA, rpB) <= 1.0) {
+        union(rpA, rpB);
+      }
+    }
+  }
+
+  // Form merged sound clusters
+  const mergedClusters = new Map<string, number[]>();
+  for (const [rp, indices] of rawSoundGroups.entries()) {
+    const root = find(rp);
+    const existing = mergedClusters.get(root) || [];
+    existing.push(...indices);
+    mergedClusters.set(root, existing);
+  }
+
+  // Active groups: clusters that appear 2+ times
   const activeGroups = new Map<string, number[]>();
-  for (const [rp, indices] of soundGroups.entries()) {
-    if (indices.length >= 2) {
-      activeGroups.set(rp, indices);
+  for (const [root, indices] of mergedClusters.entries()) {
+    const uniqueIndices = Array.from(new Set(indices));
+    if (uniqueIndices.length >= 2) {
+      activeGroups.set(root, uniqueIndices);
     }
   }
 
-  // Prioritize groups that appear as end rhymes, then by frequency
-  const endRhymeParts = new Set<string>();
+  // Prioritize clusters that appear as end rhymes, then by frequency
+  const endRhymeRoots = new Set<string>();
   for (let i = 0; i < n; i++) {
     if (allTokens[i].isEndCandidate && allTokens[i].rhymePart) {
-      endRhymeParts.add(allTokens[i].rhymePart);
+      endRhymeRoots.add(find(allTokens[i].rhymePart));
     }
   }
 
-  const sortedRps = Array.from(activeGroups.entries()).sort((a, b) => {
-    const aIsEnd = endRhymeParts.has(a[0]);
-    const bIsEnd = endRhymeParts.has(b[0]);
+  const sortedClusters = Array.from(activeGroups.entries()).sort((a, b) => {
+    const aIsEnd = endRhymeRoots.has(a[0]);
+    const bIsEnd = endRhymeRoots.has(b[0]);
     if (aIsEnd && !bIsEnd) return -1;
     if (!aIsEnd && bIsEnd) return 1;
     return b[1].length - a[1].length;
@@ -648,66 +684,60 @@ export function highlightLyrics(
 
   const groupColors = new Map<string, string>();
   let cIdx = 0;
-  for (const [rp] of sortedRps) {
+  for (const [root] of sortedClusters) {
     const css = RHYME_GROUP_CLASSES[cIdx % RHYME_GROUP_CLASSES.length];
-    groupColors.set(rp, css);
+    groupColors.set(root, css);
     cIdx++;
   }
 
-  for (const [rp, indices] of activeGroups.entries()) {
-    const css = groupColors.get(rp)!;
+  for (const [root, indices] of activeGroups.entries()) {
+    const css = groupColors.get(root)!;
     for (const idx of indices) {
       wordClasses[idx].add(css);
       wordClasses[idx].add("rhyme-word");
-      wordSoundLabels[idx] = rp;
+      wordSoundLabels[idx] = allTokens[idx].rhymePart;
     }
   }
 
-  // 3. Multi-syllable rhyme detection (adds subtle glow)
-  for (const [, indices] of activeGroups.entries()) {
+  // 3. Multi-Syllable & Complex Compound Rhyme Detection (Doppelreim)
+  for (const [root, indices] of activeGroups.entries()) {
     if (indices.length < 2) continue;
-    const ref = allTokens[indices[0]].phones;
-    for (let k = 1; k < indices.length; k++) {
-      if (isMultiSyllableRhyme(ref, allTokens[indices[k]].phones) || allTokens[indices[0]].clean.length >= 4) {
-        for (const idx of indices) {
-          wordClasses[idx].add("multi-syl-rhyme");
-        }
-        break;
-      }
-    }
-  }
+    const css = groupColors.get(root) || "rhyme-group-1";
 
-  // 4. Near / Slant rhymes (for "deep" and "all" modes, strictly on end candidates)
-  if (mode === "deep" || mode === "all") {
-    const rpKeys = Array.from(soundGroups.keys());
-    let nearColorIdx = 0;
-    const alreadyPaired = new Set<string>();
+    // Determine max syllable count in this group
+    const maxSyl = Math.max(
+      ...indices.map(
+        (i) => allTokens[i].phones.filter((p) => ARPABET_VOWELS.has(p.replace(/\d/, ""))).length || 1
+      )
+    );
 
-    for (let i = 0; i < rpKeys.length; i++) {
-      for (let j = i + 1; j < rpKeys.length; j++) {
-        const rp1 = rpKeys[i];
-        const rp2 = rpKeys[j];
-        const pairKey = rp1 < rp2 ? `${rp1}::${rp2}` : `${rp2}::${rp1}`;
-        if (alreadyPaired.has(pairKey)) continue;
+    const hasMultiSyl = maxSyl >= 2 || indices.some((i) => allTokens[i].clean.length >= 4);
 
-        if (perfectGroups.has(rp1) && perfectGroups.has(rp2)) continue;
+    if (hasMultiSyl) {
+      for (const idx of indices) {
+        wordClasses[idx].add("multi-syl-rhyme");
 
-        const dist = phonemeDistance(rp1, rp2);
-        if (dist <= 1.0) {
-          alreadyPaired.add(pairKey);
-          const combined = [...(soundGroups.get(rp1) || []), ...(soundGroups.get(rp2) || [])];
-          const linesInvolved = new Set(combined.map((idx) => allTokens[idx].lineIdx));
+        // Complex Rhyme / Doppelreim expansion:
+        // If an end-candidate word has fewer syllables than the multisyllable partner
+        // (e.g. 'die' = 1 syl vs 'homicide' = 3 syl), traverse backward in the line
+        // to link preceding words ('do', 'or') into the compound rhyme!
+        const tok = allTokens[idx];
+        if (tok.isEndCandidate && maxSyl > 1) {
+          const tokSyl = tok.phones.filter((p) => ARPABET_VOWELS.has(p.replace(/\d/, ""))).length || 1;
+          let needed = maxSyl - tokSyl;
 
-          if (linesInvolved.size >= 2 && combined.length >= 2) {
-            const nearCss = NEAR_GROUP_CLASSES[nearColorIdx % NEAR_GROUP_CLASSES.length];
-            nearColorIdx++;
-            for (const idx of combined) {
-              if (!wordClasses[idx].has("rhyme-word")) {
-                wordClasses[idx].add("near-rhyme");
-                wordClasses[idx].add(nearCss);
-                wordSoundLabels[idx] = `${rp1}/${rp2}`;
-              }
-            }
+          const lineIndices = lineWordMap[tok.lineIdx];
+          const pos = lineIndices.indexOf(idx);
+
+          for (let p = pos - 1; p >= 0 && needed > 0; p--) {
+            const prevIdx = lineIndices[p];
+            const prevTok = allTokens[prevIdx];
+            const prevSyl = prevTok.phones.filter((ph) => ARPABET_VOWELS.has(ph.replace(/\d/, ""))).length || 1;
+
+            wordClasses[prevIdx].add(css);
+            wordClasses[prevIdx].add("rhyme-word");
+            wordClasses[prevIdx].add("multi-syl-rhyme");
+            needed -= prevSyl;
           }
         }
       }
