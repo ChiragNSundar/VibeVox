@@ -19,6 +19,7 @@ import {
 import {
   Loader2, Wand2, Lock, LockOpen, Check, X, History,
   ChevronLeft, ChevronRight, Plus, CheckSquare, Square,
+  Pencil, Link2,
 } from "lucide-react";
 import { BarDiff } from "@/components/BarDiff";
 import type { CadenceMap } from "@/lib/lyrics-analysis";
@@ -41,6 +42,10 @@ export type BarRowProps = {
   selected?: boolean;
   focused?: boolean;
   repeatWarn?: boolean;
+  highlightedHtml?: string;
+  schemeLetter?: string;
+  rhymeGroupClass?: string;
+  hasInternalRhyme?: boolean;
   onToggleSelect?: () => void;
   onFocus?: () => void;
   onRewrite: (opts: RewriteOpts) => void;
@@ -50,26 +55,83 @@ export type BarRowProps = {
   onRevert: () => void;
   onToggleLock: () => void;
   onRestore: (v: BarVersion) => void;
+  onWordClick?: (word: string) => void;
+  onUpdateLine?: (newLine: string) => void;
 };
 
 export function BarRow({
   line, bar, got, gotEnd, ok, locked, proposal, history, rewriting,
   selectMode = false, selected: barSelected = false, focused = false, repeatWarn = false,
+  highlightedHtml, schemeLetter, rhymeGroupClass, hasInternalRhyme = false,
   onToggleSelect, onFocus,
   onRewrite, onMoreAlternates, onSelectAlternate, onAccept, onRevert, onToggleLock, onRestore,
+  onWordClick, onUpdateLine,
 }: BarRowProps) {
   const [open, setOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editText, setEditText] = useState(line);
   const [keepEndSound, setKeepEndSound] = useState(true);
   const [swapMetaphor, setSwapMetaphor] = useState(false);
   const [raiseDensity, setRaiseDensity] = useState(false);
   const [count, setCount] = useState(3);
   const [custom, setCustom] = useState("");
   const rowRef = useRef<HTMLDivElement | null>(null);
+  const hoveredWordRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    setEditText(line);
+  }, [line]);
+
   useEffect(() => {
     if (focused && rowRef.current) {
       rowRef.current.scrollIntoView({ block: "nearest", behavior: "smooth" });
     }
   }, [focused]);
+
+  const saveEdit = () => {
+    setIsEditing(false);
+    if (editText.trim() !== line && onUpdateLine) {
+      onUpdateLine(editText.trim());
+    }
+  };
+
+  const cancelEdit = () => {
+    setIsEditing(false);
+    setEditText(line);
+  };
+
+  const handleTextMouseMove = (e: React.MouseEvent) => {
+    const target = (e.target as HTMLElement).closest(".word-hover") as HTMLElement | null;
+    const word = target?.getAttribute("data-word") || null;
+    if (word === hoveredWordRef.current) return;
+
+    if (hoveredWordRef.current) {
+      document.querySelectorAll(".word-hover.hovered").forEach((el) => el.classList.remove("hovered"));
+    }
+
+    hoveredWordRef.current = word;
+    if (word) {
+      document.querySelectorAll(`.word-hover[data-word="${word}"]`).forEach((el) => el.classList.add("hovered"));
+    }
+  };
+
+  const handleTextMouseLeave = () => {
+    if (hoveredWordRef.current) {
+      document.querySelectorAll(".word-hover.hovered").forEach((el) => el.classList.remove("hovered"));
+      hoveredWordRef.current = null;
+    }
+  };
+
+  const handleTextClick = (e: React.MouseEvent) => {
+    const target = (e.target as HTMLElement).closest(".word-hover") as HTMLElement | null;
+    if (target) {
+      const word = target.getAttribute("data-word") || target.textContent || "";
+      if (word.trim()) {
+        e.stopPropagation();
+        onWordClick?.(word.trim());
+      }
+    }
+  };
 
   const opts: RewriteOpts = { keepEndSound, swapMetaphor, raiseDensity, custom, count };
   const total = proposal?.proposals.length ?? 0;
@@ -82,37 +144,91 @@ export function BarRow({
       className={`group rounded ${focused ? "outline outline-2 outline-primary/60 outline-offset-2" : ""}`}
       onClick={onFocus}
     >
-      <div className="flex items-start gap-1">
+      <div className="flex items-start gap-1.5">
         {selectMode && (
           <button
             type="button"
             onClick={(e) => { e.stopPropagation(); if (canSelect) onToggleSelect?.(); }}
             disabled={!canSelect}
             title={locked ? "Locked — unlock to include" : barSelected ? "Deselect" : "Select"}
-            className="mt-1 mr-1 text-muted-foreground hover:text-primary disabled:opacity-30 shrink-0"
+            className="mt-1 mr-0.5 text-muted-foreground hover:text-primary disabled:opacity-30 shrink-0"
           >
             {barSelected
               ? <CheckSquare className="h-4 w-4 text-primary" />
               : <Square className="h-4 w-4" />}
           </button>
         )}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className={`flex-1 px-1 -mx-1 rounded ${!ok ? "bg-amber-500/10" : ""} ${repeatWarn ? "border-b border-dashed border-amber-500/50" : ""} ${locked ? "border-l-2 border-primary/60 pl-2" : ""} ${barSelected ? "ring-1 ring-primary/40" : ""}`}>
-              {line || <span className="text-muted-foreground italic">(silence)</span>}
-            </div>
-          </TooltipTrigger>
-          {bar && (
-            <TooltipContent side="right" className="text-xs">
-              <div>Target: <b>{bar.syllables}</b> syll · end <b>"{bar.endSound}"</b></div>
-              <div>Got: <b>{got}</b> syll · end <b>"{gotEnd}"</b></div>
-              <div className="text-muted-foreground mt-1">Mumble: "{bar.text}"</div>
-              {repeatWarn && <div className="text-amber-400 mt-1">⚠ part of a repetition streak</div>}
-            </TooltipContent>
-          )}
-        </Tooltip>
 
-        <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex shrink-0">
+        {schemeLetter && (
+          <span
+            className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 shrink-0 self-center cursor-default ${rhymeGroupClass ? rhymeGroupClass : "text-muted-foreground bg-muted/20"}`}
+            title={`Rhyme Family: ${schemeLetter} (sound: ${gotEnd || "end"})`}
+          >
+            {schemeLetter}
+          </span>
+        )}
+
+        {isEditing ? (
+          <div className="flex-1 flex items-center gap-1.5 py-0.5" onClick={(e) => e.stopPropagation()}>
+            <input
+              type="text"
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") saveEdit();
+                if (e.key === "Escape") cancelEdit();
+              }}
+              autoFocus
+              className="flex-1 bg-background px-2 py-0.5 text-sm font-display rounded border border-primary/60 outline-none focus:ring-1 focus:ring-primary"
+            />
+            <button onClick={saveEdit} title="Save" className="p-1 text-emerald-400 hover:text-emerald-300">
+              <Check className="h-3.5 w-3.5" />
+            </button>
+            <button onClick={cancelEdit} title="Cancel" className="p-1 text-muted-foreground hover:text-foreground">
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+        ) : (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div
+                onDoubleClick={() => setIsEditing(true)}
+                onMouseMove={handleTextMouseMove}
+                onMouseLeave={handleTextMouseLeave}
+                onClick={handleTextClick}
+                className={`flex-1 px-1 -mx-1 rounded select-text ${!ok ? "bg-amber-500/10" : ""} ${repeatWarn ? "border-b border-dashed border-amber-500/50" : ""} ${locked ? "border-l-2 border-primary/60 pl-2" : ""} ${barSelected ? "ring-1 ring-primary/40" : ""}`}
+              >
+                {highlightedHtml ? (
+                  <span dangerouslySetInnerHTML={{ __html: highlightedHtml }} />
+                ) : (
+                  line || <span className="text-muted-foreground italic">(silence)</span>
+                )}
+              </div>
+            </TooltipTrigger>
+            {bar && (
+              <TooltipContent side="right" className="text-xs">
+                <div>Target: <b>{bar.syllables}</b> syll · end <b>"{bar.endSound}"</b></div>
+                <div>Got: <b>{got}</b> syll · end <b>"{gotEnd}"</b></div>
+                {hasInternalRhyme && <div className="text-purple-400 mt-0.5">🔗 Contains internal rhyme</div>}
+                <div className="text-muted-foreground mt-1">Mumble: "{bar.text}"</div>
+                {repeatWarn && <div className="text-amber-400 mt-1">⚠ part of a repetition streak</div>}
+                <div className="text-[10px] text-muted-foreground/80 mt-1">Double-click to edit · Click word to inspect rhymes</div>
+              </TooltipContent>
+            )}
+          </Tooltip>
+        )}
+
+        <div className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity flex shrink-0 items-center">
+          {!isEditing && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+              title="Edit bar (or double click line)"
+              className="p-1 text-muted-foreground hover:text-foreground"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          )}
+
           <button
             onClick={onToggleLock}
             title={locked ? "Unlock (allow rewrite)" : "Lock (protect from rewrites)"}

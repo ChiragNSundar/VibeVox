@@ -126,3 +126,70 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ── Harmonious Studio Rhyme Palette ── */
+.rhyme-word {
+  padding: 0 2px;
+  border-radius: 3px;
+  font-weight: 600;
+  display: inline;
+  border-bottom: 2px solid;
+  transition: all 0.15s ease;
+}
+
+/* 12 studio-curated harmonious hues */
+.rhyme-group-1  { border-color: #f2a65a; background: rgba(242, 166, 90, 0.18); color: #fed7aa; } /* Warm Amber */
+.rhyme-group-2  { border-color: #38bdf8; background: rgba(56, 189, 248, 0.18); color: #bae6fd; } /* Sky Cyan */
+.rhyme-group-3  { border-color: #f87171; background: rgba(248, 113, 113, 0.18); color: #fecaca; } /* Coral Red */
+.rhyme-group-4  { border-color: #818cf8; background: rgba(129, 140, 248, 0.18); color: #c7d2fe; } /* Indigo */
+.rhyme-group-5  { border-color: #34d399; background: rgba(52, 211, 153, 0.18); color: #a7f3d0; } /* Emerald */
+.rhyme-group-6  { border-color: #fb923c; background: rgba(251, 146, 60, 0.18); color: #fed7aa; } /* Sunset Orange */
+.rhyme-group-7  { border-color: #f472b6; background: rgba(244, 114, 182, 0.18); color: #fbcfe8; } /* Fuchsia Pink */
+.rhyme-group-8  { border-color: #c084fc; background: rgba(192, 132, 252, 0.18); color: #e9d5ff; } /* Lavender */
+.rhyme-group-9  { border-color: #fb7185; background: rgba(251, 113, 133, 0.18); color: #fecdd3; } /* Rose */
+.rhyme-group-10 { border-color: #a3e635; background: rgba(163, 230, 53, 0.18); color: #d9f99d; } /* Lime */
+.rhyme-group-11 { border-color: #2dd4bf; background: rgba(45, 212, 191, 0.18); color: #99f6e4; } /* Teal */
+.rhyme-group-12 { border-color: #facc15; background: rgba(250, 204, 21, 0.18); color: #fef08a; } /* Yellow */
+
+/* Near / Slant Rhymes (dashed bottom border) */
+.near-rhyme {
+  padding: 0 2px;
+  border-radius: 3px;
+  font-weight: 500;
+  display: inline;
+  border-bottom: 2px dashed;
+  transition: all 0.15s ease;
+}
+
+.near-group-1 { border-color: #f2a65a; background: rgba(242, 166, 90, 0.10); color: #fed7aa; }
+.near-group-2 { border-color: #38bdf8; background: rgba(56, 189, 248, 0.10); color: #bae6fd; }
+.near-group-3 { border-color: #f87171; background: rgba(248, 113, 113, 0.10); color: #fecaca; }
+.near-group-4 { border-color: #818cf8; background: rgba(129, 140, 248, 0.10); color: #c7d2fe; }
+.near-group-5 { border-color: #34d399; background: rgba(52, 211, 153, 0.10); color: #a7f3d0; }
+.near-group-6 { border-color: #fb923c; background: rgba(251, 146, 60, 0.10); color: #fed7aa; }
+
+/* Multi-syllable Rhyme Glow */
+.multi-syl-rhyme {
+  box-shadow: 0 0 8px rgba(242, 166, 90, 0.35);
+  font-weight: 700;
+}
+
+/* Internal Rhyme Marker */
+.internal-rhyme {
+  border-left: 2px solid #c084fc;
+  padding-left: 2px;
+}
+
+/* Word Hover Resonance & Clickable Word */
+.word-hover {
+  transition: color 0.12s ease, text-shadow 0.12s ease;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.word-hover:hover,
+.word-hover.hovered {
+  color: #f2a65a !important;
+  text-shadow: 0 0 10px rgba(242, 166, 90, 0.6) !important;
+}
+

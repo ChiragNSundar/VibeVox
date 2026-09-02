@@ -10,11 +10,37 @@ import { Badge } from "@/components/ui/badge";
 import { Music2, ExternalLink, Loader2 } from "lucide-react";
 import { lookupRhymes, rhymeWaveUrl, type RhymeHit } from "@/lib/rhymes";
 
-export function RhymeLookup({ trigger, defaultWord = "" }: { trigger?: React.ReactNode; defaultWord?: string }) {
+export type RhymeLookupProps = {
+  trigger?: React.ReactNode;
+  defaultWord?: string;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onSelectWord?: (word: string) => void;
+};
+
+export function RhymeLookup({
+  trigger,
+  defaultWord = "",
+  open: controlledOpen,
+  onOpenChange: setControlledOpen,
+  onSelectWord,
+}: RhymeLookupProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const isOpen = isControlled ? controlledOpen : internalOpen;
+  const setIsOpen = isControlled ? setControlledOpen! : setInternalOpen;
+
   const [word, setWord] = useState(defaultWord);
   const [hits, setHits] = useState<RhymeHit[]>([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (defaultWord) {
+      setWord(defaultWord);
+      run(defaultWord);
+    }
+  }, [defaultWord]);
 
   async function run(w: string) {
     const q = w.trim();
@@ -39,7 +65,8 @@ export function RhymeLookup({ trigger, defaultWord = "" }: { trigger?: React.Rea
   }, [hits]);
 
   return (
-    <Popover>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
+
       <PopoverTrigger asChild>
         {trigger ?? (
           <Button variant="outline" size="sm">
@@ -73,7 +100,12 @@ export function RhymeLookup({ trigger, defaultWord = "" }: { trigger?: React.Rea
                 <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">{k}</div>
                 <div className="flex flex-wrap gap-1">
                   {grouped[k].slice(0, 25).map((h) => (
-                    <Badge key={`${k}-${h.word}`} variant="secondary" className="font-mono text-[11px]">
+                    <Badge
+                      key={`${k}-${h.word}`}
+                      variant="secondary"
+                      className={`font-mono text-[11px] ${onSelectWord ? "cursor-pointer hover:bg-primary/20 hover:text-primary transition-colors" : ""}`}
+                      onClick={() => onSelectWord?.(h.word)}
+                    >
                       {h.word}
                       {h.syllables ? <span className="opacity-60 ml-1">·{h.syllables}</span> : null}
                     </Badge>
