@@ -51,65 +51,60 @@ const SCRIBBLE_MODES = [
 
 const PREMADE_STRUCTURES: Record<ScribbleMode, string> = {
   "verse-16": `[Verse 1 — 16 Bars]
-Bar 01: 
-Bar 02: 
-Bar 03: 
-Bar 04: 
 
-Bar 05: 
-Bar 06: 
-Bar 07: 
-Bar 08: 
 
-Bar 09: 
-Bar 10: 
-Bar 11: 
-Bar 12: 
 
-Bar 13: 
-Bar 14: 
-Bar 15: 
-Bar 16: `,
+
+
+
+
+
+
+
+
+
+
+
+
+`,
 
   "hook-anthem": `[Hook / Anthem — 8 Bars]
-Bar 01: 
-Bar 02: 
-Bar 03: 
-Bar 04: 
 
-Bar 05: 
-Bar 06: 
-Bar 07: 
-Bar 08: `,
 
-  "full-song": `[Intro — 4 Bars]
-Bar 01: 
-Bar 02: 
 
-[Verse 1 — 16 Bars]
-Bar 01: 
-Bar 02: 
-Bar 03: 
-Bar 04: 
 
-[Hook — 8 Bars]
-Bar 01: 
-Bar 02: 
-Bar 03: 
-Bar 04: 
 
-[Verse 2 — 16 Bars]
-Bar 01: 
-Bar 02: 
 
-[Outro — 4 Bars]
-Bar 01: `,
 
-  "rhyme-slang": `[4-Bar Compound Rhyme Pocket AABB]
-Bar 01: 
-Bar 02: 
-Bar 03: 
-Bar 04: `,
+`,
+
+  "full-song": `[Intro]
+
+
+[Verse 1]
+
+
+
+
+[Hook]
+
+
+
+
+[Verse 2]
+
+
+
+
+[Outro]
+
+`,
+
+  "rhyme-slang": `[4-Bar Rhyme Pocket]
+
+
+
+`,
 };
 
 export const Route = createFileRoute("/_app/scribble")({
@@ -188,23 +183,10 @@ function ScribblePage() {
 
   function handleModeSelect(newMode: ScribbleMode) {
     setMode(newMode);
-    if (!scribbleText.trim()) {
-      const template = PREMADE_STRUCTURES[newMode];
-      if (template) {
-        handleTextChange(template);
-        toast.info(`Loaded pre-made ${SCRIBBLE_MODES.find((m) => m.id === newMode)?.label || ""} structure`);
-      }
+    const template = PREMADE_STRUCTURES[newMode];
+    if (template) {
+      handleTextChange(template);
     }
-  }
-
-  function handleLoadScaffold() {
-    const template = PREMADE_STRUCTURES[mode];
-    if (!template) return;
-    if (scribbleText.trim() && !confirm("Replace notepad with this pre-made song structure?")) {
-      return;
-    }
-    handleTextChange(template);
-    toast.success(`Loaded ${SCRIBBLE_MODES.find((m) => m.id === mode)?.label || ""} structure!`);
   }
 
   async function handleMakeSense() {
@@ -427,40 +409,28 @@ function ScribblePage() {
 
       <SemanticDriftBar drift={scribbleDrift} />
 
-      {/* Top Mode Selector & Pre-Made Structures */}
+      {/* Top Mode Selector */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-card/60 border border-border/70 rounded-xl">
-            {SCRIBBLE_MODES.map((item) => {
-              const Icon = item.icon;
-              const active = mode === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => handleModeSelect(item.id as ScribbleMode)}
-                  className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
-                    active
-                      ? "bg-primary text-primary-foreground shadow-sm font-semibold"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="truncate">{item.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleLoadScaffold}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-secondary/80 hover:bg-secondary border border-border/80 text-foreground transition-all cursor-pointer shadow-xs shrink-0"
-            title="Load pre-made structural layout for this mode into notepad"
-          >
-            <FileText className="h-3.5 w-3.5 text-amber-400" />
-            <span>Load Pre-Made Structure</span>
-          </button>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 bg-card/60 border border-border/70 rounded-xl">
+          {SCRIBBLE_MODES.map((item) => {
+            const Icon = item.icon;
+            const active = mode === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleModeSelect(item.id as ScribbleMode)}
+                className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  active
+                    ? "bg-primary text-primary-foreground shadow-sm font-semibold"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{item.label}</span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Active Word Quick Rhyme Link if typing */}
