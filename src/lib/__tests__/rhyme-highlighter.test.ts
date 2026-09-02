@@ -97,4 +97,40 @@ describe("Rhyme Highlighter Engine", () => {
     expect(res[0].html).toContain("hogay");
     expect(res[1].html).toContain("margay");
   });
+
+  it("highlights complex compound rhymes (do or die vs homicide vs life)", () => {
+    const lines = [
+      "soch mera do or die",
+      "mind pe hai homicide",
+      "grind pe na life kare",
+    ];
+
+    const res = highlightLyrics(lines, "standard");
+    expect(res.length).toBe(3);
+
+    // Both line 1 and line 2 should share 'A' scheme letter
+    expect(res[0].schemeLetter).toBe("A");
+    expect(res[1].schemeLetter).toBe("A");
+
+    // 'die', 'homicide', and 'life' should be highlighted as rhyming
+    expect(res[0].html).toContain("die");
+    expect(res[1].html).toContain("homicide");
+    expect(res[2].html).toContain("life");
+
+    // 'mind' and 'grind' should be highlighted as rhyming
+    expect(res[1].html).toContain("mind");
+    expect(res[2].html).toContain("grind");
+
+    // 'pe' and 'pe' should be highlighted as rhyming
+    expect(res[1].html).toContain("pe");
+    expect(res[2].html).toContain("pe");
+
+    // Compound rhyme: 'do or die' highlights in unison with 'homicide'
+    expect(res[0].html).toContain("rhyme-word");
+    expect(res[1].html).toContain("rhyme-word");
+
+    console.log("\n--- LINE 1: ---\n", res[0].html);
+    console.log("\n--- LINE 2: ---\n", res[1].html);
+    console.log("\n--- LINE 3: ---\n", res[2].html);
+  });
 });
