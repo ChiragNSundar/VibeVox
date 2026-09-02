@@ -29,9 +29,12 @@ import {
   type ScribbleMode,
   type ScribbleResult,
 } from "@/lib/scribble-synthesizer";
-import { countSyllables } from "@/lib/lyrics-analysis";
 import { highlightLyrics, getStanzaRhymeScheme, type RhymeVisionMode } from "@/lib/rhyme-highlighter";
 import { RhymeLookup } from "@/components/RhymeLookup";
+import { ComplexityGauge } from "@/components/track/ComplexityGauge";
+import { SemanticDriftBar } from "@/components/track/SemanticDriftBar";
+import { scoreComplexity, detectSemanticDrift } from "@/lib/diagnostics";
+import { getLineStressAnalysis } from "@/lib/cadence-flow";
 
 const DRAFT_KEY = "voxscript:scribble-draft";
 const AUTO_SYNC_KEY = "voxscript:scribble-auto-sync";
@@ -196,6 +199,22 @@ function ScribblePage() {
     [scribbleLines]
   );
 
+  const scribbleComplexity = useMemo(() => {
+    const valid = scribbleLines.filter((l) => l.trim().length > 0);
+    if (valid.length < 2) return null;
+    return scoreComplexity(valid);
+  }, [scribbleLines]);
+
+  const scribbleDrift = useMemo(() => {
+    const valid = scribbleLines.filter((l) => l.trim().length > 0);
+    if (valid.length < 6) return null;
+    return detectSemanticDrift(valid);
+  }, [scribbleLines]);
+
+  const scribbleStress = useMemo(() => {
+    return scribbleLines.map((l) => getLineStressAnalysis(l));
+  }, [scribbleLines]);
+
   const resultFlatLines = useMemo(
     () => (result ? result.sections.flatMap((s) => s.lines) : []),
     [result]
@@ -225,6 +244,8 @@ function ScribblePage() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          <ComplexityGauge result={scribbleComplexity} />
+
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs">
             <Zap className="h-3.5 w-3.5 text-amber-400" />
             <span className="text-muted-foreground font-medium">Zero-AI RAG</span>
@@ -246,6 +267,8 @@ function ScribblePage() {
           </div>
         </div>
       </div>
+
+      <SemanticDriftBar drift={scribbleDrift} />
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-6 space-y-4">
