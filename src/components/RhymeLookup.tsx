@@ -60,7 +60,7 @@ export function RhymeLookup({
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const setIsOpen = isControlled ? setControlledOpen! : setInternalOpen;
 
-  const [activeTab, setActiveTab] = useState<"doppelreim" | "bilingual" | "quick">("doppelreim");
+  const [activeTab, setActiveTab] = useState<"doppelreim" | "bilingual" | "quick">("quick");
 
   // Doppelreim state
   const [word, setWord] = useState(defaultWord);
@@ -80,6 +80,7 @@ export function RhymeLookup({
   useEffect(() => {
     if (defaultWord) {
       setWord(defaultWord);
+      setActiveTab("quick");
       runDoppelreim(defaultWord, lang, flowAligned);
       runQuickRhymes(defaultWord);
     }
@@ -148,8 +149,8 @@ export function RhymeLookup({
 
   function handleSelectDictWord(dictWord: string) {
     setWord(dictWord);
-    setActiveTab("doppelreim");
-    runDoppelreim(dictWord, "kn", flowAligned);
+    setActiveTab("quick");
+    runQuickRhymes(dictWord);
   }
 
   const groupedQuick = useMemo(() => {
@@ -186,6 +187,10 @@ export function RhymeLookup({
         >
           <div className="px-4 pt-3 border-b bg-muted/20">
             <TabsList className="grid grid-cols-3 w-full max-w-md h-8">
+              <TabsTrigger value="quick" className="text-xs gap-1.5">
+                <Music2 className="h-3.5 w-3.5 text-blue-400" />
+                Quick / RhymeWave
+              </TabsTrigger>
               <TabsTrigger value="doppelreim" className="text-xs gap-1.5">
                 <Activity className="h-3.5 w-3.5 text-primary" />
                 Doppelreim
@@ -193,10 +198,6 @@ export function RhymeLookup({
               <TabsTrigger value="bilingual" className="text-xs gap-1.5">
                 <BookOpen className="h-3.5 w-3.5 text-amber-400" />
                 Bilingual Dict
-              </TabsTrigger>
-              <TabsTrigger value="quick" className="text-xs gap-1.5">
-                <Music2 className="h-3.5 w-3.5 text-blue-400" />
-                Quick / RhymeWave
               </TabsTrigger>
             </TabsList>
           </div>

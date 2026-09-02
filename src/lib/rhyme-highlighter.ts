@@ -137,8 +137,17 @@ export function wordToPhones(word: string): string[] {
       i += 2;
       continue;
     }
-    if (rem.startsWith("ay")) { tokens.push("EY1"); i += 2; continue; }
-    if (rem.startsWith("ee") || rem.startsWith("ea") || rem.startsWith("ie")) { tokens.push("IY1"); i += 2; continue; }
+    if (rem.startsWith("ie")) {
+      // At word end or short word (die, lie, tie, pie, untie), "ie" is AY1
+      if (i + 2 === len || len <= 4) {
+        tokens.push("AY1");
+      } else {
+        tokens.push("IY1");
+      }
+      i += 2;
+      continue;
+    }
+    if (rem.startsWith("ee") || rem.startsWith("ea")) { tokens.push("IY1"); i += 2; continue; }
     if (rem.startsWith("oa") || rem.startsWith("oe")) { tokens.push("OW1"); i += 2; continue; }
     if (rem.startsWith("oo")) { tokens.push("UW1"); i += 2; continue; }
     if (rem.startsWith("ou") || rem.startsWith("ow")) { tokens.push("AW1"); i += 2; continue; }
@@ -215,6 +224,15 @@ export function wordToPhones(word: string): string[] {
     }
 
     // Single consonants
+    if (c === "c") {
+      if (i + 1 < len && (clean[i + 1] === "e" || clean[i + 1] === "i" || clean[i + 1] === "y")) {
+        tokens.push("S");
+      } else {
+        tokens.push("K");
+      }
+      i++;
+      continue;
+    }
     const upper = c.toUpperCase();
     tokens.push(upper);
     i++;
