@@ -447,6 +447,14 @@ export function getStanzaRhymeScheme(lines: string[]): StanzaSchemeResult {
   };
 }
 
+const COMMON_STOP_WORDS = new Set([
+  "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of",
+  "with", "by", "from", "up", "about", "into", "over", "after", "is", "are",
+  "was", "were", "be", "been", "being", "have", "has", "had", "do", "does",
+  "did", "it", "its", "my", "your", "his", "her", "our", "their", "this",
+  "that", "these", "those", "wh", "w", "all", "so", "as", "if"
+]);
+
 /**
  * Multi-layer rhyme highlighting engine.
  * Generates highlighted HTML strings for each line, decorated with
@@ -475,6 +483,7 @@ export function highlightLyrics(
     wordIdx: number;
     phones: string[];
     rhymePart: string;
+    isEndCandidate: boolean;
   };
 
   const allTokens: WordToken[] = [];
@@ -490,6 +499,16 @@ export function highlightLyrics(
       const phones = wordToPhones(clean);
       const rp = getRhymingPart(phones);
 
+      // Only words near the end of the line are end-rhyme candidates
+      // (Last word always; penultimate word only if non-stopword)
+      const isLast = w === rawWords.length - 1;
+      const isPenultimate = w === rawWords.length - 2;
+      const isBracketTag = orig.startsWith("[") || orig.endsWith("]");
+      const isEndCandidate =
+        !isBracketTag &&
+        ((isLast && (clean.length >= 2 || !COMMON_STOP_WORDS.has(clean))) ||
+         (isPenultimate && clean.length >= 3 && !COMMON_STOP_WORDS.has(clean)));
+
       allTokens.push({
         original: orig,
         clean,
@@ -497,6 +516,7 @@ export function highlightLyrics(
         wordIdx: w,
         phones,
         rhymePart: rp,
+        isEndCandidate,
       });
 
       lineIndices.push(allTokens.length - 1);
@@ -517,9 +537,10 @@ export function highlightLyrics(
   const wordClasses: Set<string>[] = Array.from({ length: n }, () => new Set<string>());
   const wordSoundLabels: string[] = Array(n).fill("");
 
-  // 2. Perfect end-rhymes (grouped across 2+ lines)
+  // 2. Perfect end-rhymes (grouped across 2+ lines, strictly on end candidates)
   const soundGroups = new Map<string, number[]>();
   for (let i = 0; i < n; i++) {
+    if (!allTokens[i].isEndCandidate) continue;
     const rp = allTokens[i].rhymePart;
     if (rp) {
       const grp = soundGroups.get(rp) || [];
@@ -573,7 +594,7 @@ export function highlightLyrics(
     }
   }
 
-  // 4. Near / Slant rhymes (for "deep" and "all" modes)
+  // 4. Near / Slant rhymes (for "deep" and "all" modes, strictly on end candidates)
   if (mode === "deep" || mode === "all") {
     const rpKeys = Array.from(soundGroups.keys());
     let nearColorIdx = 0;
@@ -610,7 +631,7 @@ export function highlightLyrics(
     }
   }
 
-  // 5. Internal rhymes (within-line pairs)
+  // 5. Internal rhymes (within-line pairs, non-stop words only)
   const lineHasInternalRhyme: boolean[] = Array(lines.length).fill(false);
   for (let l = 0; l < lines.length; l++) {
     const wordIndices = lineWordMap[l];
@@ -622,6 +643,10 @@ export function highlightLyrics(
         const idxB = wordIndices[b];
         const tokA = allTokens[idxA];
         const tokB = allTokens[idxB];
+
+        if (COMMON_STOP_WORDS.has(tokA.clean) || COMMON_STOP_WORDS.has(tokB.clean)) continue;
+        if (tokA.clean.length < 3 || tokB.clean.length < 3) continue;
+        if (tokA.original.startsWith("[") || tokB.original.startsWith("[")) continue;
 
         if (tokA.rhymePart && tokA.rhymePart === tokB.rhymePart && tokA.clean !== tokB.clean) {
           lineHasInternalRhyme[l] = true;

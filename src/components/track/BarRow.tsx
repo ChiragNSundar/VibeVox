@@ -101,25 +101,19 @@ export function BarRow({
   };
 
   const handleTextMouseMove = (e: React.MouseEvent) => {
+    const container = e.currentTarget as HTMLElement;
     const target = (e.target as HTMLElement).closest(".word-hover") as HTMLElement | null;
-    const word = target?.getAttribute("data-word") || null;
-    if (word === hoveredWordRef.current) return;
 
-    if (hoveredWordRef.current) {
-      document.querySelectorAll(".word-hover.hovered").forEach((el) => el.classList.remove("hovered"));
-    }
+    container.querySelectorAll(".word-hover.hovered").forEach((el) => el.classList.remove("hovered"));
 
-    hoveredWordRef.current = word;
-    if (word) {
-      document.querySelectorAll(`.word-hover[data-word="${word}"]`).forEach((el) => el.classList.add("hovered"));
+    if (target) {
+      target.classList.add("hovered");
     }
   };
 
-  const handleTextMouseLeave = () => {
-    if (hoveredWordRef.current) {
-      document.querySelectorAll(".word-hover.hovered").forEach((el) => el.classList.remove("hovered"));
-      hoveredWordRef.current = null;
-    }
+  const handleTextMouseLeave = (e: React.MouseEvent) => {
+    const container = e.currentTarget as HTMLElement;
+    container.querySelectorAll(".word-hover.hovered").forEach((el) => el.classList.remove("hovered"));
   };
 
   const handleTextClick = (e: React.MouseEvent) => {
