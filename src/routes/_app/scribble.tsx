@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
+
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
@@ -36,7 +36,7 @@ import { RhymeLookup } from "@/components/RhymeLookup";
 import { ComplexityGauge } from "@/components/track/ComplexityGauge";
 import { SemanticDriftBar } from "@/components/track/SemanticDriftBar";
 import { scoreComplexity, detectSemanticDrift } from "@/lib/diagnostics";
-import { getLineStressAnalysis, calculateMatra, detectFlowMetric, detectCodeSwitch } from "@/lib/cadence-flow";
+import { getLineStressAnalysis, calculateMatra, detectFlowMetric } from "@/lib/cadence-flow";
 import { countSyllables } from "@/lib/phonetics";
 
 const DRAFT_KEY = "vibevox:scribble-draft";
