@@ -74,7 +74,6 @@ function ScribblePage() {
   const [showMatra, setShowMatra] = useState(false);
   const [mode, setMode] = useState<ScribbleMode>("full-song");
   const [autoSync, setAutoSync] = useState(true);
-  const [zeroAiMode, setZeroAiMode] = useState(false);
   const [result, setResult] = useState<ScribbleResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [syncedPaths, setSyncedPaths] = useState<{ lyricsPath?: string; rhymesPath?: string } | null>(null);
@@ -131,9 +130,9 @@ function ScribblePage() {
 
     startTransition(async () => {
       try {
-        const res = await makeSenseOfScribble(scribbleText, mode, { offlineOnly: zeroAiMode });
+        const res = await makeSenseOfScribble(scribbleText, mode);
         setResult(res);
-        toast.success(zeroAiMode ? "Synthesized via Zero-AI RAG Engine!" : "Synthesized scribbles!", {
+        toast.success("Synthesized scribbles!", {
           description: `Detected: ${res.analysis.mood} · ${res.analysis.vibe}`,
         });
 
