@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
+import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import {
@@ -574,7 +574,7 @@ because i got quite cries"
                       const line = scribbleLines[idx] || "";
                       const stress = scribbleStress[idx];
                       const flow = detectFlowMetric(line, stress?.chars);
-                      const cs = detectCodeSwitch(line);
+
                       const matra = showMatra ? calculateMatra(line) : null;
                       const isAnaphora = item.anaphora;
 
