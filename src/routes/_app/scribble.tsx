@@ -389,9 +389,20 @@ function ScribblePage() {
                           />
                         </div>
                         {scribbleLines[idx]?.trim() && (
-                          <span className="text-[10px] text-muted-foreground/60 shrink-0 font-mono">
-                            {item.syllables} syl
-                          </span>
+                          <div className="flex items-center gap-1.5 shrink-0 font-mono">
+                            {scribbleStress[idx]?.chars.length > 0 && (
+                              <span className="hidden sm:flex items-center gap-0.5 text-[8px]" title={`Cadence: ${scribbleStress[idx]?.rawPattern}`}>
+                                {scribbleStress[idx]?.chars.slice(0, 8).map((c, ci) => (
+                                  <span key={ci} className={c === "/" ? "text-primary font-bold" : "text-muted-foreground/60"}>
+                                    {c === "/" ? "●" : "○"}
+                                  </span>
+                                ))}
+                              </span>
+                            )}
+                            <span className="text-[10px] text-muted-foreground/60">
+                              {item.syllables} syl
+                            </span>
+                          </div>
                         )}
                       </div>
                     ))}
