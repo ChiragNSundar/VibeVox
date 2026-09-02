@@ -34,6 +34,7 @@ import { highlightLyrics, getStanzaRhymeScheme, detectFlowInsight, type RhymeVis
 import { RhymeLookup } from "@/components/RhymeLookup";
 import { ComplexityGauge } from "@/components/track/ComplexityGauge";
 import { SemanticDriftBar } from "@/components/track/SemanticDriftBar";
+import { scoreComplexity, detectSemanticDrift } from "@/lib/diagnostics";
 import { getLineStressAnalysis, calculateMatra, detectFlowMetric, detectCodeSwitch } from "@/lib/cadence-flow";
 import { countSyllables } from "@/lib/phonetics";
 

@@ -1005,8 +1005,9 @@ export function highlightLyrics(
     for (let w = 0; w < wordIndices.length; w++) {
       if (mosaicBlock && w === mosaicBlock.startWordIdx) {
         // Render unified enclosing mosaic block with compound bounding box
+        const lastWordInBlock = allTokens[wordIndices[mosaicBlock.endWordIdx]]?.clean || "";
         htmlParts.push(
-          `<span class="mosaic-compound-pill rhyme-group-1" data-compound="${mosaicBlock.phrase}"><span class="mosaic-bracket">[</span>${mosaicBlock.phrase}<span class="mosaic-bracket">]</span><sup class="mosaic-badge">¹</sup></span>`
+          `<span class="mosaic-pill mosaic-compound-pill rhyme-group-1 rhyme-word" data-word="${lastWordInBlock}" data-compound="${mosaicBlock.phrase}"><span class="mosaic-bracket">[</span>${mosaicBlock.phrase}<span class="mosaic-bracket">]</span><sup class="mosaic-badge">¹</sup></span>`
         );
         w = mosaicBlock.endWordIdx; // skip words consumed by mosaic block
         lineGroupClass = "rhyme-group-1";

@@ -220,7 +220,7 @@ export function detectCodeSwitch(line: string): CodeSwitchResult {
   const total = indicCount + englishCount;
   const hindiPct = Math.round((indicCount / total) * 100);
   const englishPct = 100 - hindiPct;
-  const isCodeSwitched = hindiPct >= 20 && englishPct >= 20;
+  const isCodeSwitched = (indicCount >= 1 && englishCount >= 2) || (hindiPct >= 15 && englishPct >= 15);
 
   let label = `${englishPct}% EN`;
   if (isCodeSwitched) {
