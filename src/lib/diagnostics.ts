@@ -406,14 +406,21 @@ export function detectSemanticDrift(
     };
   }
 
-  // Jaccard similarity between anchor keywords and recent keywords
+  // Overlap ratio relative to recent keywords + theme hits
   let intersectionCount = 0;
   for (const k of recentKw) {
     if (anchorKw.has(k)) intersectionCount++;
   }
 
-  const unionSize = new Set([...anchorKw, ...recentKw]).size;
-  const similarity = unionSize > 0 ? intersectionCount / unionSize : 1.0;
+  const themeKw = sessionTheme ? extractKeywords(sessionTheme) : new Set<string>();
+  let themeHits = 0;
+  for (const k of recentKw) {
+    if (themeKw.has(k)) themeHits++;
+  }
+
+  // Ratio of recent keywords anchored in theme or opening bars
+  const anchorRatio = recentKw.size > 0 ? (intersectionCount + themeHits) / (recentKw.size + (themeHits > 0 ? 1 : 0)) : 1.0;
+  const similarity = Math.min(1.0, Math.max(0.0, anchorRatio));
   const driftScore = Math.round((1.0 - similarity) * 100) / 100;
 
   let status: DriftStatus = "stable";
