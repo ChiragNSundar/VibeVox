@@ -111,6 +111,8 @@ export function TrackToolbar({
           </DropdownMenu>
         )}
 
+        <ComplexityGauge result={complexityResult} />
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
