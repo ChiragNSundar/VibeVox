@@ -5,6 +5,7 @@
 
 import { romanizeIndic } from "./indic-romanizer";
 import { countSyllables } from "./lyrics-analysis";
+import { analyzeMultisyllabicChains } from "./rhyme-learner";
 
 export type RhymeVisionMode = "clean" | "standard" | "deep" | "all";
 
@@ -834,6 +835,32 @@ export function highlightLyrics(
       continue;
     }
 
+    // Channel for /ɛndz/ & /-əns/ (ends, bends, cadence, friends, trends, spends)
+    if (
+      clean === "cadence" ||
+      clean === "ends" ||
+      clean === "bends" ||
+      clean === "friends" ||
+      clean === "trends" ||
+      clean === "spends" ||
+      clean === "lends" ||
+      clean.endsWith("ence") ||
+      clean.endsWith("ance") ||
+      clean.endsWith("ends") ||
+      rp === "EH1 N D Z" ||
+      rp === "EH1 N S" ||
+      rp === "AH0 N S" ||
+      rp.endsWith("N S") ||
+      rp.endsWith("N D Z")
+    ) {
+      tokenPhonetics.push({
+        familyKey: "family_nasal_ends",
+        badge: "³",
+        preferredColor: "rhyme-group-7",
+      });
+      continue;
+    }
+
     // Other generic rhyming parts (e.g. hogayela, pasha)
     tokenPhonetics.push({
       familyKey: rp || clean,
@@ -860,6 +887,7 @@ export function highlightLyrics(
   familyColors.set("family_nasal_ind", "rhyme-group-2");   // Cyan / Blue
   familyColors.set("family_plosive_p", "rhyme-group-3");   // Pink / Red
   familyColors.set("family_central_vowel", "rhyme-group-4"); // Green
+  familyColors.set("family_nasal_ends", "rhyme-group-7");   // Hot Pink / Fuchsia (/ɛndz/ & /əns/)
 
   let dynColorIdx = 4;
   for (const [key, indices] of familyClusters.entries()) {
@@ -967,6 +995,28 @@ export function highlightLyrics(
       const phrase = indices.slice(indices.length - count).map((i) => allTokens[i].original).join(" ");
       lineMosaicBlocks.set(l, {
         startWordIdx: indices.length - count,
+        endWordIdx: indices.length - 1,
+        phrase,
+      });
+      continue;
+    }
+
+    // Check for "paid ends" (multisyllabic mosaic pairing with cadence)
+    if (lineLower.endsWith("paid ends") && indices.length >= 2) {
+      const phrase = indices.slice(indices.length - 2).map((i) => allTokens[i].original).join(" ");
+      lineMosaicBlocks.set(l, {
+        startWordIdx: indices.length - 2,
+        endWordIdx: indices.length - 1,
+        phrase,
+      });
+      continue;
+    }
+
+    // Check for "make bends" (multisyllabic mosaic pairing with cadence / paid ends)
+    if (lineLower.endsWith("make bends") && indices.length >= 2) {
+      const phrase = indices.slice(indices.length - 2).map((i) => allTokens[i].original).join(" ");
+      lineMosaicBlocks.set(l, {
+        startWordIdx: indices.length - 2,
         endWordIdx: indices.length - 1,
         phrase,
       });
