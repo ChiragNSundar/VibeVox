@@ -298,16 +298,6 @@ function ScribblePage() {
           <ComplexityGauge result={scribbleComplexity} />
 
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs">
-            <Zap className="h-3.5 w-3.5 text-amber-400" />
-            <span className="text-muted-foreground font-medium">Zero-AI RAG</span>
-            <Switch
-              checked={zeroAiMode}
-              onCheckedChange={setZeroAiMode}
-              aria-label="Toggle Zero-AI RAG mode"
-            />
-          </div>
-
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs">
             <Brain className="h-3.5 w-3.5 text-amber-400" />
             <span className="text-muted-foreground font-medium">Auto-Sync to Brain</span>
             <Switch
@@ -534,16 +524,6 @@ because i got quite cries"
                           </div>
                           {line.trim() && (
                             <div className="flex items-center gap-1.5 shrink-0 font-mono pt-0.5">
-                              {/* Code-switch ratio pill if bilingual */}
-                              {cs.isCodeSwitched && (
-                                <span
-                                  className="text-[8px] font-mono px-1 py-0.2 rounded bg-sky-500/10 text-sky-300 border border-sky-500/25 hidden xl:inline"
-                                  title="Bilingual language balance"
-                                >
-                                  {cs.label}
-                                </span>
-                              )}
-
                               {/* Polyrhythmic Triplet / 16th flow tag */}
                               {flow.badge && (
                                 <span
