@@ -22,6 +22,7 @@ import {
   Lightbulb,
   CheckCircle2,
   FolderSync,
+  Target,
 } from "lucide-react";
 import {
   makeSenseOfScribble,
@@ -72,6 +73,8 @@ function ScribblePage() {
   const [scribbleText, setScribbleText] = useState("");
   const [rhymeVision, setRhymeVision] = useState<RhymeVisionMode>("standard");
   const [scribbleViewMode, setScribbleViewMode] = useState<"live" | "raw">("live");
+  const [canvasMode, setCanvasMode] = useState<"combined" | "scratchpad">("combined");
+  const [editingLineIdx, setEditingLineIdx] = useState<number | null>(null);
   const [rhymeLookupWord, setRhymeLookupWord] = useState("");
   const [rhymeLookupOpen, setRhymeLookupOpen] = useState(false);
   const [mode, setMode] = useState<ScribbleMode>("full-song");
@@ -281,18 +284,18 @@ function ScribblePage() {
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-5">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
             <div className="p-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-              <PenLine className="h-6 w-6" />
+              <Sparkles className="h-6 w-6 text-amber-400" />
             </div>
-            <h1 className="text-2xl font-bold font-display tracking-tight text-foreground">Scribble Studio</h1>
-            <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
-              Stream-of-Consciousness
+            <h1 className="text-2xl font-bold font-display tracking-tight text-foreground">VibeLyrics Studio</h1>
+            <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-400 border-amber-500/30 font-mono">
+              Live Phonetics & Scribble
             </Badge>
           </div>
           <p className="text-xs sm:text-sm text-muted-foreground max-w-xl">
-            Scribble raw thoughts, fragmented bars, and voice memos. The engine extracts the core narrative,
-            isolates punchlines, locks into cadence, and syncs directly into your local Brain backend.
+            Freestyle your thoughts, fragmented bars, or slang. Watch 6-channel DHH phonetics, multisyllabic compound schemes,
+            and cadence stress illuminate in the exact same place you write in real-time.
           </p>
         </div>
 
