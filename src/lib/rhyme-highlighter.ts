@@ -468,7 +468,7 @@ export function getStanzaRhymeScheme(lines: string[]): StanzaSchemeResult {
 
     let foundChar: string | null = null;
     for (const [knownEnd, char] of seen.entries()) {
-      if (end === knownEnd || phonemeDistance(end, knownEnd) <= 0.5) {
+      if (end === knownEnd || phonemeDistance(end, knownEnd) <= 1.0) {
         foundChar = char;
         break;
       }
