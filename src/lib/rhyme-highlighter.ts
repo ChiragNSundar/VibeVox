@@ -441,8 +441,27 @@ export function detectInternalRhymes(line: string): boolean {
   return false;
 }
 
+function isCompatibleRhymeVowel(v1: string, v2: string): boolean {
+  if (v1 === v2) return true;
+  if ((v1 === "IH" && v2 === "IY") || (v1 === "IY" && v2 === "IH")) return true;
+  if ((v1 === "EH" && v2 === "AE") || (v1 === "AE" && v2 === "EH")) return true;
+  if ((v1 === "AH" && v2 === "AA") || (v1 === "AA" && v2 === "AH")) return true;
+  if ((v1 === "UH" && v2 === "UW") || (v1 === "UW" && v2 === "UH")) return true;
+  if ((v1 === "AO" && v2 === "OW") || (v1 === "OW" && v2 === "AO")) return true;
+  return false;
+}
+
+function getStressedVowel(rp: string): string {
+  const parts = rp.split(" ");
+  for (const p of parts) {
+    const base = p.replace(/\d/, "");
+    if (ARPABET_VOWELS.has(base)) return base;
+  }
+  return "";
+}
+
 /**
- * Identifies 4-line stanza rhyme schemes (e.g. AABB, ABAB, AAAA, ABBA, XAXA).
+ * Identifies 4-line stanza rhyme schemes (e.g. AABB, ABAB, AAAA, ABBA, AABA).
  */
 export function getStanzaRhymeScheme(lines: string[]): StanzaSchemeResult {
   if (!lines.length) {
@@ -459,20 +478,31 @@ export function getStanzaRhymeScheme(lines: string[]): StanzaSchemeResult {
   });
 
   const scheme: string[] = [];
-  const seen = new Map<string, string>();
   let currentCharCode = 65; // 'A'
 
-  for (const end of allEndings) {
+  for (let l = 0; l < allEndings.length; l++) {
+    const end = allEndings[l];
     if (!end) {
       scheme.push("X");
       continue;
     }
 
+    const vEnd = getStressedVowel(end);
     let foundChar: string | null = null;
-    for (const [knownEnd, char] of seen.entries()) {
-      if (end === knownEnd || phonemeDistance(end, knownEnd) <= 1.0) {
-        foundChar = char;
-        break;
+
+    // 4-line stanza window
+    const stanzaStart = Math.floor(l / 4) * 4;
+
+    for (let prev = stanzaStart; prev < l; prev++) {
+      const prevEnd = allEndings[prev];
+      if (!prevEnd) continue;
+      const vPrev = getStressedVowel(prevEnd);
+
+      if (vEnd && vPrev && isCompatibleRhymeVowel(vEnd, vPrev)) {
+        if (end === prevEnd || phonemeDistance(end, prevEnd) <= 1.0) {
+          foundChar = scheme[prev];
+          break;
+        }
       }
     }
 
@@ -481,7 +511,6 @@ export function getStanzaRhymeScheme(lines: string[]): StanzaSchemeResult {
     } else {
       const char = String.fromCharCode(currentCharCode++);
       scheme.push(char);
-      seen.set(end, char);
     }
   }
 
