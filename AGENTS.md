@@ -9,7 +9,7 @@
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
 
-# VoxScript — Agent & IDE Guide
+# VibeVox — Agent & IDE Guide
 
 Optimized for Google Antigravity, Cursor, Claude Code, and any IDE agent that
 picks up this codebase after `git clone`.

@@ -186,14 +186,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "VoxScript — AI Vocal & Lyric Studio" },
-      { name: "description", content: "Advanced punch-in lyric studio with localized Brain RAG and cadence intelligence." },
-      { name: "author", content: "VoxScript" },
-      { property: "og:title", content: "VoxScript — AI Vocal & Lyric Studio" },
-      { property: "og:description", content: "Advanced punch-in lyric studio with localized Brain RAG and cadence intelligence." },
+      { title: "VibeVox — AI Vocal & Lyric Studio" },
+      { name: "description", content: "Advanced punch-in lyric studio with localized Brain RAG, VibeLyrics, and cadence intelligence." },
+      { name: "author", content: "VibeVox" },
+      { property: "og:title", content: "VibeVox — AI Vocal & Lyric Studio" },
+      { property: "og:description", content: "Advanced punch-in lyric studio with localized Brain RAG, VibeLyrics, and cadence intelligence." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@VoxScript" },
+      { name: "twitter:site", content: "@VibeVox" },
     ],
     links: [
       {

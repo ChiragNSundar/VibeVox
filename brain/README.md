@@ -1,6 +1,6 @@
-# VoxScript Localized Brain & Memory Drop-Folder
+# VibeVox Localized Brain & Memory Drop-Folder
 
-This folder is your localized memory and knowledge base for the Vocal Muse / VoxScript RAG engine.
+This folder is your localized memory and knowledge base for the VibeVox RAG engine.
 Any files placed in the subfolders below will be automatically scanned, chunked, embedded, and injected into the lyric generation pipeline.
 
 ## Subdirectories

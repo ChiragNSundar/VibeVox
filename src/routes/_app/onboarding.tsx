@@ -18,8 +18,8 @@ const ONBOARDING_KEY = "voxscript:onboarding-complete";
 export const Route = createFileRoute("/_app/onboarding")({
   head: () => ({
     meta: [
-      { title: "Get Started — VoxScript" },
-      { name: "description", content: "Set up your local AI and get familiar with VoxScript in 3 easy steps." },
+      { title: "Get Started — VibeVox" },
+      { name: "description", content: "Set up your local AI and get familiar with VibeVox in 3 easy steps." },
     ],
   }),
   component: OnboardingPage,

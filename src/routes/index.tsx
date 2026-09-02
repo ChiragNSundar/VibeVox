@@ -9,16 +9,16 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "VoxScript — Freestyle to Lyrics, Locally" },
+      { title: "VibeVox — Freestyle to Lyrics & VibeLyrics Studio" },
       {
         name: "description",
         content:
-          "Upload your freestyle, mumble, or hum — VoxScript turns it into polished lyrics that match your flow. 100% local, zero cloud.",
+          "Upload your freestyle, mumble, or hum — VibeVox turns it into polished lyrics that match your flow. Real-time 6-channel DHH phonetics, multisyllabic rimes, 100% local, zero cloud.",
       },
-      { property: "og:title", content: "VoxScript — Freestyle to Lyrics" },
+      { property: "og:title", content: "VibeVox — Freestyle to Lyrics" },
       {
         property: "og:description",
-        content: "AI lyric writer that turns rough vocals into finished songs. 100% offline.",
+        content: "AI lyric writer and VibeLyrics studio that turns rough vocals and scribbles into finished songs. 100% offline.",
       },
     ],
   }),
@@ -26,6 +26,13 @@ export const Route = createFileRoute("/")({
 });
 
 const FEATURES = [
+  {
+    icon: Sparkles,
+    title: "VibeLyrics & Scribble Studio",
+    body: "In-place 6-channel DHH multisyllabic rhyme vision, chaos-to-cadence synthesizer, and raw punchline gem mining that happens in real time as you write.",
+    color: "text-amber-400",
+    glow: "bg-amber-500/10",
+  },
   {
     icon: Radio,
     title: "Live Punch-In Studio",
@@ -71,8 +78,8 @@ const FEATURES = [
 ];
 
 const STEPS = [
-  { num: "01", icon: Mic,      title: "Record the idea",   body: "Freestyle, mumble, or hum straight over the beat — no real words needed." },
-  { num: "02", icon: Sparkles,  title: "AI reads the flow",  body: "We analyze cadence, syllables, pauses, end sounds, and rhyme scheme." },
+  { num: "01", icon: Mic,      title: "Record or scribble the idea", body: "Freestyle, mumble, or scribble raw bars in VibeLyrics — no real words needed." },
+  { num: "02", icon: Sparkles,  title: "AI reads the flow & phonetics", body: "We analyze cadence, 6-channel DHH vowels, syllables, pauses, end sounds, and rhyme schemes." },
   { num: "03", icon: Sparkles,  title: "Lyrics generated",   body: "Finished bars matched to your exact rhythm, cadence-scored and ranked." },
   { num: "04", icon: Library,   title: "Refine & save",     body: "Lock bars you love, rewrite the rest. Every version tracked." },
 ];
@@ -91,9 +98,15 @@ function Landing() {
       <header className="px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between max-w-6xl mx-auto">
         <Link to="/" className="flex items-center gap-2">
           <Mic className="h-5 w-5 text-primary" />
-          <span className="font-display font-semibold text-lg">VoxScript</span>
+          <span className="font-display font-semibold text-lg">VibeVox</span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-3">
+          <Link to="/scribble">
+            <Button variant="ghost" size="sm" className="text-amber-400 hover:text-amber-300 font-mono text-xs">
+              <Sparkles className="h-3.5 w-3.5 mr-1" />
+              VibeLyrics
+            </Button>
+          </Link>
           <Link to="/connect">
             <Button variant="ghost" size="sm" className="hidden sm:inline-flex">
               <Cpu className="h-4 w-4 mr-1.5" />
@@ -125,20 +138,26 @@ function Landing() {
           </h1>
 
           <p className="text-base sm:text-lg text-muted-foreground mt-6 sm:mt-8 max-w-2xl mx-auto leading-relaxed">
-            Freestyle, mumble, or hum a melody over your beat. VoxScript reads the
+            Freestyle, mumble, or hum a melody over your beat. VibeVox reads the
             cadence — syllables, pauses, rhymes — and writes finished lyrics you
-            can punch in over your original take. <strong className="text-foreground/80">Runs entirely on your machine.</strong>
+            can punch in over your original take. Or write live in VibeLyrics with real-time phonetics. <strong className="text-foreground/80">Runs entirely on your machine.</strong>
           </p>
 
-          <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row gap-3 justify-center items-center">
+          <div className="mt-10 sm:mt-12 flex flex-col sm:flex-row gap-3 justify-center items-center flex-wrap">
+            <Link to="/scribble">
+              <Button size="lg" className="text-base px-8 h-12 bg-amber-500 hover:bg-amber-400 text-black font-semibold shadow-lg shadow-amber-500/20 hover:shadow-amber-500/30 transition-shadow cursor-pointer">
+                <Sparkles className="h-5 w-5 mr-2" />
+                Open VibeLyrics Studio
+              </Button>
+            </Link>
             <Link to="/new">
-              <Button size="lg" className="text-base px-8 h-12 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-shadow">
+              <Button size="lg" variant="outline" className="text-base px-8 h-12">
                 <Mic className="h-5 w-5 mr-2" />
                 Start a Track
               </Button>
             </Link>
             <Link to="/library">
-              <Button size="lg" variant="outline" className="text-base px-8 h-12">
+              <Button size="lg" variant="ghost" className="text-base px-6 h-12">
                 Open Library
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
@@ -159,7 +178,7 @@ function Landing() {
         <section className="max-w-5xl mx-auto px-4 sm:px-6 pb-20 sm:pb-28">
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-center mb-4">How It Works</h2>
           <p className="text-center text-muted-foreground mb-12 max-w-xl mx-auto">
-            From raw vocal take to polished lyrics in four steps.
+            From raw vocal take or spontaneous scribble to polished lyrics in four steps.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
             {STEPS.map(({ num, icon: Icon, title, body }) => (
@@ -208,7 +227,7 @@ function Landing() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <Mic className="h-3.5 w-3.5 text-primary" />
-            <span>VoxScript — open-source, local-first</span>
+            <span>VibeVox — open-source, local-first</span>
           </div>
           <div className="flex items-center gap-4">
             <a

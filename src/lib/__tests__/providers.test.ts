@@ -15,7 +15,7 @@ describe("resolveTarget", () => {
 
   it("attaches OpenRouter attribution headers", () => {
     const t = resolveTarget({ providerId: "openrouter", apiKey: "k" });
-    expect(t.headers["X-Title"]).toBe("VoxScript");
+    expect(t.headers["X-Title"]).toBe("VibeVox");
     expect(t.headers["HTTP-Referer"]).toBeTruthy();
   });
 

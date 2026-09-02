@@ -55,7 +55,7 @@ function AppShell() {
           <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
             <Link to="/library" className="flex items-center gap-2 shrink-0">
               <Mic className="h-5 w-5 text-primary" />
-              <span className="font-display font-semibold">VoxScript</span>
+              <span className="font-display font-semibold">VibeVox</span>
             </Link>
 
             {/* Desktop nav */}
@@ -143,7 +143,7 @@ function AppShell() {
             </div>
           )}
         </header>
-        <main className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
           <Outlet />
         </main>
 

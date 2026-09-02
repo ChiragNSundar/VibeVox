@@ -54,7 +54,7 @@ function openRouterHeaders(): Record<string, string> {
     typeof window !== "undefined" && window.location?.origin
       ? window.location.origin
       : "http://localhost:8080";
-  return { "HTTP-Referer": referer, "X-Title": "VoxScript" };
+  return { "HTTP-Referer": referer, "X-Title": "VibeVox" };
 }
 
 export const PROVIDERS: Record<ProviderId, Provider> = {

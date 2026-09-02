@@ -1,4 +1,4 @@
-# Python dependencies for Vocal Muse (VoxScript)
+# Python dependencies for VibeVox
 # Ingestion pipeline, dictionary builder, and local Whisper server
 
 faster-whisper-server>=0.0.2

@@ -1,4 +1,4 @@
-# Vocal Muse (VoxScript)
+# VibeVox
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-100%25%20Local--First-emerald?style=for-the-badge" alt="Local First" />

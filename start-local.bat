@@ -1,9 +1,9 @@
 @echo off
 setlocal enabledelayedexpansion
-title Vocal Muse (VoxScript) - Smart Pre-Flight Launcher
+title VibeVox - Smart Pre-Flight Launcher
 
 echo ======================================================================
-echo           VOCAL MUSE (VOXSCRIPT) - SMART LOCAL LAUNCHER              
+echo                     VIBEVOX - SMART LOCAL LAUNCHER              
 echo ======================================================================
 echo.
 

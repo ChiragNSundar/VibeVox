@@ -36,6 +36,7 @@ import { ComplexityGauge } from "@/components/track/ComplexityGauge";
 import { SemanticDriftBar } from "@/components/track/SemanticDriftBar";
 import { scoreComplexity, detectSemanticDrift } from "@/lib/diagnostics";
 import { getLineStressAnalysis } from "@/lib/cadence-flow";
+import { countSyllables } from "@/lib/phonetics";
 
 const DRAFT_KEY = "voxscript:scribble-draft";
 const AUTO_SYNC_KEY = "voxscript:scribble-auto-sync";
@@ -281,7 +282,7 @@ function ScribblePage() {
   );
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+    <div className="w-full space-y-4 pt-1 pb-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-5">
         <div>
           <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -438,185 +439,35 @@ function ScribblePage() {
             </div>
           </div>
 
-          {/* COMBINED IN-PLACE CANVAS */}
-          <Card className="p-4 bg-card/70 border-border/80 space-y-3 relative shadow-sm">
+          {/* LEFT: 100% NORMALLY TYPABLE WRITING PAD */}
+          <Card className="p-4 bg-card/70 border-border/80 space-y-3 shadow-sm">
             <div className="flex items-center justify-between pb-2 border-b border-border/50 flex-wrap gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <Sparkles className="h-3.5 w-3.5 text-amber-400" /> VibeLyrics Unified Studio
-                </span>
-                <span className="text-[10px] text-muted-foreground/60 hidden sm:inline font-mono">
-                  (Type & highlight in the same place)
+                <PenLine className="h-3.5 w-3.5 text-primary" />
+                <span className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">
+                  Lyric Writing Pad (Notepad)
                 </span>
               </div>
-
-              <div className="flex items-center gap-2">
-                {liveScheme.name && (
-                  <span className="inline-flex items-center text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary">
-                    🎵 {liveScheme.name}
-                  </span>
-                )}
-                <div className="flex items-center gap-1 bg-background/60 p-0.5 rounded-lg border border-border/60 text-[11px]">
-                  <button
-                    type="button"
-                    onClick={() => setCanvasMode("combined")}
-                    className={`px-2 py-0.5 rounded font-mono transition-all cursor-pointer ${
-                      canvasMode === "combined"
-                        ? "bg-primary text-primary-foreground font-semibold shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    In-Place Canvas
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCanvasMode("scratchpad")}
-                    className={`px-2 py-0.5 rounded font-mono transition-all cursor-pointer ${
-                      canvasMode === "scratchpad"
-                        ? "bg-primary text-primary-foreground font-semibold shadow-xs"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    Bulk Paste
-                  </button>
-                </div>
-              </div>
+              {liveScheme.name && (
+                <span className="text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary">
+                  🎵 {liveScheme.name}
+                </span>
+              )}
             </div>
 
-            {/* In-Place Combined Mode */}
-            {canvasMode === "combined" ? (
-              <div className="space-y-1 font-mono text-sm leading-relaxed">
-                {scribbleLines.length > 0 && scribbleLines.some((l) => l.trim()) ? (
-                  scribbleLines.map((lineText, idx) => {
-                    const item = liveHighlighted[idx];
-                    const isEditing = editingLineIdx === idx;
-                    const stress = scribbleStress[idx];
-
-                    return (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between gap-3 group px-2 py-1 rounded-md hover:bg-muted/40 transition-colors border border-transparent hover:border-border/40"
-                      >
-                        {/* Scheme Badge Gutter */}
-                        <div className="w-7 shrink-0 flex items-center justify-start">
-                          {item?.schemeLetter ? (
-                            <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 ${item.rhymeGroupClass || "text-muted-foreground bg-muted/20"}`}>
-                              {item.schemeLetter}
-                            </span>
-                          ) : (
-                            <span className="text-[10px] text-muted-foreground/40 pl-1">{idx + 1}</span>
-                          )}
-                        </div>
-
-                        {/* In-Place Editor / Live Highlighted Bar */}
-                        <div className="flex-1 min-w-0">
-                          {isEditing ? (
-                            <input
-                              type="text"
-                              autoFocus
-                              value={lineText}
-                              onChange={(e) => {
-                                const newLines = [...scribbleLines];
-                                newLines[idx] = e.target.value;
-                                handleTextChange(newLines.join("\n"));
-                              }}
-                              onBlur={() => setEditingLineIdx(null)}
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  e.preventDefault();
-                                  const newLines = [...scribbleLines];
-                                  newLines.splice(idx + 1, 0, "");
-                                  handleTextChange(newLines.join("\n"));
-                                  setEditingLineIdx(idx + 1);
-                                } else if (e.key === "Backspace" && !lineText && scribbleLines.length > 1) {
-                                  e.preventDefault();
-                                  const newLines = [...scribbleLines];
-                                  newLines.splice(idx, 1);
-                                  handleTextChange(newLines.join("\n"));
-                                  setEditingLineIdx(Math.max(0, idx - 1));
-                                } else if (e.key === "ArrowUp" && idx > 0) {
-                                  e.preventDefault();
-                                  setEditingLineIdx(idx - 1);
-                                } else if (e.key === "ArrowDown" && idx < scribbleLines.length - 1) {
-                                  e.preventDefault();
-                                  setEditingLineIdx(idx + 1);
-                                }
-                              }}
-                              className="w-full bg-background border border-primary/60 px-2 py-0.5 rounded text-sm font-mono focus:outline-none focus:ring-1 focus:ring-primary shadow-inner"
-                            />
-                          ) : (
-                            <div
-                              onClick={() => setEditingLineIdx(idx)}
-                              className="cursor-text select-text break-words py-0.5"
-                              dangerouslySetInnerHTML={{
-                                __html: item?.html || (lineText.trim() ? lineText : "<span class='text-muted-foreground/40 italic'>Empty bar... click to write</span>"),
-                              }}
-                            />
-                          )}
-                        </div>
-
-                        {/* Right Margin: Cadence Dots & Syllables */}
-                        <div className="flex items-center gap-2 shrink-0 font-mono text-[11px] text-muted-foreground/70">
-                          {stress?.chars.length > 0 && (
-                            <span className="hidden sm:flex items-center gap-0.5 text-[8px]" title={`Cadence: ${stress.rawPattern}`}>
-                              {stress.chars.slice(0, 10).map((c, ci) => (
-                                <span key={ci} className={c === "/" ? "text-primary font-bold" : "text-muted-foreground/50"}>
-                                  {c === "/" ? "●" : "○"}
-                                </span>
-                              ))}
-                            </span>
-                          )}
-                          <span className="w-12 text-right text-[10px] text-muted-foreground/70">
-                            {item?.syllables || countSyllables(lineText)} syl
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <div
-                    onClick={() => {
-                      if (!scribbleText.trim()) {
-                        handleTextChange(" ");
-                        setEditingLineIdx(0);
-                      }
-                    }}
-                    className="p-8 text-center text-muted-foreground space-y-2 border border-dashed border-border/50 rounded-lg cursor-pointer hover:border-primary/50 transition-colors"
-                  >
-                    <Sparkles className="h-6 w-6 text-muted-foreground/40 mx-auto" />
-                    <p className="text-xs leading-relaxed">
-                      Click here to write your first bar, or pick a Quick Spark above.
-                    </p>
-                  </div>
-                )}
-
-                <div className="pt-2 flex items-center justify-between">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const newLines = [...scribbleLines, ""];
-                      handleTextChange(newLines.join("\n"));
-                      setEditingLineIdx(newLines.length - 1);
-                    }}
-                    className="text-xs text-primary hover:text-primary/80 font-mono flex items-center gap-1.5 px-2 py-1 rounded bg-primary/10 hover:bg-primary/20 border border-primary/30 transition-colors cursor-pointer"
-                  >
-                    + Add Next Bar (Enter)
-                  </button>
-                  <span className="text-[10px] text-muted-foreground font-mono">
-                    Click any word to explore rhymes
-                  </span>
-                </div>
-              </div>
-            ) : (
-              /* Scratchpad / Bulk Paste Mode */
-              <Textarea
-                placeholder="Paste full lyrics or dump multi-line freestyle here..."
-                value={scribbleText}
-                onChange={(e) => handleTextChange(e.target.value)}
-                rows={Math.max(12, linesCount + 2)}
-                className="font-mono text-sm leading-relaxed resize-none bg-background/50 border border-border/40 focus-visible:ring-1 focus-visible:ring-primary/50 p-3 rounded-md w-full"
-              />
-            )}
+            <Textarea
+              value={scribbleText}
+              onChange={(e) => handleTextChange(e.target.value)}
+              placeholder="Type your bars here normally like a notepad...
+jo chahe mujhe woh chahe
+jo laye mujhe woh gaaye
+na dekhu muskuraate mere hot
+pot gungunaate but you dont see it in my eyes
+because i got quite cries"
+              spellCheck={false}
+              rows={Math.max(14, linesCount + 2)}
+              className="w-full bg-background/50 font-mono text-sm leading-relaxed p-3.5 rounded-md border border-border/60 focus-visible:ring-1 focus-visible:ring-primary/50 resize-none max-h-[580px] studio-scroll overflow-y-auto block"
+            />
 
             <div className="flex items-center justify-between pt-2 border-t text-[11px] text-muted-foreground">
               <div className="flex items-center gap-3 font-mono">
@@ -641,8 +492,138 @@ function ScribblePage() {
           </Button>
         </div>
 
-        {/* Right 5 Columns: Flow Diagnostic, Rhyme Inspector & Sense-Making Output */}
-        <div className="lg:col-span-5 space-y-4">
+        {/* RIGHT COLUMN: Live Phonetic Sound Family Clusters (Side-by-Side) */}
+        <div className="lg:col-span-6 space-y-4">
+          {!result ? (
+            <div className="space-y-4">
+              <Card className="p-4 bg-card/70 border-border/80 space-y-3 shadow-sm">
+                <div className="flex items-center justify-between pb-2 border-b border-border/50 flex-wrap gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                    <span className="text-xs font-mono font-semibold uppercase tracking-wider text-muted-foreground">
+                      Phonetic Sound Family Clusters
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground font-mono">
+                    Click any word to inspect rhymes
+                  </span>
+                </div>
+
+                <div className="max-h-[580px] overflow-y-auto studio-scroll pr-1.5 space-y-2 font-mono text-sm leading-relaxed p-1">
+                  {liveHighlighted.length > 0 && scribbleLines.some((l) => l.trim()) ? (
+                    liveHighlighted.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-start justify-between gap-3 group hover:bg-card/60 px-2 py-1.5 rounded transition-colors"
+                      >
+                        <div className="flex items-baseline gap-2 flex-1 min-w-0 flex-wrap">
+                          {item.schemeLetter && (
+                            <span
+                              className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 shrink-0 self-center ${
+                                item.rhymeGroupClass || "text-muted-foreground bg-muted/20"
+                              }`}
+                            >
+                              {item.schemeLetter}
+                            </span>
+                          )}
+                          <span
+                            className="select-text cursor-pointer break-words leading-relaxed text-sm font-medium"
+                            onClick={(e) => {
+                              const target = (e.target as HTMLElement).closest(".word-hover") as HTMLElement | null;
+                              if (target) {
+                                const w = target.getAttribute("data-word") || target.textContent || "";
+                                if (w.trim()) {
+                                  setRhymeLookupWord(w.trim());
+                                  setRhymeLookupOpen(true);
+                                }
+                              }
+                            }}
+                            dangerouslySetInnerHTML={{ __html: item.html || "&nbsp;" }}
+                          />
+                        </div>
+                        {scribbleLines[idx]?.trim() && (
+                          <div className="flex items-center gap-1.5 shrink-0 font-mono pt-0.5">
+                            {scribbleStress[idx]?.chars.length > 0 && (
+                              <span className="hidden sm:flex items-center gap-0.5 text-[8px]" title={`Cadence: ${scribbleStress[idx]?.rawPattern}`}>
+                                {scribbleStress[idx]?.chars.slice(0, 10).map((c, ci) => (
+                                  <span key={ci} className={c === "/" ? "text-primary font-bold" : "text-muted-foreground/60"}>
+                                    {c === "/" ? "●" : "○"}
+                                  </span>
+                                ))}
+                              </span>
+                            )}
+                            <span className="text-[10px] text-muted-foreground/60">
+                              {item.syllables} syl
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="p-8 text-center text-muted-foreground space-y-2 border border-dashed border-border/50 rounded-lg">
+                      <Sparkles className="h-6 w-6 text-muted-foreground/40 mx-auto" />
+                      <p className="text-xs leading-relaxed">
+                        Type bars on the left to see live rhyme families, syllables, and cadence stress here.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                {/* 6-Channel DHH Color Map Guide */}
+                <div className="pt-3 border-t border-border/40 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[11px] font-mono">
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-yellow-400/10 border border-yellow-400/30">
+                    <span className="w-2.5 h-2.5 rounded bg-yellow-400/50 border border-yellow-400 shrink-0" />
+                    <span className="text-yellow-300 font-medium text-[10px]">/aɪ/ Diphthong</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-cyan-400/10 border border-cyan-400/30">
+                    <span className="w-2.5 h-2.5 rounded bg-cyan-400/50 border border-cyan-400 shrink-0" />
+                    <span className="text-cyan-300 font-medium text-[10px]">Consonance & Nasal</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-red-400/10 border border-red-400/30">
+                    <span className="w-2.5 h-2.5 rounded bg-red-400/50 border border-red-400 shrink-0" />
+                    <span className="text-red-300 font-medium text-[10px]">/eː/ Rhyme Verbs</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-green-400/10 border border-green-400/30">
+                    <span className="w-2.5 h-2.5 rounded bg-green-400/50 border border-green-400 shrink-0" />
+                    <span className="text-green-300 font-medium text-[10px]">/ɑː/ Anchor</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-pink-400/10 border border-pink-400/30">
+                    <span className="w-2.5 h-2.5 rounded bg-pink-400/50 border border-pink-400 shrink-0" />
+                    <span className="text-pink-300 font-medium text-[10px]">/iː/ High-Front</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 p-1.5 rounded bg-orange-400/10 border border-orange-400/30">
+                    <span className="w-2.5 h-2.5 rounded bg-orange-400/50 border border-orange-400 shrink-0" />
+                    <span className="text-orange-300 font-medium text-[10px]">/oʊ/ Back Vowels</span>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Flow Architecture Insight Card */}
+              {liveFlowInsight && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 text-xs text-amber-200/90 font-mono space-y-2 animate-in fade-in shadow-sm">
+                  <div className="flex items-center gap-1.5 font-semibold text-amber-400">
+                    <Sparkles className="h-4 w-4" />
+                    <span>{liveFlowInsight.title}</span>
+                  </div>
+                  <p className="text-[11px] leading-relaxed opacity-90">{liveFlowInsight.message}</p>
+                  <div className="flex flex-wrap gap-1.5 pt-1">
+                    {liveFlowInsight.suggestions.map((sug, si) => (
+                      <button
+                        key={si}
+                        type="button"
+                        onClick={() => {
+                          const lines = [...scribbleLines];
+                          lines[liveFlowInsight.lineIdx] = sug.replace(/\s*\([^)]*\)/, "");
+                          handleTextChange(lines.join("\n"));
+                        }}
+                        className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] transition-colors cursor-pointer"
+                      >
+                        {sug}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
           {!result ? (
             <div className="space-y-4">
               {/* Flow Architecture Insight Card */}
