@@ -3,12 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Sparkles, Mic, Activity } from "lucide-react";
 import { endRhymeKey, countSyllables, classifyScheme, rhymeScheme } from "@/lib/phonetics";
+import { getLineStressAnalysis } from "@/lib/cadence-flow";
 
 export type BarPocketItem = {
   index: number;
   text: string;
   syllables?: number;
   endSound?: string;
+  stressPattern?: string;
 };
 
 type PocketGridProps = {
@@ -41,6 +43,9 @@ export function PocketGrid({ bars, targetSyllables = 8, title = "Pocket & Flow V
   const items = bars.map((b) => {
     const syl = b.syllables ?? countSyllables(b.text);
     const rime = b.endSound ?? endRhymeKey(b.text) ?? "free";
+    const stressAnalysis = b.stressPattern
+      ? { chars: b.stressPattern.replace(/[^/x]/g, "").split("") as ("/" | "x")[], rawPattern: b.stressPattern }
+      : getLineStressAnalysis(b.text);
 
     if (!rimeColorMap.has(rime)) {
       rimeColorMap.set(rime, COLOR_PALETTE[paletteIdx % COLOR_PALETTE.length]);
@@ -51,7 +56,7 @@ export function PocketGrid({ bars, targetSyllables = 8, title = "Pocket & Flow V
     const diff = Math.abs(syl - targetSyllables);
     const inPocket = diff <= 1;
 
-    return { ...b, syl, rime, colorClass, inPocket };
+    return { ...b, syl, rime, colorClass, inPocket, stressAnalysis };
   });
 
   const inPocketCount = items.filter((i) => i.inPocket).length;
@@ -88,6 +93,18 @@ export function PocketGrid({ bars, targetSyllables = 8, title = "Pocket & Flow V
               <span className="truncate text-foreground font-sans text-xs">{item.text}</span>
             </div>
             <div className="flex items-center gap-1.5 flex-shrink-0">
+              {item.stressAnalysis.chars.length > 0 && (
+                <span
+                  className="hidden md:flex items-center gap-0.5 px-1 py-0.5 rounded bg-muted/40 text-[8px] font-mono"
+                  title={`Stress: ${item.stressAnalysis.rawPattern}`}
+                >
+                  {item.stressAnalysis.chars.slice(0, 8).map((c, i) => (
+                    <span key={i} className={c === "/" ? "text-primary font-bold" : "text-muted-foreground/60"}>
+                      {c === "/" ? "●" : "○"}
+                    </span>
+                  ))}
+                </span>
+              )}
               <span
                 className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border ${
                   item.inPocket ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" : "bg-muted text-muted-foreground border-border"

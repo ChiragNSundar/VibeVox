@@ -14,8 +14,11 @@ import {
   Undo2, Redo2, CheckSquare, Copy, Keyboard, AlertTriangle, Sparkles,
 } from "lucide-react";
 import { ExportMenu } from "./ExportMenu";
+import { ComplexityGauge } from "./ComplexityGauge";
+import { SemanticDriftBar } from "./SemanticDriftBar";
 import type { LocalLyrics } from "@/lib/local-pipeline";
 import type { RhymeVisionMode } from "@/lib/rhyme-highlighter";
+import type { ComplexityScoreResult, SemanticDriftResult } from "@/lib/diagnostics";
 import { toPlainText } from "@/lib/exports";
 import { toast } from "sonner";
 
@@ -32,6 +35,8 @@ export type TrackToolbarProps = {
   selectMode: boolean;
   rhymeVision?: RhymeVisionMode;
   stanzaSchemeName?: string;
+  complexityResult?: ComplexityScoreResult | null;
+  semanticDrift?: SemanticDriftResult | null;
   onSetRhymeVision?: (mode: RhymeVisionMode) => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -42,7 +47,9 @@ export type TrackToolbarProps = {
 export function TrackToolbar({
   lyrics, cadence, bpm, scheme, warnings,
   undoStack, redoStack, selectMode,
-  rhymeVision = "standard", stanzaSchemeName, onSetRhymeVision,
+  rhymeVision = "standard", stanzaSchemeName,
+  complexityResult, semanticDrift,
+  onSetRhymeVision,
   onUndo, onRedo, onToggleSelectMode, onExitSelectMode,
 }: TrackToolbarProps) {
   const copyAll = async () => {
