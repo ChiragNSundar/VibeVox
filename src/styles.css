@@ -137,19 +137,19 @@
   transition: all 0.15s ease;
 }
 
-/* 12 studio-curated harmonious hues */
-.rhyme-group-1  { border-color: #f2a65a; background: rgba(242, 166, 90, 0.18); color: #fed7aa; } /* Warm Amber */
-.rhyme-group-2  { border-color: #38bdf8; background: rgba(56, 189, 248, 0.18); color: #bae6fd; } /* Sky Cyan */
-.rhyme-group-3  { border-color: #f87171; background: rgba(248, 113, 113, 0.18); color: #fecaca; } /* Coral Red */
-.rhyme-group-4  { border-color: #818cf8; background: rgba(129, 140, 248, 0.18); color: #c7d2fe; } /* Indigo */
-.rhyme-group-5  { border-color: #34d399; background: rgba(52, 211, 153, 0.18); color: #a7f3d0; } /* Emerald */
-.rhyme-group-6  { border-color: #fb923c; background: rgba(251, 146, 60, 0.18); color: #fed7aa; } /* Sunset Orange */
-.rhyme-group-7  { border-color: #f472b6; background: rgba(244, 114, 182, 0.18); color: #fbcfe8; } /* Fuchsia Pink */
+/* 6 Primary Hip-Hop Phonetic Channels + Extended Hues */
+.rhyme-group-1  { border-color: #facc15; background: rgba(250, 204, 21, 0.20); color: #fef08a; } /* Yellow: Long /aɪ/ Diphthong & Particles (hai, die, side, life, se, ke) */
+.rhyme-group-2  { border-color: #06b6d4; background: rgba(6, 182, 212, 0.20); color: #a5f3fc; } /* Cyan: Consonance, Internal Pairs & Nasal (-aya, jale/gale, mind/grind) */
+.rhyme-group-3  { border-color: #ef4444; background: rgba(239, 68, 68, 0.20); color: #fecaca; } /* Red: Mid-Front Verbs & Plosives (sehna, kehna, dekha, pe, par) */
+.rhyme-group-4  { border-color: #22c55e; background: rgba(34, 197, 94, 0.20); color: #bbf7d0; } /* Green: Open Central /ɑː/ & /ə/ Anchors (na, tha, ka, raasta, mera) */
+.rhyme-group-5  { border-color: #ec4899; background: rgba(236, 72, 153, 0.22); color: #fbcfe8; } /* Magenta/Pink: High-Front /iː/ & /ɪ/ (nahi, sahi, kabhi, bhi, peak, seekh) */
+.rhyme-group-6  { border-color: #f97316; background: rgba(249, 115, 22, 0.20); color: #fed7aa; } /* Orange: Back Vowels /oʊ/, /uː/ (woh, bro, churiyon, tu, do) */
+.rhyme-group-7  { border-color: #818cf8; background: rgba(129, 140, 248, 0.18); color: #c7d2fe; } /* Indigo */
 .rhyme-group-8  { border-color: #c084fc; background: rgba(192, 132, 252, 0.18); color: #e9d5ff; } /* Lavender */
 .rhyme-group-9  { border-color: #fb7185; background: rgba(251, 113, 133, 0.18); color: #fecdd3; } /* Rose */
 .rhyme-group-10 { border-color: #a3e635; background: rgba(163, 230, 53, 0.18); color: #d9f99d; } /* Lime */
 .rhyme-group-11 { border-color: #2dd4bf; background: rgba(45, 212, 191, 0.18); color: #99f6e4; } /* Teal */
-.rhyme-group-12 { border-color: #facc15; background: rgba(250, 204, 21, 0.18); color: #fef08a; } /* Yellow */
+.rhyme-group-12 { border-color: #fb923c; background: rgba(251, 146, 60, 0.18); color: #fed7aa; } /* Amber */
 
 /* Near / Slant Rhymes (dashed bottom border) */
 .near-rhyme {

@@ -129,4 +129,52 @@ describe("Rhyme Highlighter Engine", () => {
     expect(res[0].html).toContain("rhyme-word");
     expect(res[1].html).toContain("rhyme-word");
   });
+
+  it("highlights 5-line complex multi with AABA macro scheme and 4-count internal monorhyme", () => {
+    const lines = [
+      "soch mera do or die",
+      "mind pe hai homicide",
+      "grind pe na life kare",
+      "par kabhi na side par hai",
+      "guys fuys luys buys",
+    ];
+
+    const scheme = getStanzaRhymeScheme(lines);
+    expect(scheme.lineLetters).toEqual(["A", "A", "B", "A", "C"]);
+    expect(scheme.raw).toBe("AABA");
+
+    const res = highlightLyrics(lines, "standard");
+    expect(res.length).toBe(5);
+
+    // Scheme letters on lines
+    expect(res[0].schemeLetter).toBe("A");
+    expect(res[1].schemeLetter).toBe("A");
+    expect(res[2].schemeLetter).toBe("B");
+    expect(res[3].schemeLetter).toBe("A");
+    expect(res[4].schemeLetter).toBe("C");
+
+    // Unified 3-syllable mosaic pills
+    expect(res[0].html).toContain("mosaic-pill");
+    expect(res[0].html).toContain("do or die");
+    expect(res[1].html).toContain("mosaic-pill");
+    expect(res[1].html).toContain("homicide");
+    expect(res[3].html).toContain("mosaic-pill");
+    expect(res[3].html).toContain("side par hai");
+
+    // Channel 2 (Cyan/Blue): mind & grind & guys, buys
+    expect(res[1].html).toContain("mind");
+    expect(res[2].html).toContain("grind");
+    expect(res[4].html).toContain("rhyme-group-2");
+
+    // Line 5 syllable count: 4 single-syllable words
+    expect(res[4].syllables).toBe(4);
+
+    // Channel 3 (Red/Pink): pe and par
+    expect(res[1].html).toContain("rhyme-group-3"); // pe
+    expect(res[3].html).toContain("rhyme-group-3"); // par
+
+    // Channel 4 (Green): mera, na, kabhi, kare
+    expect(res[0].html).toContain("rhyme-group-4"); // mera
+    expect(res[2].html).toContain("rhyme-group-4"); // na
+  });
 });

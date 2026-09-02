@@ -198,6 +198,10 @@ function ScribblePage() {
     () => getStanzaRhymeScheme(scribbleLines.filter((l) => l.trim())),
     [scribbleLines]
   );
+  const liveFlowInsight = useMemo(
+    () => detectFlowInsight(scribbleLines.filter((l) => l.trim())),
+    [scribbleLines]
+  );
 
   const scribbleComplexity = useMemo(() => {
     const valid = scribbleLines.filter((l) => l.trim().length > 0);
@@ -408,6 +412,32 @@ function ScribblePage() {
                     ))}
                   </div>
                 ) : null}
+
+                {liveFlowInsight && (
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-md p-2.5 text-xs text-amber-200/90 font-mono space-y-1.5 animate-in fade-in">
+                    <div className="flex items-center gap-1.5 font-semibold text-amber-400">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      <span>{liveFlowInsight.title}</span>
+                    </div>
+                    <p className="text-[11px] leading-relaxed opacity-90">{liveFlowInsight.message}</p>
+                    <div className="flex flex-wrap gap-1.5 pt-0.5">
+                      {liveFlowInsight.suggestions.map((sug, si) => (
+                        <button
+                          key={si}
+                          type="button"
+                          onClick={() => {
+                            const lines = [...scribbleLines];
+                            lines[liveFlowInsight.lineIdx] = sug.replace(/\s*\([^)]*\)/, "");
+                            handleTextChange(lines.join("\n"));
+                          }}
+                          className="px-2 py-0.5 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[10px] transition-colors cursor-pointer"
+                        >
+                          {sug}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 <Textarea
                   placeholder="Type your bars here to see rhymes and syllables highlight live..."
