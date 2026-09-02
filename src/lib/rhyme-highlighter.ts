@@ -139,6 +139,11 @@ export function wordToPhones(word: string): string[] {
     lot: ["L", "AA1", "T"],
     see: ["S", "IY1"],
     sea: ["S", "IY1"],
+    cadence: ["K", "EY1", "D", "EH0", "N", "S"],
+    ends: ["EH1", "N", "D", "Z"],
+    bends: ["B", "EH1", "N", "D", "Z"],
+    paid: ["P", "EY1", "D"],
+    make: ["M", "EY1", "K"],
   };
 
   if (COMMON_PHONETIC_DICT[clean]) {
@@ -491,6 +496,7 @@ function isCompatibleRhymeVowel(v1: string, v2: string): boolean {
   if (v1 === v2) return true;
   if ((v1 === "IH" && v2 === "IY") || (v1 === "IY" && v2 === "IH")) return true;
   if ((v1 === "EH" && v2 === "AE") || (v1 === "AE" && v2 === "EH")) return true;
+  if ((v1 === "EH" && v2 === "AH") || (v1 === "AH" && v2 === "EH")) return true;
   if ((v1 === "AH" && v2 === "AA") || (v1 === "AA" && v2 === "AH")) return true;
   if ((v1 === "UH" && v2 === "UW") || (v1 === "UW" && v2 === "UH")) return true;
   if ((v1 === "AO" && v2 === "OW") || (v1 === "OW" && v2 === "AO")) return true;
