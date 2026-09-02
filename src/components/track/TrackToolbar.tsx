@@ -5,16 +5,17 @@
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu, DropdownMenuTrigger, DropdownMenuContent,
-  DropdownMenuLabel, DropdownMenuSeparator,
+  DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import {
   Tooltip, TooltipContent, TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  Undo2, Redo2, CheckSquare, Copy, Keyboard, AlertTriangle,
+  Undo2, Redo2, CheckSquare, Copy, Keyboard, AlertTriangle, Sparkles,
 } from "lucide-react";
 import { ExportMenu } from "./ExportMenu";
 import type { LocalLyrics } from "@/lib/local-pipeline";
+import type { RhymeVisionMode } from "@/lib/rhyme-highlighter";
 import { toPlainText } from "@/lib/exports";
 import { toast } from "sonner";
 
@@ -29,6 +30,9 @@ export type TrackToolbarProps = {
   undoStack: { label: string }[];
   redoStack: { label: string }[];
   selectMode: boolean;
+  rhymeVision?: RhymeVisionMode;
+  stanzaSchemeName?: string;
+  onSetRhymeVision?: (mode: RhymeVisionMode) => void;
   onUndo: () => void;
   onRedo: () => void;
   onToggleSelectMode: () => void;
@@ -38,6 +42,7 @@ export type TrackToolbarProps = {
 export function TrackToolbar({
   lyrics, cadence, bpm, scheme, warnings,
   undoStack, redoStack, selectMode,
+  rhymeVision = "standard", stanzaSchemeName, onSetRhymeVision,
   onUndo, onRedo, onToggleSelectMode, onExitSelectMode,
 }: TrackToolbarProps) {
   const copyAll = async () => {
@@ -49,6 +54,11 @@ export function TrackToolbar({
     <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
       <div className="flex items-center gap-2 flex-wrap">
         <h2 className="font-display font-semibold">Lyrics</h2>
+        {stanzaSchemeName && (
+          <span className="inline-flex items-center text-[10px] font-mono font-medium px-2 py-0.5 rounded border border-primary/40 bg-primary/10 text-primary" title="Detected Rhyme Scheme Pattern">
+            🎵 {stanzaSchemeName}
+          </span>
+        )}
         {warnings.length > 0 && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -65,7 +75,35 @@ export function TrackToolbar({
           </Tooltip>
         )}
       </div>
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 flex-wrap">
+        {onSetRhymeVision && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-xs h-8 px-2 gap-1.5" title="Rhyme Vision Level">
+                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                <span className="hidden sm:inline">Vision:</span>
+                <strong className="capitalize">{rhymeVision}</strong>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel className="text-xs font-mono">Rhyme Vision</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => onSetRhymeVision("clean")}>
+                Clean (No highlights)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onSetRhymeVision("standard")}>
+                Standard (End-rhymes & multi-syl glow)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onSetRhymeVision("deep")}>
+                Deep (Slant & internal rhymes)
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onSetRhymeVision("all")}>
+                All (Full assonance/consonance)
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button
