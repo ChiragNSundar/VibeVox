@@ -331,6 +331,21 @@ function TrackPage() {
   const focusedBarRef = useRef<number | null>(null);
   useEffect(() => { focusedBarRef.current = focusedBar; }, [focusedBar]);
 
+  // Rhyme Vision & Highlighting state
+  const [rhymeVision, setRhymeVision] = useState<RhymeVisionMode>("standard");
+  const [rhymeLookupWord, setRhymeLookupWord] = useState("");
+  const [rhymeLookupOpen, setRhymeLookupOpen] = useState(false);
+
+  const highlightedResults = useMemo(() => {
+    if (!flatLines.length) return [];
+    return highlightLyrics(flatLines, rhymeVision);
+  }, [flatLines, rhymeVision]);
+
+  const stanzaScheme = useMemo(() => {
+    if (!flatLines.length) return { raw: "", name: "", lineLetters: [], colors: [] };
+    return getStanzaRhymeScheme(flatLines);
+  }, [flatLines]);
+
   // Auto-harvest into style memory when the track scores Drake-tier.
   useEffect(() => {
     if (!lyrics || !trackData || trackData.status !== "done") return;
@@ -369,6 +384,42 @@ function TrackPage() {
       quality: typeof newQualityObj === "string" ? newQualityObj : JSON.stringify(newQualityObj ?? t?.quality ?? quality ?? {}),
       styleBrief: typeof t?.styleBrief === "string" ? t.styleBrief : JSON.stringify(t?.styleBrief ?? styleBrief ?? {}),
     };
+  };
+
+  const updateBarText = async (barIndex: number, newText: string) => {
+    if (!lyrics) return;
+    const currentLine = flatLines[barIndex] || "";
+    if (currentLine.trim() === newText.trim()) return;
+    try {
+      if (isLocalTrack) {
+        let lineIdx = 0;
+        let found = false;
+        for (const section of lyrics.sections) {
+          for (let i = 0; i < section.lines.length; i++) {
+            if (lineIdx === barIndex) {
+              section.lines[i] = newText;
+              found = true;
+              break;
+            }
+            lineIdx++;
+          }
+          if (found) break;
+        }
+        const updatedTrack = getUpdatedLocalTrack(lyrics);
+        await putLocalTrack(updatedTrack);
+      } else {
+        await updateFn({ data: { deviceId: getDeviceId(), trackId: id, barIndex, text: newText } });
+      }
+      const before = local;
+      const prevHist = before.history[barIndex] ?? [];
+      const entry: BarVersion = { text: currentLine, ts: Date.now(), source: "manual" };
+      const nextHist = [entry, ...prevHist].slice(0, 12);
+      setLocal((s) => ({ ...s, history: { ...s.history, [barIndex]: nextHist } }));
+      qc.invalidateQueries({ queryKey: ["track", id] });
+      toast.success("Bar updated");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to update bar");
+    }
   };
 
   const regenerate = async (override?: StyleBrief) => {
@@ -1007,6 +1058,9 @@ function TrackPage() {
               undoStack={undoStack}
               redoStack={redoStack}
               selectMode={selectMode}
+              rhymeVision={rhymeVision}
+              stanzaSchemeName={stanzaScheme.name}
+              onSetRhymeVision={setRhymeVision}
               onUndo={doUndo}
               onRedo={doRedo}
               onToggleSelectMode={() => setSelectMode(true)}
@@ -1016,7 +1070,7 @@ function TrackPage() {
               <div className="mb-4 flex items-center justify-between text-xs text-muted-foreground border-b border-border pb-2">
                 <span>
                   {selectedBars.size} bar{selectedBars.size === 1 ? "" : "s"} selected
-                  {" Â· "}locked bars are skipped
+                  {" · "}locked bars are skipped
                 </span>
                 <div className="flex gap-2">
                   <button onClick={selectAllBars} className="hover:text-foreground underline-offset-2 hover:underline">Select all</button>
@@ -1056,6 +1110,10 @@ function TrackPage() {
                           selected={selectedBars.has(idx)}
                           focused={focusedBar === idx}
                           repeatWarn={badBarSet.has(idx)}
+                          highlightedHtml={highlightedResults[idx]?.html}
+                          schemeLetter={highlightedResults[idx]?.schemeLetter}
+                          rhymeGroupClass={highlightedResults[idx]?.rhymeGroupClass}
+                          hasInternalRhyme={highlightedResults[idx]?.hasInternalRhyme}
                           onFocus={() => setFocusedBar(idx)}
                           onToggleSelect={() => toggleBarSelected(idx)}
                           onRewrite={(opts) => runBarRewrite(idx, line, opts, "replace")}
@@ -1065,6 +1123,11 @@ function TrackPage() {
                           onRevert={() => revertProposal(idx)}
                           onToggleLock={() => toggleLock(idx)}
                           onRestore={(v) => restoreVersion(idx, v, line)}
+                          onWordClick={(word) => {
+                            setRhymeLookupWord(word);
+                            setRhymeLookupOpen(true);
+                          }}
+                          onUpdateLine={(newLine) => updateBarText(idx, newLine)}
                         />
                       );
                     })}
@@ -1072,6 +1135,12 @@ function TrackPage() {
                 </div>
               ))}
             </div>
+
+            <RhymeLookup
+              open={rhymeLookupOpen}
+              onOpenChange={setRhymeLookupOpen}
+              defaultWord={rhymeLookupWord}
+            />
           </Card>
         )}
 
