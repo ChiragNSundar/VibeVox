@@ -2,7 +2,7 @@
 // sound-alike / semantic hits. Powered by Datamuse (free) or a custom
 // local endpoint. Also deep-links to RhymeWave for phonetic exploration.
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
