@@ -363,6 +363,16 @@ export function BarRow({
         </div>
       </div>
 
+      {(focused || barSelected) && stressPattern && (
+        <StressTimeline
+          pattern={stressPattern}
+          overrides={stressOverride}
+          onToggleNode={(sylIdx) => onToggleStressOverride?.(barIndex, sylIdx)}
+          onResetOverrides={() => onResetStressOverrides?.(barIndex)}
+          syllableCount={got}
+        />
+      )}
+
       {proposal && (
         <div className="mt-1 mb-2 ml-2 pl-3 border-l-2 border-primary/60 bg-primary/5 rounded-r-md py-2 pr-2">
           <div className="flex items-center justify-between mb-1">
