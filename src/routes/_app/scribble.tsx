@@ -30,6 +30,8 @@ import {
   type ScribbleResult,
 } from "@/lib/scribble-synthesizer";
 import { countSyllables } from "@/lib/lyrics-analysis";
+import { highlightLyrics, getStanzaRhymeScheme, type RhymeVisionMode } from "@/lib/rhyme-highlighter";
+import { RhymeLookup } from "@/components/RhymeLookup";
 
 const DRAFT_KEY = "voxscript:scribble-draft";
 const AUTO_SYNC_KEY = "voxscript:scribble-auto-sync";
@@ -58,6 +60,10 @@ function ScribblePage() {
   const navigate = useNavigate();
   const [isPending, startTransition] = useTransition();
   const [scribbleText, setScribbleText] = useState("");
+  const [rhymeVision, setRhymeVision] = useState<RhymeVisionMode>("standard");
+  const [scribbleViewMode, setScribbleViewMode] = useState<"live" | "raw">("live");
+  const [rhymeLookupWord, setRhymeLookupWord] = useState("");
+  const [rhymeLookupOpen, setRhymeLookupOpen] = useState(false);
   const [mode, setMode] = useState<ScribbleMode>("full-song");
   const [autoSync, setAutoSync] = useState(true);
   const [zeroAiMode, setZeroAiMode] = useState(false);
