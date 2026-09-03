@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Mic, Library as LibraryIcon, Plus, Settings as SettingsIcon,
-  Cpu, Fingerprint as FingerprintIcon, Radio, Menu, X, Brain as BrainIcon, PenLine as ScribbleIcon, Sparkles, BookOpen,
+  Cpu, Fingerprint as FingerprintIcon, Radio, Menu, X, Brain as BrainIcon, PenLine as ScribbleIcon, Sparkles, BookOpen, BarChart3,
 } from "lucide-react";
 import { LocalStatusPill } from "@/components/LocalStatusPill";
 import { KeyboardShortcutsOverlay } from "@/components/KeyboardShortcutsOverlay";
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { to: "/library",    icon: LibraryIcon,      label: "Library" },
   { to: "/scribble",   icon: Sparkles,         label: "VibeLyrics", badge: "NEW" },
   { to: "/journal",    icon: BookOpen,         label: "Journal" },
+  { to: "/stats",      icon: BarChart3,        label: "Stats" },
   { to: "/brain",      icon: BrainIcon,        label: "Brain" },
   { to: "/references", icon: FingerprintIcon,  label: "References" },
   { to: "/connect",    icon: Cpu,              label: "Connect" },
