@@ -8,7 +8,7 @@ import { loadLlmConfig, chatTarget } from "./llm-config";
 import { resolveTarget, applyBodyCompat } from "./providers";
 import { countSyllables, endRhymeKey } from "./lyrics-analysis";
 import { synthesizeMetaphors } from "./metaphor-synthesizer";
-import { cmudictNearRhymes } from "./cmudict-rhymes";
+import { findRhymes } from "./cmudict-rhymes";
 
 export interface ScoredPunchline {
   line: string;
@@ -111,13 +111,13 @@ export function scorePunchline(line: string): {
 /**
  * Algorithmic zero-LLM punchline fallback.
  */
-function generateAlgorithmicPunchlines(
+async function generateAlgorithmicPunchlines(
   setup: string,
   mood: string = "confident"
-): ScoredPunchline[] {
+): Promise<ScoredPunchline[]> {
   const words = setup.trim().split(/\s+/).filter(Boolean);
   const anchorWord = words[words.length - 1]?.toLowerCase() || setup.toLowerCase();
-  const rhymes = cmudictNearRhymes(anchorWord).slice(0, 5);
+  const rhymes = await findRhymes(anchorWord).catch(() => []);
   const metaphor = synthesizeMetaphors(setup, [mood]);
 
   const candidates: ScoredPunchline[] = [];
@@ -135,14 +135,13 @@ function generateAlgorithmicPunchlines(
   }
 
   // Metaphor-based punchlines
-  if (metaphor.rawThemes.length > 0) {
-    candidates.push({
-      line: `Watch the table turn like ${metaphor.suggestedMetaphors[0] || "spinning rims"}, heavy on the crown.`,
-      score: 82,
-      techniques: ["Reversal", "Imagery"],
-      explanation: "Theme-driven metaphor punch",
-    });
-  }
+  const visualMeta = metaphor.sensoryDomains.visual[0] || "shadows on the blinds";
+  candidates.push({
+    line: `Watch the table turn like ${visualMeta}, heavy on the crown.`,
+    score: 82,
+    techniques: ["Reversal", "Imagery"],
+    explanation: "Theme-driven metaphor punch",
+  });
 
   candidates.push({
     line: `They talked about ${setup}, but they forgot the second meaning.`,
@@ -232,7 +231,7 @@ Rules:
   }
 
   return {
-    punchlines: generateAlgorithmicPunchlines(setup, mood),
+    punchlines: await generateAlgorithmicPunchlines(setup, mood),
     source: "algorithmic",
   };
 }
