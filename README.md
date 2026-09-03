@@ -158,6 +158,57 @@ flowchart TD
 
 ---
 
+## 📸 Interface Showcase & Visual Tour
+
+Explore the studios, creative instruments, and analytics dashboards inside **VibeVox**:
+
+### 1. VibeLyrics Studio & 6-Channel Rhyme Vision (`/scribble`)
+*Distraction-free typing notepad paired with real-time phoneme clustering, Matra prosody analysis, and 1-click structure blueprints.*
+
+![VibeLyrics Studio](public/screenshots/vibelyrics_studio.png)
+
+### 2. Studio Arsenal: Punchline & Double Entendre Engine
+*Generate witty setups, homophones, and metaphorical twists with scoring badges (0-100 pts) and 1-click drop into your writing pad.*
+
+![Studio Arsenal Drawer](public/screenshots/studio_arsenal_drawer.png)
+
+### 3. Writer's Headspace & Private Journal (`/journal`)
+*100% local-first emotional state diary with mood categorization, hashtagging, and semantic RAG injection for your AI ghostwriter.*
+
+![Writer's Headspace](public/screenshots/writers_headspace_journal.png)
+
+### 4. In-Studio Quick Headspace Drawer
+*Slide-out thought-drop drawer accessible from any active studio session without breaking your creative flow.*
+
+![Quick Headspace Drawer](public/screenshots/quick_headspace_drawer.png)
+
+### 5. Lyrical Evolution & Stats Dashboard (`/stats`)
+*Interactive Recharts visualizations of your cadence pocket distribution, session volume progression, vocabulary diversity ratio, and signature rhyme families.*
+
+![Lyrical Evolution & Stats Dashboard](public/screenshots/lyrical_stats_dashboard.png)
+
+### 6. Live Punch-In Studio (`/live`)
+*Real-time vocal capture with latency-compensated bar slicing, Web Audio oscilloscope visualizer, and tempo metronome pulse ring.*
+
+![Live Punch-In Studio](public/screenshots/live_punch_in.png)
+
+### 7. Cadence Pocket Grid & Virtualized Lyrics Editor (`/track/:id`)
+*Interactive lyric editor with real-time cadence density highlighting, syllable count matching, and rhyme scheme visualization.*
+
+![Cadence Pocket Grid](public/screenshots/lyrics_pocket_grid.png)
+
+### 8. Ghostwriter Scorecard & Critic Council
+*Multi-pass cadence scorecard, radar chart breakdown (Pocket, Wordplay, Authenticity), and automated rewrite suggestions.*
+
+![Ghostwriter Scorecard](public/screenshots/ghostwriter_scorecard.png)
+
+### 9. Connect Hub: Local AI & Hosted Gateways (`/connect`)
+*Auto-scan and connect local LLM servers (LM Studio, Ollama) and Whisper STT servers with zero cloud requirement.*
+
+![Connect Local AI](public/screenshots/connect_local_ai.png)
+
+---
+
 ## 📁 Codebase Structure & Directory Layout
 
 ```
