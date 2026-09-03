@@ -20,7 +20,16 @@ for f in det_result.get('files', {}).get('code', []):
     else:
         code_files.append(p)
 
+code_files = [
+    f for f in code_files 
+    if f.suffix in ['.ts', '.tsx', '.js', '.py'] 
+    and 'public' not in str(f) 
+    and 'node_modules' not in str(f) 
+    and '.output' not in str(f)
+]
+
 if code_files:
+    print(f"Extracting AST across {len(code_files)} source files...")
     ast_result = extract(code_files, cache_root=scan_root, parallel=False)
     Path('graphify-out/.graphify_ast.json').write_text(json.dumps(ast_result, indent=2, ensure_ascii=False), encoding='utf-8')
     print(f"AST: {len(ast_result['nodes'])} nodes, {len(ast_result['edges'])} edges")
