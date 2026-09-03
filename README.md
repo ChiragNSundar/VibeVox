@@ -6,39 +6,58 @@
   <img src="https://img.shields.io/badge/TanStack-Start%20v1-orange?style=for-the-badge" alt="TanStack Start" />
   <img src="https://img.shields.io/badge/Vite-7-purple?style=for-the-badge&logo=vite" alt="Vite 7" />
   <img src="https://img.shields.io/badge/Tailwind-v4-cyan?style=for-the-badge&logo=tailwindcss" alt="Tailwind v4" />
+  <img src="https://img.shields.io/badge/Tests-149%20Passing-brightgreen?style=for-the-badge" alt="Tests" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License MIT" />
 </p>
 
-An open-source, local-first studio workspace for vocalists, songwriters, and producers. **VibeVox** turns mumble freestyles and scribbles into Drake/Kendrick/Seedhe Maut/Brodha V-tier polished lyrics, maps audio cadences in real-time, and builds a personalized style memory—all running **100% offline** on your local machine with zero cloud lock-in.
+An open-source, local-first studio workspace for vocalists, songwriters, and producers. **VibeVox** turns mumble freestyles and loose scribbles into polished lyrics, maps audio cadences in real-time, powers multi-level artistic RAG, and tracks your lyrical evolution—all running **100% offline** on your machine with zero cloud lock-in.
 
 ---
 
-## 💡 Inspiration: VoxSketch AI
+## 💡 Inspiration: VoxSketch AI & VibeLyrics
 
-**VibeVox** is heavily inspired by **[VoxSketch AI](https://voxsketch.com/)**, pioneering the concept of turning raw vocal mumble recordings and spontaneous freestyles into structured, cadence-matched song lyrics.
+**VibeVox** merges two powerful paradigms:
+1. **[VoxSketch AI](https://voxsketch.com/)**: Turning raw vocal mumble recordings and spontaneous freestyles into structured, cadence-matched song lyrics.
+2. **VibeLyrics**: Advanced rap analytics, private emotional headspace RAG journaling, intelligent punchline/double-entendre generation, and anthemic hook synthesis.
 
-While cloud-based tools rely on remote APIs and subscription credits, **VibeVox** brings this workflow to the open-source community as a **100% local-first application**. Your audio recordings, vocal takes, and style memory never leave your device.
+While cloud-based tools rely on remote APIs and monthly credits, **VibeVox** brings this complete workflow to your device as a **100% local-first application**. Your recordings, private diary reflections, and lyrical style memories never leave your machine.
 
 ---
 
-## ✨ Features & Multilingual Intelligence
+## ✨ Features & Studio Superpowers
 
-- ✨ **VibeLyrics Studio & Side-by-Side Notepad**: Distraction-free typable notepad coupled side-by-side with live 6-channel DHH phonetic vision, Matra prosody counting, triplet pocket rolls, micro-caesura breath markers, and compound rhyme bounding boxes.
+### 1. ⚡ VibeLyrics Studio & Flagship 4-Superpowers
+- **Scribble-to-Song Synthesizer**: Paste fragments, ideas, or half-baked punchlines. Select a structure mode (*Full Song*, *16-Bar Verse*, *Hook Anthem*, *Rhyme Couplets*) to instantly generate structured, cadence-locked song blueprints.
+- **6-Channel Phonetic Rhyme Vision**: Real-time phoneme clustering coloring assonance, consonants, and compound family rhymes directly as you type.
+- **Matra Prosody & Stress Matrix**: Indian classical Matra counting alongside English metrical foot stress analysis (`/` stressed, `x` unstressed) for precise cadence pocket locking.
+- **Auto-Sync to Brain Memory**: 1-click or automatic background sync of your best written bars into your local artist style memory.
 
-- 🎙️ **Live Punch-In Studio**: Real-time voice capture with latency-compensated bar slicing, Web Audio oscilloscope waveform, and metronome pulse ring.
-- 🧠 **Ghostwriter & Zero-LLM RAG Engine**: Multi-pass cadence matching, anti-cliché burned-phrase filter, and Reciprocal Rank Fusion ($RRF$) hybrid vector recall. Works seamlessly with local LLMs (**LM Studio**, **Ollama**) or **100% Zero-LLM Offline RAG Mode** (POS-grammar cadence assembly via style memory + Indic phonetic rimes) when no LLM is connected.
-- ⚡ **Web Worker Pipeline Offloading**: Off-main-thread worker bridge (`pipeline.worker.ts`) keeps the UI thread running smoothly at 60 FPS during heavy multi-pass LLM reasoning and RAG vector scoring.
-- 📜 **Virtual Scrolling Bar List**: Integrated `@tanstack/react-virtual` for smooth 60 FPS virtualized rendering of long track bar lists (30+ bars).
-- 🕒 **Track Version History & Snapshots**: Persistent snapshots of track lyrics, cadence maps, and briefs with 1-click bar/track level restoration (`src/lib/track-versions.ts`).
-- 🔔 **Notification Center Progress Drawer**: Slide-out activity drawer tracking real-time pipeline pass progress, iteration counts, and quality scores across sessions.
-- 🎧 **Audio Playback with Bar Sync**: Custom Web Audio player (`AudioPlayer.tsx`) featuring real-time bar timestamp highlighting synchronized to track BPM.
-- 🎨 **Metaphor & Imagery Synthesizer**: Pre-generation sensory domain mapping (tactile textures, visual settings, luxury vs street contrasts, and double-entendre wordplay blueprints).
-- 🎵 **Pre-Generation Rhyme Ladder Planner**: Pre-plans 2-syllable and 3-syllable multisyllabic rime clusters across 4-bar blocks (AABB, ABAB, AAAA) using custom Indic and English phonetic rime engines.
-- 📚 **Multilingual Dictionary Datasets**: Native support for **Romanized Hindi (Hinglish)** and **Romanized Kannada (Kanglish)** with complete 31,021-entry **KEED 2018** Kannada-English dictionary ingestion (`public/data/kannada_lyric_dictionary.json`), Desi Hip-Hop vocabulary blueprints, parts-of-speech annotations, and English meanings.
-- 🔒 **100% Offline & Private**: Zero API keys or cloud subscriptions required. Runs on local LLMs (**LM Studio**, **Ollama**) and local STT (**faster-whisper-server**).
-- 💾 **Local-First Storage**: Audio takes save to **OPFS** (Origin Private File System); tracks and style memories save to **IndexedDB**. Includes 1-click JSON bundle import/export.
-- ⌨️ **Keyboard Shortcuts & Sound FX**: Integrated shortcut system (`?` overlay) and synthesized Web Audio sound FX cues.
-- 🕸️ **Knowledge Graph Enabled**: Complete codebase AST indexed with [Graphify](https://github.com/sponsors/safishamsi) for interactive architectural exploration.
+### 2. 📓 Writer's Headspace (Private Emotional State RAG)
+- **100% Local-First IndexedDB Journal**: Private diary capturing raw emotions, late-night reflections, and unfiltered thoughts (*Raw, Introspective, Aggressive, Melancholic, Triumphant, Late Night*).
+- **Semantic RAG Ingestion**: Automatically retrieves relevant diary thoughts matching your track's mood and theme, feeding real-life emotion into the AI ghostwriter without cliché imitation.
+- **In-Studio Headspace Drawer**: Slide-out drawer accessible directly inside the lyrics editor and scribble pad to jot thoughts or drop reflections into active bars.
+
+### 3. 🎯 Studio Arsenal: Punchlines & Hooks
+- **Punchline & Double Entendre Engine**: Scores punchline potential (0–100 pts) based on contrast keywords, wordplay, reversals, and alliteration. Dual-engine: uses active LLM with zero-LLM algorithmic fallback (rhymes + sensory metaphors).
+- **Hook & Anthem Builder**: Crafts catchy 2-to-4-line choruses, trap pockets, and chants with matching syllable counts per line.
+- **Unified Slide-Over Drawer**: 1-click copy or direct insertion into the active writing pad.
+
+### 4. 📊 Lyrical Evolution & Stats Dashboard (`/stats`)
+- **Cadence Pocket Distribution**: Interactive **Recharts** bar chart showing syllable frequencies (6 to 18 syllables/bar).
+- **Session Progression**: Area chart displaying bar volume and pacing over time.
+- **Vocabulary Diversity Ratio**: Tracks unique word percentage and vocabulary expansion.
+- **Dominant Rhyme Sound Families**: Detects recurring phonetic anchors (`/aɪ/`, `/eː/`, etc.).
+- **Writing Activity Streak**: Tracks consecutive studio days.
+
+### 5. 🎙️ Live Punch-In Studio & Cadence Mapping
+- **Latency-Compensated Bar Slicing**: Record vocal takes bar-by-bar with automatic latency compensation.
+- **Web Audio Oscilloscope**: Real-time waveform rendering and metronome pulse ring.
+- **OPFS Audio Persistence**: Raw takes are saved directly in the browser's Origin Private File System.
+
+### 6. 🧠 Artistic Ghostwriter & Multi-Level Hybrid RAG
+- **Reciprocal Rank Fusion ($RRF$)**: Combines vector cosine similarity, cadence density matching, and POS grammar scoring.
+- **Zero-LLM Offline RAG Mode**: Even with no LLM connected, assembles rhythmic lines using POS grammars, style memory, and phonetics.
+- **Critic Council**: Multi-critic evaluation of pocket rhythm, wordplay quality, and authenticity.
 
 ---
 
@@ -46,168 +65,135 @@ While cloud-based tools rely on remote APIs and subscription credits, **VibeVox*
 
 ```mermaid
 flowchart TD
-    subgraph Client["Client UI (Browser / Local Workspace)"]
+    subgraph StudioSurfaces["Client Studio Surfaces (Browser / Local Workspace)"]
         LiveStudio["🎙️ Live Punch-In Studio\n(Web Audio & Oscilloscope)"]
-        StyleBrief["🎛️ Style Brief Form\n(Genre, Slang Region, Topic)"]
-        LyricEditor["📝 Pocket Grid Lyric Editor\n(VirtualizedBarList & VersionHistory)"]
-        NotifCenter["🔔 Notification Center\n(Pipeline Activity Drawer)"]
+        LyricEditor["📝 Track Studio & Bar Editor\n(PocketGrid & VirtualizedList)"]
+        VibeStudio["⚡ VibeLyrics Studio\n(Scribble Synthesizer & 6-Ch Rhyme Vision)"]
+        JournalPage["📓 Writer's Headspace\n(/journal & In-Studio Drawer)"]
+        StatsDashboard["📊 Lyrical Evolution & Stats\n(/stats with Recharts)"]
     end
 
-    subgraph AudioEngine["Audio & Speech Layer"]
-        MicCapture["Mic Capture & OPFS Storage"]
-        LocalWhisper["🗣️ faster-whisper-server\n(Port 9000 STT)"]
-        CadenceSlicer["⏱️ Latency Slicer & Cadence Map"]
+    subgraph StudioArsenalLayer["Studio Arsenal Drawer"]
+        PunchlineEngine["🎯 Punchline Engine\n(Double Entendres & Metaphor Twists)"]
+        HookEngine["🔥 Hook & Anthem Builder\n(Chants & Syllable Pocket Locks)"]
     end
 
-    subgraph IntelligenceEngine["Lyric Intelligence & RAG Core"]
-        HybridRAG["🧠 Multi-Level Hybrid RAG\n(Semantic + Cadence + POS RRF)"]
-        MetaphorSynth["🎨 Metaphor & Imagery Synthesizer"]
+    subgraph IntelligenceEngine["Lyric Intelligence & Local RAG Core"]
+        JournalRAG["🧠 Emotional State RAG\n(Token Overlap + Mood Bias)"]
+        HybridRAG["⚡ Multi-Level Hybrid RAG\n(Semantic + Cadence + POS RRF)"]
+        MetaphorSynth["🎨 Metaphor Synthesizer"]
         RhymePlanner["🎵 Rhyme Ladder Planner\n(2-3 Syl Rimes)"]
-        DictEngine["📚 Indic Dictionary Service\n(31k+ KEED 2018 Entries & POS)"]
+        DictEngine["📚 Indic Dictionary Engine\n(31k+ KEED Kannada & Hinglish)"]
+        StatsEngine["📈 Local Stats Analyzer\n(IndexedDB Aggregator)"]
     end
 
-    subgraph PipelineExecution["Ghostwriter Execution Modes"]
+    subgraph ExecutionModes["Ghostwriter Execution Modes"]
         PipelineWorker["⚡ Web Worker Bridge\n(pipeline.worker.ts)"]
-        LocalLLM["🤖 Local LLM Server\n(Ollama / LM Studio / WebLLM)"]
-        ZeroLLMRAG["⚡ Zero-LLM Offline RAG Engine\n(POS Grammar Assembly)"]
-        CriticCouncil["⚖️ Critic Council\n(Pocket, Wordplay, Authenticity)"]
+        LocalLLM["🤖 Local/Cloud LLM\n(Ollama / LM Studio / OpenRouter)"]
+        ZeroLLMRAG["🛡️ Zero-LLM Offline Engine\n(Algorithmic Fallback)"]
+        CriticCouncil["⚖️ Critic Council\n(Pocket, Rhyme, Authenticity)"]
     end
 
-    subgraph StorageLayer["Local-First Persistence"]
-        IndexedDB[("💾 IndexedDB\n(Tracks, Bars, Style Memory, Snapshots)")]
-        OPFS[("📂 OPFS\n(Audio Takes)")]
+    subgraph StorageLayer["100% Local Persistence"]
+        IndexedDB[("💾 IndexedDB (voxscript-local)\nTracks, Bars, Style Memory, Journal")]
+        OPFS[("📂 OPFS Storage\nVocal Audio Takes")]
+        GraphifyKG[("🕸️ Graphify Knowledge Graph\n1045 Nodes · 2811 Edges")]
     end
 
-    LiveStudio --> MicCapture
-    MicCapture --> LocalWhisper
-    LocalWhisper --> CadenceSlicer
-    CadenceSlicer --> PipelineWorker
-    StyleBrief --> PipelineWorker
+    LiveStudio --> OPFS
+    LiveStudio --> PipelineWorker
+    LyricEditor --> IndexedDB
+    JournalPage --> IndexedDB
+
+    JournalPage --> JournalRAG
+    JournalRAG --> PipelineWorker
+    JournalRAG --> VibeStudio
+
+    PunchlineEngine --> LyricEditor
+    PunchlineEngine --> VibeStudio
+    HookEngine --> LyricEditor
+    HookEngine --> VibeStudio
+
+    VibeStudio --> LocalLLM
+    VibeStudio --> ZeroLLMRAG
 
     PipelineWorker --> HybridRAG
     DictEngine --> HybridRAG
-    DictEngine --> RhymePlanner
     HybridRAG --> MetaphorSynth
     MetaphorSynth --> RhymePlanner
 
     RhymePlanner --> LocalLLM
     RhymePlanner --> ZeroLLMRAG
     LocalLLM --> CriticCouncil
-    CriticCouncil --> NotifCenter
     CriticCouncil --> LyricEditor
-    ZeroLLMRAG --> LyricEditor
 
-    LyricEditor --> IndexedDB
-    MicCapture --> OPFS
+    IndexedDB --> StatsEngine
+    StatsEngine --> StatsDashboard
 ```
 
 ---
 
-## 📸 Interface Showcase & Visual Tour
-
-Explore the core studios and modules of **VibeVox**:
-
-### 1. Landing Page (`/`)
-*Gradient-backed hero section highlighting 100% local-first features and quickstart options.*
-
-![Landing Page](public/screenshots/landing_page.png)
-
-### 2. Onboarding Wizard (`/onboarding`)
-*3-step setup flow for auto-scanning local LLM/Whisper servers, trying demo recordings, and feature discovery.*
-
-![Onboarding Wizard](public/screenshots/onboarding.png)
-
-### 3. Track Library (`/library`)
-*The central dashboard featuring real-time search, status filter dropdowns, and sort options.*
-
-![Track Library](public/screenshots/track_library.png)
-
-### 4. New Track Studio (`/new`)
-*Create new songs from mumble transcripts, live mic recordings, or uploaded audio files with vocal guidance tips.*
-
-![New Track Studio](public/screenshots/new_track_studio.png)
-
-### 5. Live Punch-In Studio (`/live`)
-*Real-time vocal capture featuring live oscilloscope waveform visualizer, metronome ring, and bar pocket analysis.*
-
-![Live Punch-In Studio](public/screenshots/live_punch_in.png)
-
-### 6. Reference & Style Intelligence (`/references`)
-*1-click web lyric scraper to extract cadence blueprints (Cadence Fingerprints) and train your AI ghostwriter.*
-
-![Reference & Style Intelligence](public/screenshots/reference_and_style.png)
-
-### 7. Ghostwriter Scorecard & Critic Council
-*Multi-pass cadence scorecard, radar chart breakdown (Pocket, Wordplay, Authenticity), Critic Council rewrite suggestions, and real-time syllable target tooltips.*
-
-![Ghostwriter Scorecard & Critic Council](public/screenshots/ghostwriter_scorecard.png)
-
-### 8. Cadence Pocket Grid & Rhyme Scheme Highlighting
-*Interactive lyric editor with real-time cadence density highlighting, syllable count matching, and rhyme scheme visualization.*
-
-![Cadence Pocket Grid & Rhyme Scheme Highlighting](public/screenshots/lyrics_pocket_grid.png)
-
----
-
-## 📁 Codebase Directory Structure
+## 📁 Codebase Structure & Directory Layout
 
 ```
 VibeVox
-├── data/                               # Dictionary raw assets & PDFs
-│   └── KEED_2018-29-971.pdf            # KEED 2018 Kannada-English Dictionary source PDF
+├── graphify-out/                       # Graphify Knowledge Graph (HTML, JSON, Report)
+│   ├── graph.html                      # Interactive D3/WebGL architecture visualizer
+│   ├── graph.json                      # GraphRAG-ready graph dataset
+│   ├── GRAPH_REPORT.md                 # Complete god nodes & community report
+│   └── update_graph.py                 # Fast AST rebuild script
 ├── public/
-│   ├── data/                           # Ingested JSON datasets
-│   │   ├── kannada_lyric_dictionary.json # 31,021-entry Romanized Kannada dictionary (POS + definitions + rimes)
-│   │   └── hindi_lyric_dictionary.json   # Romanized Hindi (Hinglish) rap vocabulary dataset
-│   └── screenshots/                    # Interface showcase image assets
+│   ├── data/                           # Dictionaries (KEED 2018 Kannada, Hinglish rap)
+│   └── screenshots/                    # Studio tour image assets
 ├── scripts/
-│   └── build_dictionary_datasets.py    # Python ingestion pipeline for KEED 2018 PDF & Hinglish dataset
+│   └── build_dictionary_datasets.py    # Dictionary dataset compiler
 ├── src/
-│   ├── components/                     # UI components
-│   │   ├── connect/                    # Extracted Connect page scan panels (LlmScanPanel, WhisperScanPanel)
-│   │   ├── settings/                   # Extracted Settings panels (StyleTrainingPanel, StyleMemoryPanel)
-│   │   ├── track/                      # Extracted Track editor sub-components (BarRow, TrackScorecard, ExportMenu, BulkRewriteBar, TrackToolbar, VirtualizedBarList, VersionHistory, AudioPlayer)
-│   │   ├── NotificationCenter.tsx      # Pipeline progress drawer
-│   │   ├── PocketGrid.tsx              # Cadence syllable grid & rhyme visualizer
-│   │   └── StyleBriefForm.tsx          # Lyric direction & brief controls
-│   ├── hooks/                          # Custom React hooks (use-notifications, use-shortcuts, use-live-capture)
-│   ├── lib/                            # Core intelligence & persistence layer
-│   │   ├── data/                       # Pre-compiled TypeScript dictionary modules
-│   │   ├── __tests__/                  # Vitest unit test suite (87/87 tests passing)
-│   │   │   ├── artistic-ghostwriter.test.ts
-│   │   │   ├── BarRow.test.tsx
-│   │   │   ├── cache.test.ts
-│   │   │   ├── indic-phonetics.test.ts
-│   │   │   ├── local-pipeline.integration.test.ts
-│   │   │   ├── local-store.test.ts
-│   │   │   ├── offline-rag.test.ts
-│   │   │   ├── phonemes.test.ts
-│   │   │   ├── PocketGrid.test.tsx
-│   │   │   ├── providers.test.ts
-│   │   │   ├── style-memory.merge.test.ts
-│   │   │   └── style-recall.test.ts
-│   │   ├── local-pipeline.ts           # Ghostwriter generation & refinement pipeline
-│   │   ├── pipeline.worker.ts          # Off-thread Web Worker pipeline runner
-│   │   ├── pipeline-worker-bridge.ts   # Main thread worker bridge
-│   │   ├── track-versions.ts           # Persistent track snapshot history
-│   │   ├── local-store.ts              # IndexedDB & OPFS local storage manager
-│   │   ├── offline-rag-generator.ts    # Zero-LLM Offline POS-Grammar Cadence Engine
-│   │   ├── rhymes.ts                   # Dynamic lazy-loaded rhyme providers (Datamuse, CMUdict, Indic)
-│   │   └── style-hybrid-rag.ts         # Reciprocal Rank Fusion (RRF) Multi-Level Hybrid RAG
-│   └── routes/                         # TanStack Start file-based route handlers
-│       ├── __root.tsx
-│       ├── _app/                       # Authenticated application surface
-│       │   ├── live.tsx                # Live Punch-In studio page
-│       │   ├── new.tsx                 # New track studio page
-│       │   ├── library.tsx             # Track library dashboard
-│       │   ├── references.tsx          # Reference fingerprints page
-│       │   ├── settings.tsx            # Settings & LLM configuration
-│       │   └── track.$id.tsx           # Track lyrics editor & studio
-│       └── onboarding.tsx
-├── .commitlintrc.json                  # Conventional commits linting config
-├── .env.example                        # Documented environment template
-├── graphify-out/                       # Graphify AST Knowledge Graph index
-├── start-local.bat                     # Windows 1-click launcher script
+│   ├── components/                     # Modular Studio Components
+│   │   ├── connect/                    # Barrel: LlmScanPanel, WhisperScanPanel
+│   │   ├── journal/                    # Barrel: JournalDrawer
+│   │   ├── scribble/                   # Barrel: SuperpowersBanner, ScribbleResultView
+│   │   ├── settings/                   # Barrel: StyleTrainingPanel, StyleMemoryPanel
+│   │   ├── studio-arsenal/             # Barrel: StudioArsenalDrawer (Punchlines & Hooks)
+│   │   ├── track/                      # Barrel: BarRow, TrackToolbar, TrackScorecard, etc.
+│   │   ├── NotificationCenter.tsx      # Real-time pipeline progress drawer
+│   │   ├── PocketGrid.tsx              # Syllable cadence grid & rhyme scheme tagging
+│   │   └── RhymeLookup.tsx             # Datamuse & CMUdict rhyme explorer
+│   ├── hooks/                          # useShortcuts, useNotifications, useMobile
+│   ├── lib/                            # Core Algorithms & Local Intelligence
+│   │   ├── __tests__/                  # 23 Vitest test suites (149/149 passing)
+│   │   │   ├── arsenal-and-stats.test.ts # Punchlines, hooks, and stats tests
+│   │   │   ├── journal.test.ts         # Journal storage and RAG recall tests
+│   │   │   ├── scribble-synthesizer.test.ts
+│   │   │   ├── cadence-flow.test.ts
+│   │   │   ├── dhh-technicalities.test.ts
+│   │   │   └── style-memory.merge.test.ts
+│   │   ├── cadence-flow.ts             # Matra calculation & stress pattern analysis
+│   │   ├── cmudict-rhymes.ts           # Offline CMU phonetic dictionary
+│   │   ├── hook-engine.ts              # Anthemic chorus & chant builder
+│   │   ├── journal-rag.ts              # Emotional state journal RAG retriever
+│   │   ├── local-pipeline.ts           # Ghostwriter prompt building & multi-pass generation
+│   │   ├── local-store.ts              # IndexedDB database (tracks, bars, journal) & OPFS
+│   │   ├── punchline-engine.ts         # Wordplay, contrast, and double-entendre engine
+│   │   ├── stats-analyzer.ts           # Local stats aggregation & evolution engine
+│   │   ├── style-memory.ts             # Persona & style memory store
+│   │   └── scribble-synthesizer.ts     # Scribble-to-song synthesis engine
+│   └── routes/                         # TanStack Start File-Based Routes
+│       ├── __root.tsx                  # Root shell & SSR HTML metadata
+│       ├── _app.tsx                    # Shell layout with sticky nav & connection pill
+│       ├── _app/
+│       │   ├── library.tsx             # /library — Track library & bundle import/export
+│       │   ├── scribble.tsx            # /scribble — VibeLyrics studio & superpowers
+│       │   ├── journal.tsx             # /journal — Writer's Headspace & emotional diary
+│       │   ├── stats.tsx               # /stats — Lyrical Evolution & Stats dashboard
+│       │   ├── brain.tsx               # /brain — Local style memory & vector indexer
+│       │   ├── references.tsx          # /references — Cadence fingerprints & references
+│       │   ├── connect.tsx             # /connect — Local & cloud LLM/STT connection hub
+│       │   ├── settings.tsx            # /settings — Audio calibration, OPFS & cache
+│       │   ├── live.tsx                # /live — Real-time punch-in studio
+│       │   └── track.$id.tsx           # /track/:id — Deep studio lyric editor & arsenal
+│       ├── index.tsx                   # / — Landing page
+│       └── onboarding.tsx              # /onboarding — First-time setup wizard
+├── AGENTS.md                           # Comprehensive agent & IDE guide
 └── README.md
 ```
 
@@ -215,54 +201,36 @@ VibeVox
 
 ## 🚀 Quickstart
 
-### Option A: Windows 1-Click Launcher (Recommended)
-Double-click `start-local.bat` in the project root. It automatically:
-1. Runs pre-flight diagnostic checks (Node.js version, missing dependencies).
-2. Auto-starts AMD GPU DirectML `faster-whisper-server` (voice transcription) on port `9000`.
-3. Opens **[http://localhost:8080](http://localhost:8080)** in your web browser.
-4. Starts the local development server.
-
-*To shut down all background AI servers and dev ports cleanly, double-click **`stop-local.bat`**.*
-
-### Option B: Command Line (Cross-Platform)
-
 ```bash
-# 1. Install dependencies (Bun or NPM)
+# 1. Install dependencies
 bun install   # or: npm install
 
-# 2. Start development server
+# 2. Start development server (http://localhost:8080)
 bun dev       # or: npm run dev
-```
 
-Open **`http://localhost:8080`** in your browser.
+# 3. Run full unit test suite (149 tests across 23 files)
+npx vitest run
+
+# 4. Production build
+npm run build
+```
 
 ---
 
-## 🤖 Local AI Setup (Optional)
+## 🕸️ Knowledge Graph (Graphify)
 
-### 1. Local LLM (LM Studio / Ollama)
-For offline AI lyric generation and ghostwriter assistance:
-- **LM Studio**: Open LM Studio $\rightarrow$ Load a model (e.g., `Qwen2.5-7B` or `Llama-3.2`) $\rightarrow$ Go to **Local Server** tab ($\langle/\rangle$) $\rightarrow$ Click **Start Server** (Port `1234`). Enable **CORS** in settings.
-- **Ollama**: Run `ollama pull llama3.1:8b` and start with `OLLAMA_ORIGINS='*' ollama serve`.
-
-### 2. Live Voice Transcription & AMD GPU / Low-RAM Setup
-For real-time voice-to-text recording:
-
-#### Option A: Low-RAM Mode (int8) — ~180 MB RAM (CPU / General)
-```bash
-pip install faster-whisper-server
-faster-whisper-server --model tiny.en --compute_type int8 --port 9000
-```
-
-#### Option B: AMD Radeon GPU Acceleration (DirectML / Vulkan)
-For Windows PCs with AMD Radeon GPUs:
-- **DirectML**: `pip install onnxruntime-directml` and launch `faster-whisper-server --device auto --port 9000`.
-- **whisper.cpp (Vulkan GPU)**: Build with `-DGGML_VULKAN=ON` and run `./whisper-server -m models/ggml-tiny.en.bin --port 9000 -vulkan`. Operates entirely on AMD GPU shaders with ~150 MB RAM overhead.
+The entire codebase is indexed into a persistent, queryable knowledge graph powered by **Graphify**:
+- **Interactive Visualization**: Open `graphify-out/graph.html` in your browser for an interactive D3 graph of all 1,045 nodes and 2,811 cross-module edges.
+- **Architectural Report**: See [`graphify-out/GRAPH_REPORT.md`](graphify-out/GRAPH_REPORT.md) for community detection breakdowns, cohesion metrics, and god nodes.
+- **Fast AST Update**: Rebuild the graph anytime in ~7s using:
+  ```powershell
+  & (Get-Content graphify-out\.graphify_python) graphify-out\update_graph.py
+  ```
 
 ---
 
 ## 📄 License & Acknowledgments
 
 - **License**: Released under the **MIT License**.
-- **Special Thanks**: Inspired by **[VoxSketch AI](https://voxsketch.com/)** for pioneering AI vocal mumble transcription.
-- **Dictionaries & Phonetics**: Powered by KEED 2018 Kannada-English Dictionary, Hinglish DHH dataset, CMUdict, Datamuse, and RhymeWave.
+- **Special Thanks**: Inspired by **[VoxSketch AI](https://voxsketch.com/)** and the **VibeLyrics** lyrical intelligence ecosystem.
+- **Phonetics & Lexicons**: Powered by KEED 2018 Kannada-English Dictionary, Hinglish rap dataset, CMUdict, Datamuse, and RhymeWave.
