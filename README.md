@@ -51,33 +51,33 @@ While cloud-based tools rely on remote APIs and monthly credits, **VibeVox** bri
 
 ## ✨ Features & Studio Superpowers
 
-### 1. ⚡ VibeLyrics Studio & Flagship 4-Superpowers
+### 1. 🎙️ Vocal Mumble-to-Lyrics Conversion & Cadence Mapping
+- **Mumble-to-Bar Synthesis**: Hum a melody, mumble gibberish rhythms, or drop spontaneous flows. VibeVox extracts the rhythmic envelope and writes hit-tier lyrics matching your voice.
+- **Latency-Compensated Bar Slicing**: Record vocal takes bar-by-bar with automatic delay compensation and sub-millisecond audio alignment.
+- **Live Punch-In Studio**: Web Audio oscilloscope waveform visualizer, tempo metronome pulse ring, and OPFS audio persistence.
+
+### 2. ⚡ VibeLyrics Studio & Flagship 4-Superpowers
 - **Scribble-to-Song Synthesizer**: Paste fragments, ideas, or half-baked punchlines. Select a structure mode (*Full Song*, *16-Bar Verse*, *Hook Anthem*, *Rhyme Couplets*) to instantly generate structured, cadence-locked song blueprints.
 - **6-Channel Phonetic Rhyme Vision**: Real-time phoneme clustering coloring assonance, consonants, and compound family rhymes directly as you type.
 - **Matra Prosody & Stress Matrix**: Indian classical Matra counting alongside English metrical foot stress analysis (`/` stressed, `x` unstressed) for precise cadence pocket locking.
 - **Auto-Sync to Brain Memory**: 1-click or automatic background sync of your best written bars into your local artist style memory.
 
-### 2. 📓 Writer's Headspace (Private Emotional State RAG)
+### 3. 📓 Writer's Headspace (Private Emotional State RAG)
 - **100% Local-First IndexedDB Journal**: Private diary capturing raw emotions, late-night reflections, and unfiltered thoughts (*Raw, Introspective, Aggressive, Melancholic, Triumphant, Late Night*).
 - **Semantic RAG Ingestion**: Automatically retrieves relevant diary thoughts matching your track's mood and theme, feeding real-life emotion into the AI ghostwriter without cliché imitation.
 - **In-Studio Headspace Drawer**: Slide-out drawer accessible directly inside the lyrics editor and scribble pad to jot thoughts or drop reflections into active bars.
 
-### 3. 🎯 Studio Arsenal: Punchlines & Hooks
+### 4. 🎯 Studio Arsenal: Punchlines & Hooks
 - **Punchline & Double Entendre Engine**: Scores punchline potential (0–100 pts) based on contrast keywords, wordplay, reversals, and alliteration. Dual-engine: uses active LLM with zero-LLM algorithmic fallback (rhymes + sensory metaphors).
 - **Hook & Anthem Builder**: Crafts catchy 2-to-4-line choruses, trap pockets, and chants with matching syllable counts per line.
 - **Unified Slide-Over Drawer**: 1-click copy or direct insertion into the active writing pad.
 
-### 4. 📊 Lyrical Evolution & Stats Dashboard (`/stats`)
+### 5. 📊 Lyrical Evolution & Stats Dashboard (`/stats`)
 - **Cadence Pocket Distribution**: Interactive **Recharts** bar chart showing syllable frequencies (6 to 18 syllables/bar).
 - **Session Progression**: Area chart displaying bar volume and pacing over time.
 - **Vocabulary Diversity Ratio**: Tracks unique word percentage and vocabulary expansion.
 - **Dominant Rhyme Sound Families**: Detects recurring phonetic anchors (`/aɪ/`, `/eː/`, etc.).
 - **Writing Activity Streak**: Tracks consecutive studio days.
-
-### 5. 🎙️ Live Punch-In Studio & Cadence Mapping
-- **Latency-Compensated Bar Slicing**: Record vocal takes bar-by-bar with automatic latency compensation.
-- **Web Audio Oscilloscope**: Real-time waveform rendering and metronome pulse ring.
-- **OPFS Audio Persistence**: Raw takes are saved directly in the browser's Origin Private File System.
 
 ### 6. 🧠 Artistic Ghostwriter & Multi-Level Hybrid RAG
 - **Reciprocal Rank Fusion ($RRF$)**: Combines vector cosine similarity, cadence density matching, and POS grammar scoring.
