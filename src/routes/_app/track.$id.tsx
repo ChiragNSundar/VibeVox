@@ -21,7 +21,7 @@ import {
 import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { Loader2, RefreshCw, Trash2, ChevronDown, Sliders, BookOpen } from "lucide-react";
+import { Loader2, RefreshCw, Trash2, ChevronDown, Sliders, BookOpen, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { addToStyleMemory, sampleStyleExamples, addBurnedPhrasesFromBars, loadBurnedPhrases, loadBurnedVowels } from "@/lib/style-memory";
@@ -40,6 +40,7 @@ import { TrackToolbar } from "@/components/track/TrackToolbar";
 import { BulkRewriteBar, type BulkOpts, DEFAULT_BULK_OPTS } from "@/components/track/BulkRewriteBar";
 import { RhymeLookup } from "@/components/RhymeLookup";
 import { JournalDrawer } from "@/components/journal";
+import { StudioArsenalDrawer } from "@/components/studio-arsenal";
 import { highlightLyrics, getStanzaRhymeScheme, type RhymeVisionMode } from "@/lib/rhyme-highlighter";
 import { getLineStressAnalysis } from "@/lib/cadence-flow";
 import { scoreComplexity, detectSemanticDrift } from "@/lib/diagnostics";
@@ -193,6 +194,7 @@ function TrackPage() {
   const [selectMode, setSelectMode] = useState(false);
   const [selectedBars, setSelectedBars] = useState<Set<number>>(new Set());
   const [journalDrawerOpen, setJournalDrawerOpen] = useState(false);
+  const [arsenalOpen, setArsenalOpen] = useState(false);
   const [bulkPending, setBulkPending] = useState<Set<number>>(() => new Set());
   const [bulkRunning, setBulkRunning] = useState(false);
   const [bulkOpts, setBulkOpts] = useState<BulkOpts>(initialBulk.bulkOpts);
@@ -1079,6 +1081,14 @@ function TrackPage() {
           <div className="flex gap-2 shrink-0">
             <Button
               variant="outline" size="sm"
+              onClick={() => setArsenalOpen(true)}
+              className="gap-1.5 text-xs text-amber-400 border-amber-500/30 hover:bg-amber-500/10 cursor-pointer"
+              title="Open Studio Arsenal: Punchlines & Hooks"
+            >
+              <Zap className="h-4 w-4 text-amber-400" /> Arsenal
+            </Button>
+            <Button
+              variant="outline" size="sm"
               onClick={() => setJournalDrawerOpen(true)}
               className="gap-1.5 text-xs text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10 cursor-pointer"
               title="Open Writer's Headspace & Quick Journal"
@@ -1296,6 +1306,12 @@ function TrackPage() {
         <JournalDrawer
           open={journalDrawerOpen}
           onOpenChange={setJournalDrawerOpen}
+        />
+
+        <StudioArsenalDrawer
+          open={arsenalOpen}
+          onOpenChange={setArsenalOpen}
+          recentLines={flatLines}
         />
       </div>
     </TooltipProvider>
