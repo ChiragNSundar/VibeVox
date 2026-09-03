@@ -18,8 +18,8 @@ import { runLocalPipeline, type LocalPipelineResult, type LocalLyrics, type Loca
 import { loadLlmConfig } from "./llm-config";
 
 const DB_NAME = "voxscript-local";
-const DB_VERSION = 1;
-const STORES = ["tracks", "bars", "takes", "meta"] as const;
+const DB_VERSION = 2;
+const STORES = ["tracks", "bars", "takes", "meta", "journal"] as const;
 type Store = (typeof STORES)[number];
 
 // Re-export types from local-pipeline for convenience
@@ -56,6 +56,16 @@ export type LocalBar = {
   createdAt: number;
 };
 
+export type JournalEntry = {
+  id: string;
+  content: string;
+  mood: string; // e.g., "Introspective", "Aggressive", "Melancholic", "Triumphant", "Raw", "Late Night"
+  tags?: string[];
+  createdAt: number;
+  updatedAt: number;
+  embedding?: number[];
+};
+
 let dbPromise: Promise<IDBDatabase> | null = null;
 
 function openDb(): Promise<IDBDatabase> {
@@ -79,6 +89,11 @@ function openDb(): Promise<IDBDatabase> {
       }
       if (!db.objectStoreNames.contains("meta")) {
         db.createObjectStore("meta", { keyPath: "key" });
+      }
+      if (!db.objectStoreNames.contains("journal")) {
+        const s = db.createObjectStore("journal", { keyPath: "id" });
+        s.createIndex("createdAt", "createdAt");
+        s.createIndex("mood", "mood");
       }
     };
     req.onsuccess = () => {
@@ -191,10 +206,40 @@ export async function putBars(bars: LocalBar[]): Promise<void> {
 }
 
 export async function barsForTrack(trackId: string): Promise<LocalBar[]> {
-  const all = await tx<LocalBar[]>("bars", "readonly", (s) =>
-    req(s.index("trackId").getAll(IDBKeyRange.only(trackId)) as IDBRequest<LocalBar[]>),
-  );
+  const all = await tx("bars", "readonly", (s) => req(s.index("trackId").getAll(IDBKeyRange.only(trackId))));
   return all.sort((a, b) => a.index - b.index);
+}
+
+// ---------- Journal ----------
+
+export async function saveJournalEntry(
+  input: Omit<JournalEntry, "id" | "createdAt" | "updatedAt"> & { id?: string; createdAt?: number; updatedAt?: number }
+): Promise<JournalEntry> {
+  const now = Date.now();
+  const entry: JournalEntry = {
+    id: input.id || "jnl_" + Math.random().toString(36).slice(2, 10) + "_" + now,
+    content: input.content,
+    mood: input.mood || "Raw",
+    tags: input.tags || [],
+    createdAt: input.createdAt || now,
+    updatedAt: input.updatedAt || now,
+    embedding: input.embedding,
+  };
+  await tx("journal", "readwrite", (s) => req(s.put(entry)));
+  return entry;
+}
+
+export async function getJournalEntries(): Promise<JournalEntry[]> {
+  const all = await tx("journal", "readonly", (s) => req(s.getAll())).catch(() => [] as JournalEntry[]);
+  return (all || []).sort((a, b) => b.createdAt - a.createdAt);
+}
+
+export async function getJournalEntry(id: string): Promise<JournalEntry | null> {
+  return tx("journal", "readonly", (s) => req(s.get(id))).then((v) => v || null).catch(() => null);
+}
+
+export async function deleteJournalEntry(id: string): Promise<void> {
+  await tx("journal", "readwrite", (s) => req(s.delete(id)));
 }
 
 // ---------- OPFS blob storage ----------
@@ -296,6 +341,7 @@ export type Bundle = {
   bars: LocalBar[];
   /** audioKey → base64 wav bytes */
   audio: Record<string, { type: string; base64: string }>;
+  journal?: JournalEntry[];
 };
 
 async function blobToBase64(blob: Blob): Promise<string> {
@@ -324,7 +370,8 @@ export async function exportBundle(deviceId?: string): Promise<Bundle> {
     const blob = await getBlob(k);
     if (blob) audio[k] = { type: blob.type || "audio/wav", base64: await blobToBase64(blob) };
   }
-  return { version: 1, exportedAt: Date.now(), tracks, bars, audio };
+  const journal = await getJournalEntries().catch(() => []);
+  return { version: 1, exportedAt: Date.now(), tracks, bars, audio, journal };
 }
 
 export async function importBundle(bundle: Bundle, opts: { overwrite?: boolean } = {}): Promise<{ tracks: number; bars: number; audio: number }> {
@@ -338,6 +385,11 @@ export async function importBundle(bundle: Bundle, opts: { overwrite?: boolean }
     if (!existing) await putTrack(t);
   }
   await putBars(bundle.bars);
+  if (bundle.journal && Array.isArray(bundle.journal)) {
+    for (const j of bundle.journal) {
+      await saveJournalEntry(j).catch(() => {});
+    }
+  }
   return { tracks: bundle.tracks.length, bars: bundle.bars.length, audio: Object.keys(bundle.audio).length };
 }
 
