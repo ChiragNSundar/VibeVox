@@ -20,6 +20,7 @@ import { countSyllables, endRhymeKey } from "./lyrics-analysis";
 import { chatTarget, type LlmConfig } from "./llm-config";
 import { applyBodyCompat, resolveTarget } from "./providers";
 import { styleExamplesPromptBlock } from "./style-memory";
+import { recallRelevantJournalEntries, formatJournalContextForPrompt } from "./journal-rag";
 import {
   adaptiveChunkBars,
   budgetFor,
@@ -440,6 +441,12 @@ async function writeOneChunk(
   const rhymePlan = planRhymeLadders(cadence, lang);
   const brainDirectives = getBrainPromptDirectives(brief);
 
+  const journalHits = await recallRelevantJournalEntries(
+    brief?.topic || chunkBars.map((b) => b.text).join(" "),
+    { mood: brief?.attitude?.[0], limit: 3 }
+  ).catch(() => []);
+  const journalBlock = formatJournalContextForPrompt(journalHits);
+
   const sys = `You are an elite ghostwriter for punch-in rappers/vocalists. Write high-artistry finished bars that sit perfectly on beat.
 
 ${CRAFT}
@@ -450,7 +457,7 @@ ${rhymePlan.promptInstructions}
 
 ${brainDirectives.personaBlock}${brainDirectives.guidelinesBlock}CADENCE LOCK: for each cadence bar produce ONE finished bar with target syllables (±1) and target endSound. Group by section.
 
-${briefBlock(brief)}${styleExamplesPromptBlock(examples)}
+${briefBlock(brief)}${styleExamplesPromptBlock(examples)}${journalBlock ? `\n\n${journalBlock}\n` : ""}
 
 ${formatHint(profile)}`;
 
