@@ -8,7 +8,7 @@ import {
   Scripts,
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
-import { AlertTriangle, RotateCcw, Home, Copy, Check, Terminal, ChevronDown, ChevronUp, Music, PenLine, Brain } from "lucide-react";
+import { AlertTriangle, RotateCcw, Home, Copy, Check, Terminal, ChevronDown, ChevronUp, Music, PenLine, Brain, BookOpen, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -33,27 +33,39 @@ function NotFoundComponent() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs">
           <Link to="/library">
-            <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs">
+            <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs cursor-pointer">
               <Music className="h-3.5 w-3.5 text-primary" />
               Library
             </Button>
           </Link>
           <Link to="/scribble">
-            <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs">
+            <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs cursor-pointer">
               <PenLine className="h-3.5 w-3.5 text-emerald-400" />
-              Scribble
+              Studio
+            </Button>
+          </Link>
+          <Link to="/journal">
+            <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs cursor-pointer">
+              <BookOpen className="h-3.5 w-3.5 text-indigo-400" />
+              Journal
+            </Button>
+          </Link>
+          <Link to="/stats">
+            <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs cursor-pointer">
+              <BarChart3 className="h-3.5 w-3.5 text-emerald-400" />
+              Stats
             </Button>
           </Link>
           <Link to="/brain">
-            <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs">
+            <Button variant="outline" size="sm" className="w-full gap-1.5 text-xs cursor-pointer">
               <Brain className="h-3.5 w-3.5 text-amber-400" />
-              Local Brain
+              Brain
             </Button>
           </Link>
           <Link to="/new">
-            <Button size="sm" className="w-full gap-1.5 text-xs">
+            <Button size="sm" className="w-full gap-1.5 text-xs cursor-pointer">
               New Track
             </Button>
           </Link>

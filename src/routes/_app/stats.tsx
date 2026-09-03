@@ -42,7 +42,7 @@ export const Route = createFileRoute("/_app/stats")({
   component: StatsPage,
 });
 
-export function StatsPage() {
+function StatsPage() {
   const [stats, setStats] = useState<LyricalStats | null>(null);
   const [loading, setLoading] = useState(true);
 
