@@ -52,7 +52,7 @@ const MOODS = [
   { id: "Late Night", label: "Late Night", icon: Moon, color: "text-purple-400 bg-purple-500/10 border-purple-500/30" },
 ] as const;
 
-export function JournalPage() {
+function JournalPage() {
   const navigate = useNavigate();
   const [entries, setEntries] = useState<JournalEntry[]>([]);
   const [content, setContent] = useState("");
