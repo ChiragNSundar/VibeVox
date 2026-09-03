@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import React, { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -159,6 +159,29 @@ export function StatsPage() {
           </p>
         </Card>
       </div>
+
+      {/* Empty State Onboarding Banner */}
+      {s.totalBars === 0 && (
+        <Card className="p-5 bg-amber-500/10 border-amber-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <h3 className="text-sm font-bold text-foreground flex items-center gap-1.5">
+              <Sparkles className="h-4 w-4 text-amber-400" />
+              Welcome to your Lyrical Analytics Hub
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              Once you start writing bars in the VibeLyrics Studio or recording vocal takes, this dashboard will visualize your cadence consistency, rhyme density, and vocabulary growth.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <Link to="/scribble">
+              <Button size="sm" className="text-xs font-semibold gap-1.5 cursor-pointer">
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Open Studio</span>
+              </Button>
+            </Link>
+          </div>
+        </Card>
+      )}
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
