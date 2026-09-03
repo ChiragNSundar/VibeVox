@@ -8,19 +8,27 @@ echo ======================================================================
 echo.
 
 :: ----------------------------------------------------------------------
-:: 1. CHECK NODE.JS
+:: 1. CHECK RUNTIME (BUN OR NODE.JS)
 :: ----------------------------------------------------------------------
-where node >nul 2>nul
-if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Node.js is NOT installed on your computer!
-    echo.
-    echo FIX: Please download and install Node.js ^(LTS version^) from:
-    echo      https://nodejs.org/
-    echo.
-    echo Once installed, double-click start-local.bat again.
-    echo ======================================================================
-    pause
-    exit /b 1
+set RUNNER=npm
+where bun >nul 2>nul
+if %ERRORLEVEL% EQU 0 (
+    set RUNNER=bun
+    echo [OK] Bun detected as high-performance runtime.
+) else (
+    where node >nul 2>nul
+    if %ERRORLEVEL% NEQ 0 (
+        echo [ERROR] Neither Node.js nor Bun is installed on your computer!
+        echo.
+        echo FIX: Please download and install Node.js (LTS version) from:
+        echo      https://nodejs.org/  or  https://bun.sh
+        echo.
+        echo Once installed, double-click start-local.bat again.
+        echo ======================================================================
+        pause
+        exit /b 1
+    )
+    echo [OK] Node.js detected.
 )
 
 :: ----------------------------------------------------------------------
@@ -28,7 +36,11 @@ if %ERRORLEVEL% NEQ 0 (
 :: ----------------------------------------------------------------------
 if not exist "node_modules\" (
     echo [INFO] First-time setup detected. Installing project dependencies...
-    call npm install
+    if "%RUNNER%"=="bun" (
+        call bun install
+    ) else (
+        call npm install
+    )
     if %ERRORLEVEL% NEQ 0 (
         echo [ERROR] Dependency installation failed! Please check your internet connection.
         pause
@@ -48,7 +60,7 @@ if %ERRORLEVEL% EQU 0 (
         python -m pip install -q -r docs\requirements.txt >nul 2>nul
     )
 ) else (
-    echo [NOTICE] Python is not installed in PATH. ^(Optional for local Whisper server^).
+    echo [NOTICE] Python is not installed in PATH. (Optional for local Whisper server).
 )
 
 :: ----------------------------------------------------------------------
@@ -56,15 +68,15 @@ if %ERRORLEVEL% EQU 0 (
 :: ----------------------------------------------------------------------
 powershell -NoProfile -Command "(New-Object Net.Sockets.TcpClient).Connect('127.0.0.1', 1234)" >nul 2>nul
 if %ERRORLEVEL% EQU 0 (
-    echo [OK] Local LLM Server detected ^& active on port 1234 ^(LM Studio^)!
+    echo [OK] Local LLM Server detected ^& active on port 1234 (LM Studio)!
 ) else (
     powershell -NoProfile -Command "(New-Object Net.Sockets.TcpClient).Connect('127.0.0.1', 11434)" >nul 2>nul
     if %ERRORLEVEL% EQU 0 (
-        echo [OK] Local LLM Server detected ^& active on port 11434 ^(Ollama^)!
+        echo [OK] Local LLM Server detected ^& active on port 11434 (Ollama)!
     ) else (
-        echo [NOTICE] Local LLM server ^(LM Studio / Ollama^) is not running yet.
-        echo          * The app will work offline, but for local AI lyric generation:
-        echo            Open LM Studio -^> Go to Local Server -^> Click 'Start Server' ^(Port 1234^).
+        echo [NOTICE] Local LLM server (LM Studio / Ollama) is not running yet.
+        echo          * The app works offline with Zero-LLM RAG & algorithmic fallbacks.
+        echo          * To connect an AI model: open LM Studio -^> Start Server (Port 1234).
     )
 )
 echo.
@@ -77,8 +89,8 @@ if %ERRORLEVEL% EQU 0 (
     echo [OK] Local Whisper Transcription Server detected ^& active on port 9000!
 ) else (
     echo [INFO] Launching AMD GPU DirectML Whisper server in background on port 9000...
-    start "Vocal Muse - Whisper STT Server (Port 9000)" cmd /k "python scripts\launch_whisper_directml.py"
-    echo [OK] AMD GPU DirectML Whisper server launched!
+    start "VibeVox - Whisper STT Server (Port 9000)" cmd /k "python scripts\launch_whisper_directml.py"
+    echo [OK] Whisper server launched!
 )
 echo.
 
@@ -86,21 +98,26 @@ echo.
 :: 6. LAUNCH BROWSER & DEV SERVER
 :: ----------------------------------------------------------------------
 echo ======================================================================
-echo [LAUNCHING] Opening Vocal Muse in your browser: http://localhost:8080/
+echo [LAUNCHING] Opening VibeVox in your browser: http://localhost:8080/
 echo ======================================================================
 echo.
 
 start "" "http://localhost:8080/"
-call npm run dev
+if "%RUNNER%"=="bun" (
+    call bun dev
+) else (
+    call npm run dev
+)
 
 :cleanup
 echo.
 echo ======================================================================
 echo [CLEANUP] Terminating background AI processes...
 echo ======================================================================
+taskkill /F /FI "WINDOWTITLE eq VibeVox - Whisper STT Server*" >nul 2>nul
 taskkill /F /FI "WINDOWTITLE eq Vocal Muse - Whisper STT Server*" >nul 2>nul
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":9000" ^| findstr "LISTENING"') do taskkill /F /PID %%a >nul 2>nul
 for /f "tokens=5" %%a in ('netstat -aon ^| findstr ":8080" ^| findstr "LISTENING"') do taskkill /F /PID %%a >nul 2>nul
-echo [OK] Vocal Muse processes terminated cleanly.
+echo [OK] VibeVox processes terminated cleanly.
 echo.
 pause
