@@ -21,7 +21,7 @@ import {
 import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { Loader2, RefreshCw, Trash2, ChevronDown, Sliders } from "lucide-react";
+import { Loader2, RefreshCw, Trash2, ChevronDown, Sliders, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { useEffect, useMemo, useState, useCallback, useRef } from "react";
 import { addToStyleMemory, sampleStyleExamples, addBurnedPhrasesFromBars, loadBurnedPhrases, loadBurnedVowels } from "@/lib/style-memory";
@@ -39,6 +39,7 @@ import { TrackScorecard } from "@/components/track/TrackScorecard";
 import { TrackToolbar } from "@/components/track/TrackToolbar";
 import { BulkRewriteBar, type BulkOpts, DEFAULT_BULK_OPTS } from "@/components/track/BulkRewriteBar";
 import { RhymeLookup } from "@/components/RhymeLookup";
+import { JournalDrawer } from "@/components/journal";
 import { highlightLyrics, getStanzaRhymeScheme, type RhymeVisionMode } from "@/lib/rhyme-highlighter";
 import { getLineStressAnalysis } from "@/lib/cadence-flow";
 import { scoreComplexity, detectSemanticDrift } from "@/lib/diagnostics";
@@ -189,8 +190,9 @@ function TrackPage() {
   const [local, setLocal] = useState<BarLocalState>(() => loadLocal(id));
   const [rewritingIdx, setRewritingIdx] = useState<number | null>(null);
   const initialBulk = useMemo(() => loadBulk(id), [id]);
-  const [selectMode, setSelectMode] = useState<boolean>(initialBulk.selectMode);
-  const [selectedBars, setSelectedBars] = useState<Set<number>>(() => new Set(initialBulk.selectedBars));
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedBars, setSelectedBars] = useState<Set<number>>(new Set());
+  const [journalDrawerOpen, setJournalDrawerOpen] = useState(false);
   const [bulkPending, setBulkPending] = useState<Set<number>>(() => new Set());
   const [bulkRunning, setBulkRunning] = useState(false);
   const [bulkOpts, setBulkOpts] = useState<BulkOpts>(initialBulk.bulkOpts);
@@ -1077,6 +1079,14 @@ function TrackPage() {
           <div className="flex gap-2 shrink-0">
             <Button
               variant="outline" size="sm"
+              onClick={() => setJournalDrawerOpen(true)}
+              className="gap-1.5 text-xs text-indigo-400 border-indigo-500/30 hover:bg-indigo-500/10 cursor-pointer"
+              title="Open Writer's Headspace & Quick Journal"
+            >
+              <BookOpen className="h-4 w-4 text-indigo-400" /> Headspace
+            </Button>
+            <Button
+              variant="outline" size="sm"
               onClick={() => regenerate()}
               disabled={busy || isProcessing || !((trackData as any)?.transcript || (trackData as any)?.raw_transcript)}
             >
@@ -1282,6 +1292,11 @@ function TrackPage() {
             </CollapsibleContent>
           </Collapsible>
         )}
+
+        <JournalDrawer
+          open={journalDrawerOpen}
+          onOpenChange={setJournalDrawerOpen}
+        />
       </div>
     </TooltipProvider>
   );

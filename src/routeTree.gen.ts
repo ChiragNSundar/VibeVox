@@ -18,6 +18,7 @@ import { Route as AppOnboardingRouteImport } from './routes/_app/onboarding'
 import { Route as AppNewRouteImport } from './routes/_app/new'
 import { Route as AppLiveRouteImport } from './routes/_app/live'
 import { Route as AppLibraryRouteImport } from './routes/_app/library'
+import { Route as AppJournalRouteImport } from './routes/_app/journal'
 import { Route as AppConnectRouteImport } from './routes/_app/connect'
 import { Route as AppBrainRouteImport } from './routes/_app/brain'
 import { Route as AppTrackIdRouteImport } from './routes/_app/track.$id'
@@ -66,6 +67,11 @@ const AppLibraryRoute = AppLibraryRouteImport.update({
   path: '/library',
   getParentRoute: () => AppRoute,
 } as any)
+const AppJournalRoute = AppJournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppConnectRoute = AppConnectRouteImport.update({
   id: '/connect',
   path: '/connect',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/brain': typeof AppBrainRoute
   '/connect': typeof AppConnectRoute
+  '/journal': typeof AppJournalRoute
   '/library': typeof AppLibraryRoute
   '/live': typeof AppLiveRoute
   '/new': typeof AppNewRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/brain': typeof AppBrainRoute
   '/connect': typeof AppConnectRoute
+  '/journal': typeof AppJournalRoute
   '/library': typeof AppLibraryRoute
   '/live': typeof AppLiveRoute
   '/new': typeof AppNewRoute
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_app/brain': typeof AppBrainRoute
   '/_app/connect': typeof AppConnectRoute
+  '/_app/journal': typeof AppJournalRoute
   '/_app/library': typeof AppLibraryRoute
   '/_app/live': typeof AppLiveRoute
   '/_app/new': typeof AppNewRoute
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
     | '/'
     | '/brain'
     | '/connect'
+    | '/journal'
     | '/library'
     | '/live'
     | '/new'
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
     | '/'
     | '/brain'
     | '/connect'
+    | '/journal'
     | '/library'
     | '/live'
     | '/new'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_app/brain'
     | '/_app/connect'
+    | '/_app/journal'
     | '/_app/library'
     | '/_app/live'
     | '/_app/new'
@@ -236,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLibraryRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/journal': {
+      id: '/_app/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof AppJournalRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/connect': {
       id: '/_app/connect'
       path: '/connect'
@@ -263,6 +282,7 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppBrainRoute: typeof AppBrainRoute
   AppConnectRoute: typeof AppConnectRoute
+  AppJournalRoute: typeof AppJournalRoute
   AppLibraryRoute: typeof AppLibraryRoute
   AppLiveRoute: typeof AppLiveRoute
   AppNewRoute: typeof AppNewRoute
@@ -276,6 +296,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppBrainRoute: AppBrainRoute,
   AppConnectRoute: AppConnectRoute,
+  AppJournalRoute: AppJournalRoute,
   AppLibraryRoute: AppLibraryRoute,
   AppLiveRoute: AppLiveRoute,
   AppNewRoute: AppNewRoute,

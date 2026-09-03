@@ -10,6 +10,7 @@ import { reindexBrain } from "./brain-indexer";
 import { loadUnifiedStyleMemory } from "./style-memory";
 import { getBrainPromptDirectives } from "./brain-indexer";
 import { romanizeIndic, stripPronunciationMarks } from "./indic-romanizer";
+import { recallRelevantJournalEntries, formatJournalContextForPrompt } from "./journal-rag";
 
 export type ScribbleMode = "full-song" | "verse-16" | "hook-anthem" | "rhyme-slang";
 
@@ -244,6 +245,9 @@ export async function makeSenseOfScribble(
         ? "Highlight the slang vocabulary and build tightly coupled rhyme couplets."
         : "Synthesize a complete structure with a Hook and Verse(s).";
 
+    const journalHits = await recallRelevantJournalEntries(trimmed, { limit: 2 }).catch(() => []);
+    const journalBlock = formatJournalContextForPrompt(journalHits);
+
     const userPrompt = `RAW ARTIST SCRIBBLE:
 """
 ${trimmed}
@@ -251,7 +255,7 @@ ${trimmed}
 
 SYNTHESIS MODE: ${modeInstruction}
 
-${brainContext}
+${journalBlock ? `${journalBlock}\n\n` : ""}${brainContext}
 
 Make sense of this scribble and return the structured JSON object.`;
 
