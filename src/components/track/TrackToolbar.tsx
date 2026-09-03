@@ -182,6 +182,7 @@ export function TrackToolbar({
             </div>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </div>
       <SemanticDriftBar drift={semanticDrift} />
     </div>
