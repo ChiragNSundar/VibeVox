@@ -4,11 +4,11 @@ import { useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { listTracks, deleteTrack } from "@/lib/tracks.functions";
 import { getDeviceId } from "@/lib/device-id";
-import { listTracks as listLocalTracks, deleteTrack as deleteLocalTrack, isLocalOnly, getDeviceId as getLocalDeviceId } from "@/lib/local-store";
+import { isLocalOnly } from "@/lib/local-store";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,

@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -30,12 +30,12 @@ import {
   calibrateWithRetry, MIN_CONFIDENCE,
 } from "@/lib/latency-calibration";
 import { RhymeLookup } from "@/components/RhymeLookup";
-import { PocketGrid, type BarPocketItem } from "@/components/PocketGrid";
+import { PocketGrid } from "@/components/PocketGrid";
 import { AudioWaveform } from "@/components/AudioWaveform";
 import { MetronomeRing } from "@/components/MetronomeRing";
-import { isLocalOnly, putTrack, putBars, putBlob, getDeviceId as getLocalDeviceId, loadLlmConfig } from "@/lib/local-store";
+import { isLocalOnly, putTrack, putBars, putBlob, loadLlmConfig } from "@/lib/local-store";
 import { transcribeLocal } from "@/lib/local-transcribe";
-import { runLocalPipeline, type LocalPipelineResult } from "@/lib/local-pipeline";
+import { runLocalPipeline } from "@/lib/local-pipeline";
 
 
 export const Route = createFileRoute("/_app/live")({

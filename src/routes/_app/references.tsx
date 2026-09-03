@@ -30,7 +30,7 @@ import {
 } from "@/lib/style-memory";
 import { searchWebLyrics, type WebLyricsResult } from "@/lib/lyrics-fetcher";
 import { toast } from "sonner";
-import { Trash2, Sparkles, FileText, Search, Globe, Check, Loader2, Music, Brain, Target, Zap, Eye, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, FileText, Search, Globe, Check, Loader2, Music, Brain, Target, Zap, Eye, ChevronDown, ChevronUp } from "lucide-react";
 
 export const Route = createFileRoute("/_app/references")({
   head: () => ({

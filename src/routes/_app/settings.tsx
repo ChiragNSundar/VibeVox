@@ -14,7 +14,7 @@ import {
   Loader2,
   Database,
 } from "lucide-react";
-import { toast } from "sonner";
+
 import { DEFAULT_LLM_CONFIG, loadLlmConfig, pingLlm, saveLlmConfig, isLocalConfig, keyFor, setKeyFor, selectProvider, type LlmConfig } from "@/lib/llm-config";
 import { chatProviders, getProvider, type ProviderId } from "@/lib/providers";
 import {

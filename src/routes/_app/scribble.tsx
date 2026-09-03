@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+
 import { toast } from "sonner";
 import {
   PenLine,
@@ -16,14 +16,10 @@ import {
   ArrowRight,
   Copy,
   Check,
-  RotateCcw,
   Layers,
   Flame,
-  Lightbulb,
   CheckCircle2,
   FolderSync,
-  Target,
-  FileText,
 } from "lucide-react";
 import {
   makeSenseOfScribble,
@@ -362,6 +358,16 @@ function ScribblePage() {
 
         <div className="flex items-center gap-2 flex-wrap">
           <ComplexityGauge result={scribbleComplexity} />
+
+          <button
+            type="button"
+            onClick={() => { setRhymeLookupWord(""); setRhymeLookupOpen(true); }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all cursor-pointer"
+            title="Open Rhyme Studio"
+          >
+            <Music className="h-3.5 w-3.5 text-primary" />
+            <span className="font-medium">Rhyme Studio</span>
+          </button>
 
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs">
             <Brain className="h-3.5 w-3.5 text-amber-400" />
@@ -882,6 +888,7 @@ because i got quite cries"
         open={rhymeLookupOpen}
         onOpenChange={setRhymeLookupOpen}
         defaultWord={rhymeLookupWord}
+        trigger={<span className="hidden" />}
       />
     </div>
   );

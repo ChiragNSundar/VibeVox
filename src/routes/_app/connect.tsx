@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -35,7 +35,7 @@ import {
   type ProviderId,
 } from "@/lib/providers";
 import { pingLocalWhisper } from "@/lib/local-transcribe";
-import { detectModel, tierFor, profileFor } from "@/lib/local-profiles";
+import { detectModel, tierFor } from "@/lib/local-profiles";
 import { LlmScanPanel } from "@/components/connect/LlmScanPanel";
 import { WhisperScanPanel } from "@/components/connect/WhisperScanPanel";
 

@@ -12,7 +12,7 @@ import {
 import { StyleBriefForm } from "@/components/StyleBriefForm";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+
 import {
   Collapsible,
   CollapsibleContent,
@@ -29,13 +29,13 @@ import { recallStyleExamples, buildRecallQuery } from "@/lib/style-recall";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PocketGrid, type BarPocketItem } from "@/components/PocketGrid";
 import { analyzeRepetition } from "@/lib/track-analytics";
-import { toPlainText } from "@/lib/exports";
-import { getTrack as getLocalTrack, listTracks as listLocalTracks, deleteTrack as deleteLocalTrack, putBar as putLocalBar, putBars as putLocalBars, getBlob as getLocalBlob, putTrack as putLocalTrack, isLocalOnly, getDeviceId as getLocalDeviceId, runLocalPipeline, type LocalPipelineResult, type LocalLyrics, type LocalCadence, type LocalQuality, type LocalTrack } from "@/lib/local-store";
+
+import { getTrack as getLocalTrack, isLocalOnly, getDeviceId as getLocalDeviceId, runLocalPipeline, type LocalTrack } from "@/lib/local-store";
 import { loadLlmConfig } from "@/lib/llm-config";
 
 // Extracted track sub-components
 import { BarRow, type BarVersion, type BarProposal, type RewriteOpts } from "@/components/track/BarRow";
-import { TrackScorecard, type TrackQuality } from "@/components/track/TrackScorecard";
+import { TrackScorecard } from "@/components/track/TrackScorecard";
 import { TrackToolbar } from "@/components/track/TrackToolbar";
 import { BulkRewriteBar, type BulkOpts, DEFAULT_BULK_OPTS } from "@/components/track/BulkRewriteBar";
 import { RhymeLookup } from "@/components/RhymeLookup";

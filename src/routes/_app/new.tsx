@@ -22,8 +22,8 @@ import { getProvider } from "@/lib/providers";
 import { transcribeLocal } from "@/lib/local-transcribe";
 import { addToStyleMemory, sampleStyleExamples, styleMemoryStats, loadBurnedPhrases, loadBurnedVowels } from "@/lib/style-memory";
 import { recallStyleExamples, buildRecallQuery } from "@/lib/style-recall";
-import { runLocalPipeline, type LocalLyrics, type ProgressEvent, type LocalCadence, type LocalQuality, type LocalBrief, type LocalPipelineResult } from "@/lib/local-pipeline";
-import { putTrack, putBars, putBlob, isLocalOnly, getDeviceId as getLocalDeviceId } from "@/lib/local-store";
+import { runLocalPipeline, type LocalLyrics, type ProgressEvent, type LocalPipelineResult } from "@/lib/local-pipeline";
+import { putTrack, putBars, putBlob, isLocalOnly } from "@/lib/local-store";
 
 export const Route = createFileRoute("/_app/new")({
   head: () => ({ meta: [{ title: "New track · VibeVox" }] }),
