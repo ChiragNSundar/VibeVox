@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppStatsRouteImport } from './routes/_app/stats'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppScribbleRouteImport } from './routes/_app/scribble'
 import { Route as AppReferencesRouteImport } from './routes/_app/references'
@@ -31,6 +32,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppStatsRoute = AppStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
   id: '/settings',
@@ -100,6 +106,7 @@ export interface FileRoutesByFullPath {
   '/references': typeof AppReferencesRoute
   '/scribble': typeof AppScribbleRoute
   '/settings': typeof AppSettingsRoute
+  '/stats': typeof AppStatsRoute
   '/track/$id': typeof AppTrackIdRoute
 }
 export interface FileRoutesByTo {
@@ -114,6 +121,7 @@ export interface FileRoutesByTo {
   '/references': typeof AppReferencesRoute
   '/scribble': typeof AppScribbleRoute
   '/settings': typeof AppSettingsRoute
+  '/stats': typeof AppStatsRoute
   '/track/$id': typeof AppTrackIdRoute
 }
 export interface FileRoutesById {
@@ -130,6 +138,7 @@ export interface FileRoutesById {
   '/_app/references': typeof AppReferencesRoute
   '/_app/scribble': typeof AppScribbleRoute
   '/_app/settings': typeof AppSettingsRoute
+  '/_app/stats': typeof AppStatsRoute
   '/_app/track/$id': typeof AppTrackIdRoute
 }
 export interface FileRouteTypes {
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/references'
     | '/scribble'
     | '/settings'
+    | '/stats'
     | '/track/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -160,6 +170,7 @@ export interface FileRouteTypes {
     | '/references'
     | '/scribble'
     | '/settings'
+    | '/stats'
     | '/track/$id'
   id:
     | '__root__'
@@ -175,6 +186,7 @@ export interface FileRouteTypes {
     | '/_app/references'
     | '/_app/scribble'
     | '/_app/settings'
+    | '/_app/stats'
     | '/_app/track/$id'
   fileRoutesById: FileRoutesById
 }
@@ -198,6 +210,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/stats': {
+      id: '/_app/stats'
+      path: '/stats'
+      fullPath: '/stats'
+      preLoaderRoute: typeof AppStatsRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/settings': {
       id: '/_app/settings'
@@ -290,6 +309,7 @@ interface AppRouteChildren {
   AppReferencesRoute: typeof AppReferencesRoute
   AppScribbleRoute: typeof AppScribbleRoute
   AppSettingsRoute: typeof AppSettingsRoute
+  AppStatsRoute: typeof AppStatsRoute
   AppTrackIdRoute: typeof AppTrackIdRoute
 }
 
@@ -304,6 +324,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppReferencesRoute: AppReferencesRoute,
   AppScribbleRoute: AppScribbleRoute,
   AppSettingsRoute: AppSettingsRoute,
+  AppStatsRoute: AppStatsRoute,
   AppTrackIdRoute: AppTrackIdRoute,
 }
 
