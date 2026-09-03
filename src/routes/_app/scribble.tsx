@@ -28,6 +28,7 @@ import { RhymeLookup } from "@/components/RhymeLookup";
 import { ComplexityGauge, SemanticDriftBar } from "@/components/track";
 import { SuperpowersBanner, ScribbleResultView } from "@/components/scribble";
 import { JournalDrawer } from "@/components/journal";
+import { StudioArsenalDrawer } from "@/components/studio-arsenal";
 import { scoreComplexity, detectSemanticDrift } from "@/lib/diagnostics";
 import { getLineStressAnalysis, calculateMatra, detectFlowMetric } from "@/lib/cadence-flow";
 import { countSyllables } from "@/lib/phonetics";
@@ -124,6 +125,7 @@ function ScribblePage() {
   const [rhymeLookupWord, setRhymeLookupWord] = useState("");
   const [rhymeLookupOpen, setRhymeLookupOpen] = useState(false);
   const [journalDrawerOpen, setJournalDrawerOpen] = useState(false);
+  const [arsenalOpen, setArsenalOpen] = useState(false);
   const [showMatra, setShowMatra] = useState(false);
   const [mode, setMode] = useState<ScribbleMode>("full-song");
   const [autoSync, setAutoSync] = useState(true);
@@ -375,6 +377,16 @@ function ScribblePage() {
           >
             <BookOpen className="h-3.5 w-3.5 text-indigo-400" />
             <span className="font-medium">Headspace</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setArsenalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs text-muted-foreground hover:text-foreground hover:border-amber-500/40 transition-all cursor-pointer"
+            title="Open Studio Arsenal: Punchlines & Hooks"
+          >
+            <Zap className="h-3.5 w-3.5 text-amber-400" />
+            <span className="font-medium">Arsenal</span>
           </button>
 
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs">
@@ -740,6 +752,15 @@ because i got quite cries"
         onInsertIntoPad={(text) => {
           handleTextChange(scribbleText ? `${scribbleText}\n${text}` : text);
         }}
+      />
+
+      <StudioArsenalDrawer
+        open={arsenalOpen}
+        onOpenChange={setArsenalOpen}
+        onInsertLine={(line) => {
+          handleTextChange(scribbleText ? `${scribbleText}\n${line}` : line);
+        }}
+        recentLines={scribbleLines}
       />
     </div>
   );
