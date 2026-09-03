@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Vocal Muse — Multilingual Lyric Dictionary & Training Dataset Builder
+VibeVox — Multilingual Lyric Dictionary & Training Dataset Builder
 Parses KEED_2018-29-971.pdf (Kannada-English Dictionary) and compiles:
   1. Romanized Kannada Lyric Dictionary Dataset (pos, English meaning, syllables, rimes, multisyllables)
   2. Romanized Hindi (Hinglish) Lyric Dictionary Dataset

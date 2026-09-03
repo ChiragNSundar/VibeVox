@@ -1,11 +1,11 @@
-# DirectML AMD GPU Accelerated Whisper Server for Vocal Muse
+# DirectML AMD GPU Accelerated Whisper Server for VibeVox
 # Targets AMD Radeon GPUs (e.g. RX 9060 XT 16GB) via DirectML Execution Provider (DmlExecutionProvider)
 
 import sys
 import os
 
 print("======================================================================")
-print("  VOCAL MUSE - AMD RADEON DIRECTML GPU WHISPER TRANSCRIBER           ")
+print("  VIBEVOX - AMD RADEON DIRECTML GPU WHISPER TRANSCRIBER           ")
 print("======================================================================")
 
 try:
