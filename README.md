@@ -10,7 +10,32 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License MIT" />
 </p>
 
-An open-source, local-first studio workspace for vocalists, songwriters, and producers. **VibeVox** turns mumble freestyles and loose scribbles into polished lyrics, maps audio cadences in real-time, powers multi-level artistic RAG, and tracks your lyrical evolution—all running **100% offline** on your machine with zero cloud lock-in.
+An open-source, local-first studio workspace for vocalists, songwriters, and producers. **VibeVox** turns **raw vocal mumbles, hummed melodies, and freestyles** into Drake/Kendrick-tier polished lyrics, maps audio cadences in real-time, powers multi-level artistic RAG, and tracks your lyrical evolution—all running **100% offline** on your machine with zero cloud lock-in.
+
+> **💡 The Hitmaker Secret:** Every major artist starts by humming or mumbling a melody into their phone. **VibeVox** captures that raw vocal take, extracts your exact cadence and syllable rhythm, and writes hit-ready lyrics that lock directly into your vocal pocket.
+
+---
+
+## 🎙️ The Flagship Superpower: Vocal Mumbling to Polished Lyrics
+
+Most lyricists don't start with a blank page; they start with a **vocal melody or rhythm pocket**. VibeVox automates the journey from spontaneous vocal sketch to radio-ready song:
+
+```mermaid
+flowchart LR
+    A["🎤 1. Mumble & Hum\n(Raw vocal freestyle take)"] --> B["⏱️ 2. Cadence Slicing\n(Extracts syllables, pauses & BPM)"]
+    B --> C["🧠 3. Style RAG & Memory\n(Fuses your slang & journal mood)"]
+    C --> D["🔥 4. Finished Lyrics\n(Locked into your vocal pocket)"]
+```
+
+### The Mumble-to-Masterpiece Workflow:
+1. **Hum or Mumble Freely:** Hit record in the **Live Punch-In Studio** or **New Track Wizard**. Mumble gibberish, hum the flow, or drop loose words (`"mhm da-da-dum in the night... mm yeah tryna get the bag right..."`).
+2. **Real-Time Cadence Extraction:** The local audio pipeline runs through latency-compensated bar slicing and Whisper STT to calculate the exact syllable count per bar, stress envelope (`/` vs `x`), and breath caesuras.
+3. **Ghostwriter Pocket Locking:** The AI Ghostwriter (or Zero-LLM POS engine) takes the extracted syllable envelope and replaces the mumble with authentic, hard-hitting lyrics that match your vocal cadence note-for-note.
+
+| Raw Vocal Mumble Take | VibeVox Synthesized Studio Bar | Cadence Pocket |
+|---|---|---|
+| *"mhm da-da-dum in the backseat... mm yeah..."* | *"Heavy bass humming in the backseat, neon on the glass"* | 14 Syllables · Locked |
+| *"da-da running from the clock man... no cap..."* | *"Racing every minute till the shadow of the past has passed"* | 14 Syllables · Locked |
 
 ---
 
