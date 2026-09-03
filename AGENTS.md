@@ -44,6 +44,11 @@ lookups all work with zero backend:
 - **Audio takes** → Origin Private File System (OPFS) with an IDB fallback.
 - **Style memory + embeddings** → IndexedDB via `src/lib/cache.ts` and
   `src/lib/style-memory.ts`.
+- **Writer's Headspace (Journal)** → IndexedDB `journal` store via
+  `src/lib/local-store.ts` and emotional state RAG via `src/lib/journal-rag.ts`.
+- **Studio Arsenal (Punchlines & Hooks)** → `src/lib/punchline-engine.ts` and
+  `src/lib/hook-engine.ts` (dual-engine LLM with zero-LLM algorithmic fallback).
+- **Lyrical Evolution & Stats** → `src/lib/stats-analyzer.ts` and `src/routes/_app/stats.tsx`.
 - **LLM** → Ollama / LM Studio / llama.cpp server (see `src/lib/llm-config.ts`).
   Hosted providers work through the same path — see below.
 - **Transcription** → faster-whisper-server or whisper.cpp
