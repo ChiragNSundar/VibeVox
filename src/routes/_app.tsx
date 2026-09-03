@@ -54,14 +54,14 @@ function AppShell() {
     <NotificationProvider>
       <div className="min-h-screen">
         <header className="border-b sticky top-0 z-40 bg-background/80 backdrop-blur-sm">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between gap-3">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2">
             <Link to="/library" className="flex items-center gap-2 shrink-0">
               <Mic className="h-5 w-5 text-primary" />
               <span className="font-display font-semibold">VibeVox</span>
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden md:flex items-center gap-1.5">
+            <nav className="hidden lg:flex items-center gap-1">
               <LocalStatusPill />
               {NAV_ITEMS.map((item) => {
                 const Icon = item.icon;
@@ -93,8 +93,8 @@ function AppShell() {
               </Link>
             </nav>
 
-            {/* Mobile hamburger */}
-            <div className="flex md:hidden items-center gap-2">
+            {/* Mobile / Tablet hamburger */}
+            <div className="flex lg:hidden items-center gap-2">
               <LocalStatusPill />
               <NotificationCenter />
               <Link to="/new">
@@ -119,8 +119,8 @@ function AppShell() {
 
           {/* Mobile dropdown menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden border-t bg-background/95 backdrop-blur-sm animate-in slide-in-from-top-2 duration-200">
-              <nav className="max-w-5xl mx-auto px-4 py-3 flex flex-col gap-1">
+            <div className="lg:hidden border-t bg-background/95 backdrop-blur-sm animate-in slide-in-from-top-2 duration-200">
+              <nav className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-1">
                 {NAV_ITEMS.map((item) => {
                   const Icon = item.icon;
                   return (
