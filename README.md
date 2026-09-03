@@ -163,9 +163,14 @@ flowchart TD
 Explore the studios, creative instruments, and analytics dashboards inside **VibeVox**:
 
 ### 1. VibeLyrics Studio & 6-Channel Rhyme Vision (`/scribble`)
-*Distraction-free typing notepad paired with real-time phoneme clustering, Matra prosody analysis, and 1-click structure blueprints.*
+*Distraction-free typing notepad paired with real-time multi-syllabic phoneme clustering, Matra prosody analysis, bar-by-bar syllable counts, and 1-click structure blueprints.*
 
-![VibeLyrics Studio](public/screenshots/vibelyrics_studio.png)
+![VibeLyrics Studio Overview](public/screenshots/vibelyrics_studio.png)
+
+#### 🔥 Active Multi-Syllabic Rhyme Highlighting & Phonetic Vision
+*Watch as compound multisyllabic rhymes, assonance families, and internal rhythms illuminate in real-time across 6 distinct phonetic channels with live syllable counters (`16 syl`, `15 syl`, etc.) and rhyme scheme tracking (`ABBC`).*
+
+![VibeLyrics 6-Channel Rhyme Vision](public/screenshots/vibelyrics_phonetic_rhymes.png)
 
 ### 2. Studio Arsenal: Punchline & Double Entendre Engine
 *Generate witty setups, homophones, and metaphorical twists with scoring badges (0-100 pts) and 1-click drop into your writing pad.*
