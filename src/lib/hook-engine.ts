@@ -27,7 +27,7 @@ export interface HookOptions {
 function generateAlgorithmicHooks(theme: string, mood: string = "hypnotic"): GeneratedHook[] {
   const clean = theme.trim() || "Rise Above";
   const metaphor = synthesizeMetaphors(clean, [mood]);
-  const anchor = metaphor.rawThemes[0] || clean;
+  const anchor = metaphor.wordplayConcepts?.[0] || clean;
 
   return [
     {
