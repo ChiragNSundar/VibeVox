@@ -22,6 +22,7 @@ export type HighlightedLineResult = {
   syllables: number;
   schemeLetter?: string;
   rhymeGroupClass?: string;
+  anaphora?: { phrase: string; groupKey: string };
 };
 
 // 12 studio-curated harmonious rhyme palette names

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { getRhymes, type RhymeHit, type RhymeKind } from "@/lib/rhymes";
+import { lookupRhymes, type RhymeHit, type RhymeKind } from "@/lib/rhymes";
 import { Badge } from "@/components/ui/badge";
 import { Zap, Music, ExternalLink, Plus, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -36,8 +36,8 @@ export function InlineRhymeDock({
     let cancelled = false;
     setLoading(true);
 
-    getRhymes(cleanWord)
-      .then((res) => {
+    lookupRhymes(cleanWord)
+      .then((res: RhymeHit[]) => {
         if (!cancelled) {
           setHits(res);
         }

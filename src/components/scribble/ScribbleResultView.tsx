@@ -11,7 +11,7 @@ interface ScribbleResultViewProps {
   resultHighlighted: Array<{ html?: string; schemeLetter?: string; rhymeGroupClass?: string }>;
   copied: boolean;
   onCopy: () => void;
-  syncedPaths: { lyricsPath: string; analysisPath: string } | null;
+  syncedPaths: { lyricsPath?: string; rhymesPath?: string } | null;
   onManualSync: () => void;
   onSendToStudio: () => void;
   onWordClick: (word: string) => void;
