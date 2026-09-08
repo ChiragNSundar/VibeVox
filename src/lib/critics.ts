@@ -43,10 +43,16 @@ function briefBlock(b: StyleBrief | undefined): string {
   if (b.topic) parts.push(`Topic: ${b.topic}`);
   if (b.avoid) parts.push(`Avoid: ${b.avoid}`);
   let base = parts.length ? `STYLE BRIEF: ${parts.join(" · ")}` : "STYLE BRIEF: infer.";
-  if (b.slangRegion?.toLowerCase().includes("hinglish")) {
-    base += "\n[LANGUAGE: Romanized Hindi / Hinglish — Evaluate Desi Hip-Hop flow, internal multisyllabic rhymes, and authentic Hinglish street vocabulary.]";
-  } else if (b.slangRegion?.toLowerCase().includes("kanglish")) {
-    base += "\n[LANGUAGE: Romanized Kannada / Kanglish — Evaluate Kannada Rap flow, cadence-matched rimes, and authentic Kanglish street vocabulary.]";
+  const reg = (b.slangRegion || "").toLowerCase();
+  const isHi = reg.includes("hinglish") || reg.includes("hindi");
+  const isKn = reg.includes("kanglish") || reg.includes("kannada");
+
+  if (isHi && isKn) {
+    base += "\n[LANGUAGE: Bilingual Code-Switch (Kanglish + Hinglish DHH) — Evaluate natural code-switching flow, Kannada Dwitiyakshara Prasa & Antyaprasa, Hindi Qafiya-Radif couplets, and strict zero-pronunciation-mark Romanization.]";
+  } else if (isHi) {
+    base += "\n[LANGUAGE: Romanized Hindi / Hinglish — Evaluate Desi Hip-Hop flow, Qafiya-Radif structure, internal multisyllabic rhymes (-aoon, -aan, -eeb, -ehra), and authentic street vocabulary (wajood, rooh, bantai, haq se). Flag any macrons/diacritics.]";
+  } else if (isKn) {
+    base += "\n[LANGUAGE: Romanized Kannada / Kanglish — Evaluate Kannada Rap flow, Dwitiyakshara Prasa (2nd consonant match on bar openings), Antyaprasa (-aagi, -odu, -illa, -beku), and Bengaluru slang. Flag any macrons/diacritics.]";
   }
   return b.fingerprint
     ? base + "\n\n" + fingerprintToConstraints(b.fingerprint)
