@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import type { StyleBrief } from "@/lib/lyrics-analysis";
 import { DEFAULT_BRIEF } from "@/lib/lyrics-analysis";
 import { loadFingerprints, type Fingerprint } from "@/lib/fingerprint";
@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MultiSelect, type MultiSelectOption } from "@/components/ui/multi-select";
 import { cn } from "@/lib/utils";
 
 const GENRES = [
@@ -69,6 +70,60 @@ export function StyleBriefForm({
   useEffect(() => { setFingerprints(loadFingerprints()); }, []);
   const currentFpId = v.fingerprint?.id ?? "none";
 
+  const genreOptions: MultiSelectOption[] = useMemo(
+    () => GENRES.map(([id, label]) => ({ value: id, label })),
+    [],
+  );
+
+  const regionOptions: MultiSelectOption[] = useMemo(
+    () => REGIONS.map(([id, label]) => ({ value: id, label })),
+    [],
+  );
+
+  const selectedGenres = useMemo(() => {
+    if (v.genres && Array.isArray(v.genres) && v.genres.length > 0) return v.genres;
+    if (v.genre && v.genre !== "auto") {
+      return v.genre.split(/[\/,+]/).map((s) => s.trim().toLowerCase()).filter(Boolean);
+    }
+    return ["auto"];
+  }, [v.genres, v.genre]);
+
+  const selectedRegions = useMemo(() => {
+    if (v.slangRegions && Array.isArray(v.slangRegions) && v.slangRegions.length > 0) return v.slangRegions;
+    if (v.slangRegion && v.slangRegion !== "auto") {
+      return v.slangRegion.split(/[\/,+]/).map((s) => s.trim().toLowerCase()).filter(Boolean);
+    }
+    return ["auto"];
+  }, [v.slangRegions, v.slangRegion]);
+
+  const handleGenresChange = (genres: string[]) => {
+    let next = genres;
+    if (next.length > 1 && next.includes("auto")) {
+      next = next.filter((g) => g !== "auto");
+    } else if (next.length === 0) {
+      next = ["auto"];
+    }
+    onChange({
+      ...v,
+      genres: next,
+      genre: next.join(" / "),
+    });
+  };
+
+  const handleRegionsChange = (regions: string[]) => {
+    let next = regions;
+    if (next.length > 1 && next.includes("auto")) {
+      next = next.filter((r) => r !== "auto");
+    } else if (next.length === 0) {
+      next = ["auto"];
+    }
+    onChange({
+      ...v,
+      slangRegions: next,
+      slangRegion: next.join(" + "),
+    });
+  };
+
   return (
     <Card className="p-5 space-y-5">
       <div>
@@ -109,25 +164,29 @@ export function StyleBriefForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label className="text-xs uppercase tracking-wider">Genre / vibe</Label>
-          <Select value={v.genre} onValueChange={(x) => set("genre", x)}>
-            <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {GENRES.map(([id, label]) => (
-                <SelectItem key={id} value={id}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="mt-1.5">
+            <MultiSelect
+              options={genreOptions}
+              selected={selectedGenres}
+              onChange={handleGenresChange}
+              placeholder="Select genres..."
+              searchPlaceholder="Search genres..."
+              maxVisibleTags={2}
+            />
+          </div>
         </div>
         <div>
           <Label className="text-xs uppercase tracking-wider">Slang region</Label>
-          <Select value={v.slangRegion} onValueChange={(x) => set("slangRegion", x)}>
-            <SelectTrigger className="mt-1.5"><SelectValue /></SelectTrigger>
-            <SelectContent>
-              {REGIONS.map(([id, label]) => (
-                <SelectItem key={id} value={id}>{label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="mt-1.5">
+            <MultiSelect
+              options={regionOptions}
+              selected={selectedRegions}
+              onChange={handleRegionsChange}
+              placeholder="Select regions..."
+              searchPlaceholder="Search slang regions..."
+              maxVisibleTags={2}
+            />
+          </div>
         </div>
       </div>
 

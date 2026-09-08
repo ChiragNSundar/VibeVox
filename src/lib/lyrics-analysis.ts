@@ -77,9 +77,11 @@ import type { Fingerprint } from "./fingerprint";
 
 export type StyleBrief = {
   genre?: string;
+  genres?: string[];
   attitude?: string[];
   rhymeDensity?: number; // 1..5
   slangRegion?: string;
+  slangRegions?: string[];
   customSlang?: string;
   topic?: string;
   avoid?: string;
@@ -90,9 +92,11 @@ export type StyleBrief = {
 
 export const DEFAULT_BRIEF: StyleBrief = {
   genre: "auto",
+  genres: ["auto"],
   attitude: [],
   rhymeDensity: 3,
   slangRegion: "auto",
+  slangRegions: ["auto"],
   customSlang: "",
   topic: "",
   avoid: "",

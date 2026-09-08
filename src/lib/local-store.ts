@@ -358,8 +358,12 @@ function base64ToBlob(b64: string, type: string): Blob {
   return new Blob([buf], { type });
 }
 
-export async function exportBundle(deviceId?: string): Promise<Bundle> {
-  const tracks = await listTracks(deviceId);
+export async function exportBundle(deviceId?: string, trackIds?: string[]): Promise<Bundle> {
+  let tracks = await listTracks(deviceId);
+  if (trackIds && trackIds.length > 0) {
+    const idSet = new Set(trackIds);
+    tracks = tracks.filter((t) => idSet.has(t.id));
+  }
   const bars: LocalBar[] = [];
   for (const t of tracks) bars.push(...await barsForTrack(t.id));
   const audio: Bundle["audio"] = {};
@@ -370,7 +374,7 @@ export async function exportBundle(deviceId?: string): Promise<Bundle> {
     const blob = await getBlob(k);
     if (blob) audio[k] = { type: blob.type || "audio/wav", base64: await blobToBase64(blob) };
   }
-  const journal = await getJournalEntries().catch(() => []);
+  const journal = trackIds ? [] : await getJournalEntries().catch(() => []);
   return { version: 1, exportedAt: Date.now(), tracks, bars, audio, journal };
 }
 
@@ -393,13 +397,13 @@ export async function importBundle(bundle: Bundle, opts: { overwrite?: boolean }
   return { tracks: bundle.tracks.length, bars: bundle.bars.length, audio: Object.keys(bundle.audio).length };
 }
 
-export async function downloadBundle(deviceId?: string): Promise<void> {
-  const bundle = await exportBundle(deviceId);
-  const blob = new Blob([JSON.stringify(bundle)], { type: "application/json" });
+export async function downloadBundle(deviceId?: string, trackIds?: string[], filename?: string): Promise<void> {
+  const bundle = await exportBundle(deviceId, trackIds);
+  const blob = new Blob([JSON.stringify(bundle, null, 2)], { type: "application/json" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = `voxscript-bundle-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = filename || `vibevox-bundle-${new Date().toISOString().slice(0, 10)}.json`;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }

@@ -52,19 +52,33 @@ export function StudioArsenalDrawer({
 
   // Punchline State
   const [punchInput, setPunchInput] = useState("");
-  const [punchMood, setPunchMood] = useState<string>("Confident");
+  const [punchMoods, setPunchMoods] = useState<string[]>(["Confident"]);
   const [punchLoading, setPunchLoading] = useState(false);
   const [punchlines, setPunchlines] = useState<ScoredPunchline[]>([]);
   const [punchSource, setPunchSource] = useState<"ai" | "algorithmic" | null>(null);
 
   // Hook State
   const [hookTheme, setHookTheme] = useState("");
-  const [hookMood, setHookMood] = useState<string>("Anthemic");
+  const [hookMoods, setHookMoods] = useState<string[]>(["Anthemic"]);
   const [hookLoading, setHookLoading] = useState(false);
   const [hooks, setHooks] = useState<GeneratedHook[]>([]);
   const [hookSource, setHookSource] = useState<"ai" | "algorithmic" | null>(null);
 
   const [copiedText, setCopiedText] = useState<string | null>(null);
+
+  const togglePunchMood = (m: string) => {
+    setPunchMoods((prev) => {
+      if (prev.includes(m)) return prev.length === 1 ? prev : prev.filter((x) => x !== m);
+      return [...prev, m];
+    });
+  };
+
+  const toggleHookMood = (m: string) => {
+    setHookMoods((prev) => {
+      if (prev.includes(m)) return prev.length === 1 ? prev : prev.filter((x) => x !== m);
+      return [...prev, m];
+    });
+  };
 
   async function handleGeneratePunchlines() {
     if (!punchInput.trim()) {
@@ -74,7 +88,7 @@ export function StudioArsenalDrawer({
     try {
       setPunchLoading(true);
       const res = await generatePunchlines(punchInput, {
-        mood: punchMood.toLowerCase(),
+        mood: punchMoods.join(", ").toLowerCase(),
         recentLines,
       });
       setPunchlines(res.punchlines);
@@ -95,7 +109,7 @@ export function StudioArsenalDrawer({
     try {
       setHookLoading(true);
       const res = await generateHooks(hookTheme, {
-        mood: hookMood.toLowerCase(),
+        mood: hookMoods.join(", ").toLowerCase(),
         recentLines,
       });
       setHooks(res.hooks);
@@ -167,20 +181,23 @@ export function StudioArsenalDrawer({
                     Setup Bar / Target Word
                   </span>
                   <div className="flex items-center gap-1 flex-wrap">
-                    {PUNCHLINE_MOODS.map((m) => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => setPunchMood(m)}
-                        className={`px-2 py-0.5 rounded text-[11px] font-medium border transition-all cursor-pointer ${
-                          punchMood === m
-                            ? "bg-amber-500/20 text-amber-300 border-amber-500/40 font-semibold"
-                            : "border-border/40 text-muted-foreground hover:bg-muted/30"
-                        }`}
-                      >
-                        {m}
-                      </button>
-                    ))}
+                    {PUNCHLINE_MOODS.map((m) => {
+                      const isSelected = punchMoods.includes(m);
+                      return (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => togglePunchMood(m)}
+                          className={`px-2 py-0.5 rounded text-[11px] font-medium border transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-amber-500/20 text-amber-300 border-amber-500/40 font-semibold shadow-sm"
+                              : "border-border/40 text-muted-foreground hover:bg-muted/30"
+                          }`}
+                        >
+                          {m}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -288,20 +305,23 @@ export function StudioArsenalDrawer({
                     Chorus Theme / Concept
                   </span>
                   <div className="flex items-center gap-1 flex-wrap">
-                    {HOOK_MOODS.map((m) => (
-                      <button
-                        key={m}
-                        type="button"
-                        onClick={() => setHookMood(m)}
-                        className={`px-2 py-0.5 rounded text-[11px] font-medium border transition-all cursor-pointer ${
-                          hookMood === m
-                            ? "bg-rose-500/20 text-rose-300 border-rose-500/40 font-semibold"
-                            : "border-border/40 text-muted-foreground hover:bg-muted/30"
-                        }`}
-                      >
-                        {m}
-                      </button>
-                    ))}
+                    {HOOK_MOODS.map((m) => {
+                      const isSelected = hookMoods.includes(m);
+                      return (
+                        <button
+                          key={m}
+                          type="button"
+                          onClick={() => toggleHookMood(m)}
+                          className={`px-2 py-0.5 rounded text-[11px] font-medium border transition-all cursor-pointer ${
+                            isSelected
+                              ? "bg-rose-500/20 text-rose-300 border-rose-500/40 font-semibold shadow-sm"
+                              : "border-border/40 text-muted-foreground hover:bg-muted/30"
+                          }`}
+                        >
+                          {m}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 
