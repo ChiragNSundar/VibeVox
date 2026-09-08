@@ -105,6 +105,10 @@ export function ScribbleResultView({
         {/* Lines Container */}
         <div className="space-y-4 max-h-[500px] overflow-y-auto overflow-x-hidden studio-scroll pr-1 font-mono text-sm leading-relaxed">
           {result.sections.map((sec, secIdx) => {
+            const prevLinesCount = result.sections
+              .slice(0, secIdx)
+              .reduce((acc, s) => acc + s.lines.length, 0);
+
             return (
               <div key={secIdx} className="space-y-1.5">
                 <div className="text-xs font-bold text-primary/80 uppercase tracking-wide px-2 py-0.5 rounded bg-primary/10 inline-block">
@@ -112,8 +116,8 @@ export function ScribbleResultView({
                 </div>
                 <div className="space-y-1">
                   {sec.lines.map((line, lineIdx) => {
-                    const absIdx = lineCounter++;
-                    const highlighted = resultHighlighted[absIdx];
+                    const globalIdx = prevLinesCount + lineIdx;
+                    const highlighted = resultHighlighted[globalIdx];
                     const syllables = countSyllables(line);
 
                     return (
