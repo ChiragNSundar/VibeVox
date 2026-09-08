@@ -57,9 +57,18 @@ lookups all work with zero backend:
   [RhymeWave](https://www.rhymewave.com/) for phonetic exploration.
 
 Toggle local mode with `setLocalOnly(true)` from `src/lib/local-store.ts`
-or via Settings once wired in the UI. Bundle export/import
-(`exportBundle` / `importBundle` / `downloadBundle`) roundtrips everything
-to a single portable `.json`.
+or via Settings once wired in the UI. Single and batch bundle export/import
+(`exportBundle` / `importBundle` / `downloadBundle` in `src/lib/local-store.ts`,
+with optional `trackIds` filtering) and multi-track document exports
+(`toMultiTrackPlainText`, `toMultiTrackGeniusMarkdown`, `toMultiTrackPrintableHtml`
+in `src/lib/exports.ts`) roundtrip songs to portable formats.
+
+## UI Primitives & Studio Instruments
+
+- **MultiSelect Combobox** → `src/components/ui/multi-select.tsx` (accessible popover with live search, chip badges, `+N more` tooltip folding, and keyboard navigation).
+- **Flow Metronome Bar** → `src/components/scribble/FlowMetronomeBar.tsx` (Web Audio synthesized click, hover-and-mouse-wheel BPM control clamped 40–240 BPM with `preventDefault()`, visual 4-LED meter, tap tempo).
+- **Inline Rhyme Dock** → `src/components/scribble/InlineRhymeDock.tsx` (zero-latency phonetic rhyme lookup beneath notepad with categorized tabs and 1-click word insertion).
+- **VibeLyrics Studio** → `src/routes/_app/scribble.tsx` (dual-pane cursor tracking, auto-scrolling phonetic inspector, cadence delta indicators, toggle-deselect structure modes, and seamless conversion to Track Studio projects).
 
 ## LLM Providers
 
