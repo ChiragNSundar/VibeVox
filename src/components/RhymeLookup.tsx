@@ -385,7 +385,7 @@ export function RhymeLookup({
                             {entry.syllables} syl
                           </span>
                         </div>
-                        <p className="text-muted-foreground text-xs">{entry.meaning}</p>
+                        <p className="text-muted-foreground text-xs">{entry.meaning || entry.definition}</p>
                       </div>
 
                       <Button
