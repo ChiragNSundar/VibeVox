@@ -5,7 +5,7 @@
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1060 nodes · 2885 edges · 49 communities (48 shown, 1 thin omitted)
+- 1060 nodes · 2885 edges · 48 communities (47 shown, 1 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 23 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -53,7 +53,6 @@
 - [[_COMMUNITY_Module Cluster 40|Module Cluster 40]]
 - [[_COMMUNITY_Module Cluster 41|Module Cluster 41]]
 - [[_COMMUNITY_Module Cluster 42|Module Cluster 42]]
-- [[_COMMUNITY_Module Cluster 43|Module Cluster 43]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `countSyllables()` - 38 edges
@@ -82,7 +81,7 @@
 ## Import Cycles
 - 3-file cycle: `src/lib/journal-rag.ts -> src/lib/local-store.ts -> src/lib/local-pipeline.ts -> src/lib/journal-rag.ts`
 
-## Communities (49 total, 1 thin omitted)
+## Communities (48 total, 1 thin omitted)
 
 ### Community 0 - "Track Management & Studio Pipeline"
 Cohesion: 0.06
@@ -133,56 +132,56 @@ Cohesion: 0.09
 Nodes (25): Route, discoverLlmBackends(), discoverWhisperBackends(), fetchTimeout(), getOllamaContextLength(), listOllamaModels(), listOpenAIModels(), LLM_CANDIDATES (+17 more)
 
 ### Community 12 - "Module Cluster 12"
+Cohesion: 0.11
+Nodes (26): LibraryPage(), SortKey, EmptyState(), EmptyStateProps, downloadBlob(), escapeHtml(), flatLines(), Lyrics (+18 more)
+
+### Community 13 - "Module Cluster 13"
 Cohesion: 0.14
 Nodes (17): MOODS, CachePanel(), LABELS, formatBytes(), ScribbleResult, FlowMetronomeBar(), FlowMetronomeBarProps, ScribbleResultViewProps (+9 more)
 
-### Community 13 - "Module Cluster 13"
+### Community 14 - "Module Cluster 14"
 Cohesion: 0.16
 Nodes (18): CadenceMap, AudioPlayer(), BarProposal, BarRow(), BarRowProps, BarVersion, RewriteOpts, BulkOpts (+10 more)
 
-### Community 14 - "Module Cluster 14"
+### Community 15 - "Module Cluster 15"
 Cohesion: 0.16
 Nodes (20): ReferencesPage(), BarDiff(), diffWords(), tokenize(), buildFingerprint(), Fingerprint, loadFingerprints(), removeFingerprint() (+12 more)
 
-### Community 15 - "Module Cluster 15"
+### Community 16 - "Module Cluster 16"
 Cohesion: 0.15
 Nodes (18): BarPocketItem, COLOR_PALETTE, PocketGrid(), PocketGridProps, getLineStressAnalysis(), calcSchemeSophisticationScore(), CadenceBar, CLICHES (+10 more)
 
-### Community 16 - "Module Cluster 16"
+### Community 17 - "Module Cluster 17"
 Cohesion: 0.13
 Nodes (19): ARPABET_VOWELS, COMMON_STOP_WORDS, detectInternalRhymes(), detectRhetoricalFraming(), FlowInsight, G2P_RULES, getRhymingPart(), getStanzaRhymeScheme() (+11 more)
 
-### Community 17 - "Module Cluster 17"
+### Community 18 - "Module Cluster 18"
 Cohesion: 0.10
 Nodes (15): BarLocalState, BarSlice, bulkKey(), BulkPersist, loadBulk(), Lyrics, saveBulk(), trackSearchSchema (+7 more)
 
-### Community 18 - "Module Cluster 18"
+### Community 19 - "Module Cluster 19"
 Cohesion: 0.17
 Nodes (20): TrackPage(), detectFlowMetric(), calcAssonanceScore(), calcConsonanceScore(), calcHomophoneScore(), calcInternalRhymeScore(), calcMultisyllabicScore(), calcVocabularyScore() (+12 more)
 
-### Community 19 - "Module Cluster 19"
+### Community 20 - "Module Cluster 20"
 Cohesion: 0.13
 Nodes (9): BarRow, encodeWav(), writeString(), AudioWaveform(), AudioWaveformProps, MetronomeRing(), MetronomeRingProps, DEFAULT_BRIEF (+1 more)
 
-### Community 20 - "Module Cluster 20"
+### Community 21 - "Module Cluster 21"
 Cohesion: 0.15
 Nodes (15): KeyboardShortcutsOverlay(), LocalStatusPill(), NotificationCenter(), NotificationContext, NotificationContextType, NotificationItem, NotificationProvider(), useNotifications() (+7 more)
 
-### Community 21 - "Module Cluster 21"
+### Community 22 - "Module Cluster 22"
 Cohesion: 0.18
 Nodes (15): CmudictRhymeHit, ensureCmudictLoaded(), findRhymes(), findRhymesBySound(), getAllPhonemes(), getLastStressedVowel(), getRhymeEnding(), getVowelPhonemes() (+7 more)
 
-### Community 22 - "Module Cluster 22"
+### Community 23 - "Module Cluster 23"
 Cohesion: 0.22
 Nodes (11): ATTITUDES, GENRES, REGIONS, cn(), MultiSelect(), MultiSelectOption, MultiSelectProps, PopoverContent (+3 more)
 
-### Community 23 - "Module Cluster 23"
+### Community 24 - "Module Cluster 24"
 Cohesion: 0.17
 Nodes (15): deleteTrackSnapshot(), listTrackSnapshots(), saveTrackSnapshot(), TrackSnapshot, VersionHistory(), VersionHistoryProps, DropdownMenuCheckboxItem, DropdownMenuContent (+7 more)
-
-### Community 24 - "Module Cluster 24"
-Cohesion: 0.21
-Nodes (15): escapeHtml(), flatLines(), Lyrics, openMultiTrackPrintWindow(), openPrintWindow(), slugify(), toGeniusMarkdown(), toLrc() (+7 more)
 
 ### Community 25 - "Module Cluster 25"
 Cohesion: 0.20
@@ -205,54 +204,50 @@ Cohesion: 0.18
 Nodes (8): LiveCapture, LiveCaptureOpts, playClick(), State, blobToBase64(), encodeWav(), rms(), writeString()
 
 ### Community 30 - "Module Cluster 30"
-Cohesion: 0.16
-Nodes (11): LibraryPage(), SortKey, EmptyState(), EmptyStateProps, downloadBlob(), toMultiTrackGeniusMarkdown(), toMultiTrackPlainText(), TrackExportItem (+3 more)
-
-### Community 31 - "Module Cluster 31"
 Cohesion: 0.27
 Nodes (9): BarTimelineProps, SOURCE_LABELS, BarVersion, clearBarHistory(), getBarHistory(), getLatestBarVersion(), loadAll(), recordBarVersion() (+1 more)
 
-### Community 32 - "Module Cluster 32"
+### Community 31 - "Module Cluster 31"
 Cohesion: 0.21
 Nodes (7): PREMADE_STRUCTURES, SCRIBBLE_MODES, JournalDrawer(), getDeviceId(), detectFlowInsight(), RhymeVisionMode, StudioArsenalDrawer()
 
-### Community 33 - "Module Cluster 33"
+### Community 32 - "Module Cluster 32"
 Cohesion: 0.21
 Nodes (8): chatInBrowser(), getModelId(), getWhisperModelId(), InBrowserEmbedConfig, InBrowserLlmConfig, InBrowserTranscribeConfig, initInBrowserAI(), transcribeInBrowser()
 
-### Community 34 - "Module Cluster 34"
+### Community 33 - "Module Cluster 33"
 Cohesion: 0.25
 Nodes (10): CalibrateOpts, calibrateWithRetry(), clearCalibratedLatencyMs(), detectPeaks(), LatencyResult, loadCalibratedLatencyMs(), measureMicLatencyMs(), mergeChunks() (+2 more)
 
-### Community 35 - "Module Cluster 35"
+### Community 34 - "Module Cluster 34"
 Cohesion: 0.20
 Nodes (9): CommitBar, CommitInput, commitLiveTake, DeviceId, GenerateBarInput, generateLiveBar, StyleBriefSchema, transcribeBar (+1 more)
 
-### Community 36 - "Module Cluster 36"
+### Community 35 - "Module Cluster 35"
 Cohesion: 0.38
 Nodes (9): build_hindi_dataset(), build_kannada_dataset(), clean_definition(), count_syllables(), extract_multi_rime(), extract_rime(), main(), normalize_romanization() (+1 more)
 
-### Community 37 - "Module Cluster 37"
+### Community 36 - "Module Cluster 36"
 Cohesion: 0.39
 Nodes (8): hashBlob(), hashInputs(), sha256Hex(), detectBackend(), LocalWhisperConfig, transcribeFasterWhisper(), transcribeLocal(), transcribeWhisperCpp()
 
-### Community 38 - "Module Cluster 38"
+### Community 37 - "Module Cluster 37"
 Cohesion: 0.29
 Nodes (5): Props, QualityRadar(), TrackQuality, TrackScorecard(), TrackScorecardProps
 
-### Community 40 - "Module Cluster 40"
+### Community 39 - "Module Cluster 39"
 Cohesion: 0.40
 Nodes (3): FEATURES, Route, STEPS
 
-### Community 41 - "Module Cluster 41"
+### Community 40 - "Module Cluster 40"
 Cohesion: 0.50
 Nodes (3): InlineRhymeDock(), ScribbleResultView(), SuperpowersBanner()
 
-### Community 42 - "Module Cluster 42"
+### Community 41 - "Module Cluster 41"
 Cohesion: 0.40
 Nodes (4): getRouter(), Register, routeTree, startInstance
 
-### Community 43 - "Module Cluster 43"
+### Community 42 - "Module Cluster 42"
 Cohesion: 0.67
 Nodes (3): BpmResult, detectBpm(), snapBpm()
 
@@ -264,9 +259,9 @@ Nodes (3): BpmResult, detectBpm(), snapBpm()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `countSyllables()` connect `Module Cluster 18` to `Module Cluster 32`, `Cadence, Stress & Indic Romanizer`, `Style Memory & Artistic Ghostwriter RAG`, `Audio Capture, Latency & Live Punch-In`, `Module Cluster 35`, `Studio Arsenal & Lyrical Intelligence`, `Headspace Journal & Evolution Analytics`, `Track Management & Studio Pipeline`, `Module Cluster 9`, `Module Cluster 10`, `Module Cluster 12`, `Module Cluster 13`, `Module Cluster 14`, `Module Cluster 15`, `Module Cluster 16`, `Module Cluster 17`?**
+- **Why does `countSyllables()` connect `Module Cluster 19` to `Track Management & Studio Pipeline`, `Cadence, Stress & Indic Romanizer`, `Style Memory & Artistic Ghostwriter RAG`, `Audio Capture, Latency & Live Punch-In`, `Module Cluster 34`, `Studio Arsenal & Lyrical Intelligence`, `Headspace Journal & Evolution Analytics`, `Module Cluster 9`, `Module Cluster 10`, `Module Cluster 13`, `Module Cluster 14`, `Module Cluster 15`, `Module Cluster 16`, `Module Cluster 17`, `Module Cluster 18`, `Module Cluster 31`?**
   _High betweenness centrality (0.049) - this node is a cross-community bridge._
-- **Why does `Button` connect `Module Cluster 12` to `Module Cluster 32`, `Track Management & Studio Pipeline`, `Module Cluster 38`, `Module Cluster 8`, `Module Cluster 40`, `Module Cluster 10`, `Module Cluster 11`, `Module Cluster 13`, `Module Cluster 17`, `Module Cluster 19`, `Module Cluster 20`, `Module Cluster 23`, `Module Cluster 24`, `Module Cluster 26`, `Module Cluster 28`, `Module Cluster 30`, `Module Cluster 31`?**
+- **Why does `Button` connect `Module Cluster 13` to `Track Management & Studio Pipeline`, `Module Cluster 37`, `Module Cluster 39`, `Module Cluster 8`, `Module Cluster 10`, `Module Cluster 11`, `Module Cluster 12`, `Module Cluster 14`, `Module Cluster 18`, `Module Cluster 20`, `Module Cluster 21`, `Module Cluster 24`, `Module Cluster 26`, `Module Cluster 28`, `Module Cluster 30`, `Module Cluster 31`?**
   _High betweenness centrality (0.044) - this node is a cross-community bridge._
 - **Why does `getAdmin()` connect `Module Cluster 6` to `Studio Arsenal & Lyrical Intelligence`?**
   _High betweenness centrality (0.040) - this node is a cross-community bridge._
