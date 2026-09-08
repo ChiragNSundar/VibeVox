@@ -15,7 +15,9 @@ describe("InlineRhymeDock Component", () => {
 
   it("renders idle hint when target word is empty or short", () => {
     render(<InlineRhymeDock targetWord="" onSelectWord={vi.fn()} />);
-    expect(screen.getByText(/type or place cursor near a word/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/place cursor on any bar to see instant 1-click rhymes/i)
+    ).toBeInTheDocument();
   });
 
   it("fetches and displays rhymes when valid word is provided", async () => {
