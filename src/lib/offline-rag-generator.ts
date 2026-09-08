@@ -13,40 +13,41 @@ import { loadBrainState, getBrainPromptDirectives } from "./brain-indexer";
 
 // Regional pattern banks for offline fallback generation
 const HINGLISH_PATTERNS = [
-  "dhundhla sa aks ab mitaoon main",
-  "qaid ye dard-e-jaan teri main",
-  "neendein dhuaan, soya kab hoon bata de",
-  "sach toh ye hai rootha naseeb main",
-  "saare panne phaade, kaale dhaage mein lipti",
-  "kaise aadha kar diya, kyun dil tera ye rulaah",
-  "jaam mein zeher, naa kho ja tu",
-  "raah mein ab nahi rehna tujhe paas na",
-  "kya hua aage bhaaga kyun ye saath",
-  "kyun aana nahi jaana kyun mere haath mein",
-  "jaana ab dil mera, lafzon se kheliu",
-  "lafzon ki heera-pheri, teri hi vibe",
-  "tera aks, mera bas, khatam sab back",
-  "zeher tera gehra, uljha wahi scene",
-  "kaisa ye nashaa, tera hi hai ye vibe",
+  "rootha mera ye naseeb hai yahan pe",
+  "khada jo mere kareeb hai yahan pe",
+  "dhundhla sa aks ab mitaoon main shauq se",
+  "sach toh ye hai sab bataoon main haq se",
+  "gully se penthouse tak wajood ki dastaan",
+  "neendein dhuaan par chhu liya aasmaan",
+  "chehra ye gehra jaise andhero ka pehra",
+  "tehelta main andhero mein akela sa thehra",
+  "qaid ye dard-e-jaan lafzon mein lipti",
+  "jaam mein zeher par saari baatein sach thi",
+  "bawaal ye awaaz meri sawaal kare aukaat",
+  "shikaar bana dildaar hathiyaar mera lafz",
+  "lafzon ki heera-pheri malum hai na bhai",
+  "wajood mera barood jaise toofan uthai",
   "shamo-sehar lamhon ki bechaini ki hai lay",
-  "numb sa ye sar, ab utha na pain",
-  "tehelta main hoon andhero mein stay",
-  "badalta main hoon yeh chehra bezaar",
+  "badalta main hoon yeh chehra bezaar stay",
   "na dikha tu mujhko ye jhootha raabta",
-  "shishe mein bikhri hai teri hasee",
+  "manzil hai aage khula mera raasta",
 ];
 
 const KANGLISH_PATTERNS = [
-  "yenu macha scene-u sariyaagi sakkat",
-  "bisi oota guru, haadu ready aagi",
-  "namma bengaluru, paata kaltivi illi",
-  "magane kopa beda, preeti maado scene-u",
-  "haadu taage, kettodhga dhoolu",
-  "sakkat vibe-u illi, macha kottu pacha",
-  "gothilla andru, sariyaagi kalti",
-  "scene-u super guru, haadu kelo illi",
-  "kannada rap-u illi, dhoolu macha sakkat",
-  "namma huduga barli, paata maado scene-u",
+  "macha bisi oota guru sariyaagi sakkat",
+  "pacha aagi hodha scene-u keli illi mattu",
+  "kastoori namma naadu haadu keli illi",
+  "nisteja aaguvilla namma huduga barli",
+  "bengaluru hood-u namma paata kaltivi illi",
+  "kettodhga dhoolu macha bittu nodu alli",
+  "haadu taage sariyaagi maado scene-u super",
+  "magane kopa beda preeti thilkolbeku illi",
+  "sakkat vibe-u illi macha kottu pacha aagi",
+  "gothilla andru kooda paata kalti sariyaagi",
+  "kannada rap-u illi dhoolu macha sakkat",
+  "namma huduga barli paata maado scene-u",
+  "bisi oota ready aagi kelo guru illi",
+  "dhaani namma kenne muttu hejje bisi beedhi",
 ];
 
 const ENGLISH_PATTERNS = [
@@ -62,9 +63,24 @@ const ENGLISH_PATTERNS = [
 
 function selectPatternBank(region?: string): string[] {
   const r = (region || "").toLowerCase();
+  const isHi = r.includes("hinglish") || r.includes("hindi");
+  const isKn = r.includes("kanglish") || r.includes("kannada");
+
   let baseBank = ENGLISH_PATTERNS;
-  if (r.includes("hinglish")) baseBank = HINGLISH_PATTERNS;
-  else if (r.includes("kanglish")) baseBank = KANGLISH_PATTERNS;
+  if (isHi && isKn) {
+    // Interleave blended pattern bank for bilingual code-switching
+    const blended: string[] = [];
+    const maxLen = Math.max(KANGLISH_PATTERNS.length, HINGLISH_PATTERNS.length);
+    for (let i = 0; i < maxLen; i++) {
+      if (KANGLISH_PATTERNS[i]) blended.push(KANGLISH_PATTERNS[i]);
+      if (HINGLISH_PATTERNS[i]) blended.push(HINGLISH_PATTERNS[i]);
+    }
+    baseBank = blended;
+  } else if (isHi) {
+    baseBank = HINGLISH_PATTERNS;
+  } else if (isKn) {
+    baseBank = KANGLISH_PATTERNS;
+  }
 
   try {
     const brainPatterns = loadBrainState().rhymes.flatMap((rb) => rb.patterns).filter(Boolean);
