@@ -305,7 +305,7 @@ bun install   # or: npm install
 # 2. Start development server (http://localhost:8080)
 bun dev       # or: npm run dev
 
-# 3. Run full unit test suite (165 tests across 27 files)
+# 3. Run full unit test suite (166 tests across 27 files)
 npm test      # or: npx vitest run
 
 # 4. Production build
