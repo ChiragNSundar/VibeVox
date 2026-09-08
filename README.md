@@ -92,10 +92,21 @@ While cloud-based tools rely on remote APIs and monthly credits, **VibeVox** bri
 - **Dominant Rhyme Sound Families**: Detects recurring phonetic anchors (`/aɪ/`, `/eː/`, etc.).
 - **Writing Activity Streak**: Tracks consecutive studio days.
 
-### 7. 🧠 Artistic Ghostwriter & Multi-Level Hybrid RAG
-- **Reciprocal Rank Fusion ($RRF$)**: Combines vector cosine similarity, cadence density matching, and POS grammar scoring.
+### 7. 🧠 Indic Poetics Engine & Multi-Level Hybrid RAG 2.0
+- **Classical & DHH Poetics**:
+  - **Dwitiyakshara Prasa (ದ್ವಿತೀಯಾಕ್ಷರ ಪ್ರಾಸ)**: 2nd consonant cluster matching for classical and street Kannada rap (*Ma-cha / Pa-cha*, *Ka-stoori / Ni-steja*).
+  - **Qafiya & Radif (क़ाफ़िया & रदीफ़)**: Couplet rhyming core and repeating refrain parallelism for Desi Hip-Hop (*naseeb hai yahan pe* / *kareeb hai yahan pe*).
+  - **Antyaprasa & Multisyllabic Rimes**: Suffix rhyming chains (`-aagi`, `-odu`, `-illa`, `-beku`, `-aoon`, `-aan`, `-eeb`, `-ehra`, `-aani`, `-aana`, `-aar`).
+  - **Matra Prosodic Balancing**: Laghu ($1$) and Guru ($2$) rhythmic weight calculation to ensure breath balance across bars.
+- **Curated Indic Lexicons (Zero Pronunciation Marks)**:
+  - **400+ DHH Words**: Curated street nouns, flow verbs, adjectives, and authentic slang in pure colloquial Latin script.
+  - **31,000+ Kannada KEED 2018 + Bengaluru Street Rap**: Vernacular terms (*macha, magane, bisi oota, scene-u, paata, saaku, kirik, bombaat*).
+- **4-Stream Reciprocal Rank Fusion ($RRF$)**:
+  - Combines: (1) Semantic Vector Similarity, (2) Cadence Pocket Alignment, (3) POS & Lexical Rimes, and (4) Indic Poetics Stream.
+  - Supports **Bilingual Code-Switching ("blend")**: fuses dual Indic streams when both Kanglish and Hinglish are selected.
+- **Sensory & Metaphor Synthesizer**: Concrete Bengaluru streetscapes (Majestic neon, filter coffee, Western Ghats petrichor) and DHH realism (Mumbai local train rattle, cutting chai, Kurla alleys).
 - **Zero-LLM Offline RAG Mode**: Even with no LLM connected, assembles rhythmic lines using POS grammars, style memory, and phonetics.
-- **Critic Council**: Multi-critic evaluation of pocket rhythm, wordplay quality, and authenticity.
+- **Critic Council**: Multi-critic evaluation of pocket rhythm, wordplay quality, authenticity, and Indic poetics.
 
 ---
 
@@ -118,10 +129,11 @@ flowchart TD
 
     subgraph IntelligenceEngine["Lyric Intelligence & Local RAG Core"]
         JournalRAG["🧠 Emotional State RAG\n(Token Overlap + Mood Bias)"]
-        HybridRAG["⚡ Multi-Level Hybrid RAG\n(Semantic + Cadence + POS RRF)"]
-        MetaphorSynth["🎨 Metaphor Synthesizer"]
-        RhymePlanner["🎵 Rhyme Ladder Planner\n(2-3 Syl Rimes)"]
-        DictEngine["📚 Indic Dictionary Engine\n(31k+ KEED Kannada & Hinglish)"]
+        HybridRAG["⚡ Multi-Level Hybrid RAG 2.0\n(Semantic + Cadence + POS + Indic Poetics RRF)"]
+        IndicPoetics["🇮🇳 Indic Poetics Engine\n(Dwitiyakshara, Qafiya-Radif & Matra)"]
+        MetaphorSynth["🎨 Sensory Metaphor Synthesizer\n(Bengaluru & DHH Realism)"]
+        RhymePlanner["🎵 Rhyme Ladder Planner\n(2-3 Syl Rimes & Blend Mode)"]
+        DictEngine["📚 Indic Dictionary Engine\n(31k+ KEED Kannada & 400+ DHH)"]
         StatsEngine["📈 Local Stats Analyzer\n(IndexedDB Aggregator)"]
     end
 
@@ -129,13 +141,13 @@ flowchart TD
         PipelineWorker["⚡ Web Worker Bridge\n(pipeline.worker.ts)"]
         LocalLLM["🤖 Local/Cloud LLM\n(Ollama / LM Studio / OpenRouter)"]
         ZeroLLMRAG["🛡️ Zero-LLM Offline Engine\n(Algorithmic Fallback)"]
-        CriticCouncil["⚖️ Critic Council\n(Pocket, Rhyme, Authenticity)"]
+        CriticCouncil["⚖️ Critic Council\n(Pocket, Rhyme, Authenticity, Indic)"]
     end
 
     subgraph StorageLayer["100% Local Persistence"]
         IndexedDB[("💾 IndexedDB (voxscript-local)\nTracks, Bars, Style Memory, Journal")]
         OPFS[("📂 OPFS Storage\nVocal Audio Takes")]
-        GraphifyKG[("🕸️ Graphify Knowledge Graph\n1060 Nodes · 2885 Edges · 49 Communities")]
+        GraphifyKG[("🕸️ Graphify Knowledge Graph\n1075 Nodes · 2938 Edges · 53 Communities")]
     end
 
     LiveStudio --> OPFS
