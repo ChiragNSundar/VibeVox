@@ -6,7 +6,7 @@
   <img src="https://img.shields.io/badge/TanStack-Start%20v1-orange?style=for-the-badge" alt="TanStack Start" />
   <img src="https://img.shields.io/badge/Vite-7-purple?style=for-the-badge&logo=vite" alt="Vite 7" />
   <img src="https://img.shields.io/badge/Tailwind-v4-cyan?style=for-the-badge&logo=tailwindcss" alt="Tailwind v4" />
-  <img src="https://img.shields.io/badge/Tests-149%20Passing-brightgreen?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-165%20Passing-brightgreen?style=for-the-badge" alt="Tests" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License MIT" />
 </p>
 
