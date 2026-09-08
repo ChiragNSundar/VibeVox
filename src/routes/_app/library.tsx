@@ -275,7 +275,7 @@ function LibraryPage() {
       return;
     }
 
-    const exportItems: TrackExportItem[] = selectedTracks.map((t) => {
+    const exportItems: TrackExportItem[] = selectedTracks.map((t: any) => {
       let parsedLyrics = null;
       if (t.lyrics) {
         try {
@@ -287,9 +287,9 @@ function LibraryPage() {
       return {
         title: t.title || "Untitled",
         lyrics: parsedLyrics,
-        rawTranscript: (t as any).transcript || (t as any).raw_transcript,
+        rawTranscript: t.transcript || t.raw_transcript,
         bpm: t.bpm,
-        createdAt: "createdAt" in t ? (t as any).createdAt : (t as any).created_at,
+        createdAt: "createdAt" in t ? t.createdAt : t.created_at,
       };
     });
 
@@ -528,7 +528,7 @@ function LibraryPage() {
                         <div className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1.5">
                           <Database className="h-3 w-3 text-muted-foreground" />
                           {dateStr}
-                          {t.bpm && <span>· {t.bpm} BPM</span>}
+                          {(t as any).bpm && <span>· {(t as any).bpm} BPM</span>}
                         </div>
                       </div>
                     </div>
