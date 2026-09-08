@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
 
 import { toast } from "sonner";
 import {
@@ -34,7 +33,6 @@ import { getLineStressAnalysis, calculateMatra, detectFlowMetric } from "@/lib/c
 import { countSyllables } from "@/lib/phonetics";
 
 const DRAFT_KEY = "vibevox:scribble-draft";
-const AUTO_SYNC_KEY = "vibevox:scribble-auto-sync";
 
 const SCRIBBLE_MODES = [
   { id: "full-song", label: "Full Song", icon: Music },
@@ -128,7 +126,7 @@ function ScribblePage() {
   const [arsenalOpen, setArsenalOpen] = useState(false);
   const [showMatra, setShowMatra] = useState(false);
   const [mode, setMode] = useState<ScribbleMode | null>("full-song");
-  const [autoSync, setAutoSync] = useState(true);
+  const autoSync = true;
   const [result, setResult] = useState<ScribbleResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [syncedPaths, setSyncedPaths] = useState<{ lyricsPath?: string; rhymesPath?: string } | null>(null);
@@ -138,8 +136,6 @@ function ScribblePage() {
     if (typeof localStorage !== "undefined") {
       const savedDraft = localStorage.getItem(DRAFT_KEY) || localStorage.getItem("voxscript:scribble-draft");
       if (savedDraft) setScribbleText(savedDraft);
-      const savedAutoSync = localStorage.getItem(AUTO_SYNC_KEY) || localStorage.getItem("voxscript:scribble-auto-sync");
-      if (savedAutoSync !== null) setAutoSync(savedAutoSync === "true");
     }
   }, []);
 
@@ -149,14 +145,6 @@ function ScribblePage() {
     if (typeof localStorage !== "undefined") {
       localStorage.setItem(DRAFT_KEY, val);
     }
-  }
-
-  function handleAutoSyncToggle(enabled: boolean) {
-    setAutoSync(enabled);
-    if (typeof localStorage !== "undefined") {
-      localStorage.setItem(AUTO_SYNC_KEY, String(enabled));
-    }
-    toast.info(enabled ? "Auto-sync to brain enabled" : "Auto-sync disabled");
   }
 
   function handleApplySpark(sparkText: string) {
@@ -397,16 +385,6 @@ function ScribblePage() {
             <Zap className="h-3.5 w-3.5 text-amber-400" />
             <span className="font-medium">Arsenal</span>
           </button>
-
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs">
-            <Brain className="h-3.5 w-3.5 text-amber-400" />
-            <span className="text-muted-foreground font-medium">Auto-Sync to Brain</span>
-            <Switch
-              checked={autoSync}
-              onCheckedChange={handleAutoSyncToggle}
-              aria-label="Toggle Auto-sync to Brain"
-            />
-          </div>
         </div>
       </div>
 
