@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect, useTransition, useMemo, useRef } from "react";
+import { useState, useEffect, useTransition, useMemo, useRef, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -303,6 +303,7 @@ function ScribblePage() {
         syllables: b.syllables,
         endSound: b.endSound,
         text: b.text,
+        createdAt: Date.now(),
         updatedAt: Date.now(),
       }));
       await putBars(localBars);
