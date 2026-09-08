@@ -134,6 +134,10 @@ function ScribblePage() {
   const [arsenalOpen, setArsenalOpen] = useState(false);
   const [showMatra, setShowMatra] = useState(false);
   const [mode, setMode] = useState<ScribbleMode | null>("full-song");
+  const [bpm, setBpm] = useState<number>(90);
+  const [cursorLineIdx, setCursorLineIdx] = useState<number>(0);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const inspectorRef = useRef<HTMLDivElement>(null);
   const autoSync = true;
   const [result, setResult] = useState<ScribbleResult | null>(null);
   const [copied, setCopied] = useState(false);
@@ -246,9 +250,68 @@ function ScribblePage() {
     toast.success("Lyrics copied to clipboard");
   }
 
-  function handleSendToStudio() {
+  async function handleSendToStudio() {
     if (!result) return;
-    navigate({ to: "/new" });
+    try {
+      const trackId = `track_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+      const deviceId = getDeviceId();
+      const localLyrics = {
+        title: result.title || "Scribble Track",
+        sections: result.sections,
+      };
+
+      const cadenceBars = result.sections.flatMap((s, sIdx) =>
+        s.lines.map((l, lIdx) => ({
+          index: lIdx,
+          syllables: countSyllables(l),
+          endSound: endRhymeKey(l),
+          section: s.type,
+          text: l,
+        }))
+      );
+
+      const cadenceMap = {
+        bars: cadenceBars,
+        detectedVibe: result.analysis.vibe,
+        detectedKeyPhrases: result.analysis.standoutGems,
+      };
+
+      const localTrack: LocalTrack = {
+        id: trackId,
+        deviceId,
+        title: result.title || "Scribble Track",
+        status: "done",
+        bpm: result.analysis.suggestedBpm || bpm || 90,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        transcript: result.rawScribble,
+        lyrics: JSON.stringify(localLyrics),
+        cadenceMap: JSON.stringify(cadenceMap),
+        styleBrief: JSON.stringify({
+          genre: result.analysis.genre,
+          attitude: [result.analysis.mood],
+          topic: result.analysis.centralNarrative,
+        }),
+      };
+
+      await putTrack(localTrack);
+
+      const localBars: LocalBar[] = cadenceBars.map((b, i) => ({
+        id: `${trackId}:${i}`,
+        trackId,
+        index: i,
+        syllables: b.syllables,
+        endSound: b.endSound,
+        text: b.text,
+        updatedAt: Date.now(),
+      }));
+      await putBars(localBars);
+
+      toast.success("Created Track Studio project!");
+      navigate({ to: "/track/$id", params: { id: trackId } });
+    } catch (err: any) {
+      toast.error(`Failed to send to studio: ${err?.message || "Unknown error"}`);
+    }
   }
 
   const linesCount = scribbleText.split("\n").filter((l) => l.trim().length > 0).length;
@@ -259,6 +322,49 @@ function ScribblePage() {
     () => highlightLyrics(scribbleLines, rhymeVision),
     [scribbleLines, rhymeVision]
   );
+
+  const updateCursorLine = useCallback(() => {
+    if (!textareaRef.current) return;
+    const pos = textareaRef.current.selectionStart || 0;
+    const textBefore = scribbleText.slice(0, pos);
+    const lineIndex = textBefore.split("\n").length - 1;
+    setCursorLineIdx(lineIndex);
+
+    if (inspectorRef.current) {
+      const items = inspectorRef.current.querySelectorAll("[data-bar-idx]");
+      const target = items[lineIndex] as HTMLElement | undefined;
+      if (target) {
+        target.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      }
+    }
+  }, [scribbleText]);
+
+  const activeLine = scribbleLines[cursorLineIdx] || "";
+  const activeLineEnding = useMemo(() => {
+    if (!activeLine.trim()) return "";
+    const words = activeLine.trim().split(/\s+/);
+    return words[words.length - 1]?.replace(/[^a-zA-Z0-9'-]/g, "") || "";
+  }, [activeLine]);
+
+  const dockWord = rhymeLookupWord || activeLineEnding;
+
+  const handleInsertRhyme = (word: string) => {
+    const lines = scribbleText.split("\n");
+    const curLine = lines[cursorLineIdx] || "";
+    if (curLine.trim()) {
+      lines[cursorLineIdx] = `${curLine.trimEnd()} ${word}`;
+    } else {
+      lines[cursorLineIdx] = word;
+    }
+    const newText = lines.join("\n");
+    handleTextChange(newText);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        updateCursorLine();
+      }
+    }, 40);
+  };
   const liveScheme = useMemo(
     () => getStanzaRhymeScheme(scribbleLines.filter((l) => l.trim())),
     [scribbleLines]
@@ -362,6 +468,7 @@ function ScribblePage() {
         </div>
 
         <div className="flex items-center gap-2 flex-wrap">
+          <FlowMetronomeBar bpm={bpm} onBpmChange={setBpm} />
           <ComplexityGauge result={scribbleComplexity} />
 
           <button
@@ -463,8 +570,15 @@ function ScribblePage() {
             </div>
 
             <Textarea
+              ref={textareaRef}
               value={scribbleText}
-              onChange={(e) => handleTextChange(e.target.value)}
+              onChange={(e) => {
+                handleTextChange(e.target.value);
+                updateCursorLine();
+              }}
+              onClick={updateCursorLine}
+              onKeyUp={updateCursorLine}
+              onSelect={updateCursorLine}
               placeholder="Type your bars here normally like a notepad...
 jo chahe mujhe woh chahe
 jo laye mujhe woh gaaye
@@ -487,6 +601,12 @@ because i got quite cries"
               </div>
             </div>
           </Card>
+
+          {/* Inline Non-Blocking Rhyme Dock */}
+          <InlineRhymeDock
+            targetWord={dockWord}
+            onSelectWord={handleInsertRhyme}
+          />
 
           <Button
             size="lg"
@@ -530,7 +650,10 @@ because i got quite cries"
                   </div>
                 </div>
 
-                <div className="max-h-[580px] overflow-y-auto studio-scroll pr-1.5 space-y-2 font-mono text-sm leading-relaxed p-1">
+                <div
+                  ref={inspectorRef}
+                  className="max-h-[580px] overflow-y-auto studio-scroll pr-1.5 space-y-2 font-mono text-sm leading-relaxed p-1"
+                >
                   {liveHighlighted.length > 0 && scribbleLines.some((l) => l.trim()) ? (
                     liveHighlighted.map((item, idx) => {
                       const line = scribbleLines[idx] || "";
@@ -566,12 +689,44 @@ because i got quite cries"
                         );
                       }
 
+                      const isActiveLine = idx === cursorLineIdx;
+
+                      // Compute delta with previous non-empty bar
+                      let deltaText = "";
+                      let deltaClass = "";
+                      if (barNum > 0) {
+                        let prevSyllables: number | null = null;
+                        for (let bi = idx - 1; bi >= 0; bi--) {
+                          const bl = scribbleLines[bi]?.trim() || "";
+                          if (bl && !/^\[.+\]$/.test(bl)) {
+                            prevSyllables = liveHighlighted[bi]?.syllables ?? null;
+                            break;
+                          }
+                        }
+                        if (prevSyllables !== null) {
+                          const diff = item.syllables - prevSyllables;
+                          if (diff === 0) {
+                            deltaText = "±0";
+                            deltaClass = "text-emerald-400 bg-emerald-500/10 border-emerald-500/30";
+                          } else if (Math.abs(diff) === 1) {
+                            deltaText = diff > 0 ? `+${diff}` : `${diff}`;
+                            deltaClass = "text-sky-400 bg-sky-500/10 border-sky-500/30";
+                          } else {
+                            deltaText = diff > 0 ? `+${diff}` : `${diff}`;
+                            deltaClass = "text-amber-400 bg-amber-500/10 border-amber-500/30 font-bold";
+                          }
+                        }
+                      }
+
                       return (
                         <div
                           key={idx}
-                          className={`flex items-start justify-between gap-3 group hover:bg-card/60 px-2 py-1.5 rounded transition-colors ${
-                            isAnaphora ? "anaphora-bracket" : ""
-                          }`}
+                          data-bar-idx={idx}
+                          className={`flex items-start justify-between gap-3 group px-2 py-1.5 rounded transition-all ${
+                            isActiveLine
+                              ? "bg-primary/10 border border-primary/50 shadow-xs ring-1 ring-primary/30"
+                              : "hover:bg-card/60"
+                          } ${isAnaphora ? "anaphora-bracket" : ""}`}
                         >
                           <div className="flex items-baseline gap-2 flex-1 min-w-0 flex-wrap">
                             {barNum > 0 && (
@@ -638,6 +793,16 @@ because i got quite cries"
                                       {c === "/" ? "●" : "○"}
                                     </span>
                                   ))}
+                                </span>
+                              )}
+
+                              {/* Cadence Delta Badge on active line */}
+                              {isActiveLine && deltaText && (
+                                <span
+                                  className={`text-[8px] font-mono px-1 py-0.2 rounded border ${deltaClass}`}
+                                  title={`Cadence delta: ${deltaText} vs previous bar`}
+                                >
+                                  {deltaText}
                                 </span>
                               )}
 
