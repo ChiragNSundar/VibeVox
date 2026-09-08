@@ -7,8 +7,16 @@
 import { KANNADA_DICTIONARY, type DictEntry } from "./data/kannada-dict";
 import { HINDI_DICTIONARY } from "./data/hindi-dict";
 import { romanizeIndic, stripPronunciationMarks, normalizeIndicWord } from "./indic-romanizer";
+import {
+  extractDwitiyakshara,
+  matchDwitiyakshara,
+  findDwitiyaksharaCandidates,
+  extractQafiyaRadif,
+  matchQafiyaRadif,
+} from "./indic-poetics";
 
 export type { DictEntry };
+export { extractDwitiyakshara, matchDwitiyakshara, findDwitiyaksharaCandidates, extractQafiyaRadif, matchQafiyaRadif };
 
 export type WordMatch = DictEntry & {
   score: number;
@@ -29,7 +37,7 @@ function getHindiDictSync(): DictEntry[] {
  */
 export function findRhymesWithPos(
   targetWord: string,
-  language: "kannada" | "hinglish" | "auto" = "auto",
+  language: "kannada" | "hinglish" | "blend" | "auto" = "auto",
   filterPos?: string,
 ): WordMatch[] {
   const clean = normalizeIndicWord(targetWord);
@@ -40,10 +48,10 @@ export function findRhymesWithPos(
   const kannada = getKannadaDictSync();
   const hindi = getHindiDictSync();
 
-  if (language === "kannada" || language === "auto") {
+  if (language === "kannada" || language === "blend" || language === "auto") {
     if (kannada.length) dataset.push({ data: kannada, lang: "kannada" });
   }
-  if (language === "hinglish" || language === "auto") {
+  if (language === "hinglish" || language === "blend" || language === "auto") {
     if (hindi.length) dataset.push({ data: hindi, lang: "hinglish" });
   }
 
