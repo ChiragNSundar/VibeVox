@@ -150,7 +150,7 @@ export function FlowMetronomeBar({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-card/80 border border-border/80 text-xs shadow-sm",
+        "flex items-center gap-1.5 sm:gap-2 px-2 sm:px-2.5 py-1.5 rounded-lg bg-card/80 border border-border/80 text-xs shadow-sm max-w-full overflow-hidden shrink-0",
         className,
       )}
     >
@@ -159,7 +159,7 @@ export function FlowMetronomeBar({
         type="button"
         onClick={() => setIsPlaying(!isPlaying)}
         className={cn(
-          "h-7 w-7 rounded-md flex items-center justify-center transition-all cursor-pointer",
+          "h-7 w-7 rounded-md flex items-center justify-center transition-all cursor-pointer shrink-0",
           isPlaying
             ? "bg-amber-500 text-amber-950 font-bold shadow-sm animate-pulse"
             : "bg-muted/50 text-muted-foreground hover:text-foreground hover:bg-muted",
@@ -169,18 +169,39 @@ export function FlowMetronomeBar({
         {isPlaying ? <Pause className="h-3.5 w-3.5 fill-current" /> : <Play className="h-3.5 w-3.5 fill-current ml-0.5" />}
       </button>
 
-      {/* Hover & Scroll Wheel BPM Box */}
-      <div
-        ref={scrollRef}
-        title="Scroll mouse wheel to change BPM (Shift + Scroll for ±5)"
-        className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-background/70 border border-border/70 cursor-ns-resize select-none group hover:border-primary/60 transition-colors"
-      >
-        <span className="font-mono font-bold text-xs text-foreground tabular-nums min-w-[28px] text-center">
-          {bpm}
-        </span>
-        <span className="text-[10px] font-mono text-muted-foreground uppercase">
-          BPM
-        </span>
+      {/* BPM Box with Touch Buttons & Wheel Scroll */}
+      <div className="flex items-center gap-0.5">
+        <button
+          type="button"
+          onClick={() => onBpmChange(Math.max(40, bpm - 1))}
+          className="h-5 w-3.5 flex items-center justify-center rounded text-[11px] font-mono text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-90 transition-all cursor-pointer select-none"
+          title="Decrease BPM (or scroll down)"
+        >
+          -
+        </button>
+        <div
+          ref={scrollRef}
+          title="Scroll mouse wheel to change BPM (Shift + Scroll for ±5)"
+          className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded bg-background/70 border border-border/70 cursor-ns-resize select-none group hover:border-primary/60 transition-colors"
+        >
+          <span className="font-mono font-bold text-xs text-foreground tabular-nums min-w-[26px] text-center">
+            {bpm}
+          </span>
+          <span className="text-[10px] font-mono text-muted-foreground uppercase hidden sm:inline">
+            BPM
+          </span>
+          <span className="text-[9px] font-mono text-muted-foreground uppercase sm:hidden">
+            B
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => onBpmChange(Math.min(240, bpm + 1))}
+          className="h-5 w-3.5 flex items-center justify-center rounded text-[11px] font-mono text-muted-foreground hover:text-foreground hover:bg-muted/60 active:scale-90 transition-all cursor-pointer select-none"
+          title="Increase BPM (or scroll up)"
+        >
+          +
+        </button>
       </div>
 
       {/* Visual 4-Beat Meter Dots */}
