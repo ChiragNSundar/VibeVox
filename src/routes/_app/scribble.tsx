@@ -136,6 +136,7 @@ function ScribblePage() {
   const [mode, setMode] = useState<ScribbleMode | null>("full-song");
   const [bpm, setBpm] = useState<number>(90);
   const [cursorLineIdx, setCursorLineIdx] = useState<number>(0);
+  const [mobileStudioTab, setMobileStudioTab] = useState<"both" | "notepad" | "phonetics">("both");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const inspectorRef = useRef<HTMLDivElement>(null);
   const autoSync = true;
@@ -468,38 +469,39 @@ function ScribblePage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
           <FlowMetronomeBar bpm={bpm} onBpmChange={setBpm} />
           <ComplexityGauge result={scribbleComplexity} />
 
           <button
             type="button"
             onClick={() => { setRhymeLookupWord(""); setRhymeLookupOpen(true); }}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs text-muted-foreground hover:text-foreground hover:border-primary/40 transition-all cursor-pointer shrink-0"
             title="Open Rhyme Studio"
           >
             <Music className="h-3.5 w-3.5 text-primary" />
-            <span className="font-medium">Rhyme Studio</span>
+            <span className="font-medium hidden sm:inline">Rhyme Studio</span>
+            <span className="font-medium sm:hidden">Rhymes</span>
           </button>
 
           <button
             type="button"
             onClick={() => setJournalDrawerOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs text-muted-foreground hover:text-foreground hover:border-indigo-500/40 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs text-muted-foreground hover:text-foreground hover:border-indigo-500/40 transition-all cursor-pointer shrink-0"
             title="Open Writer's Headspace & Quick Journal"
           >
             <BookOpen className="h-3.5 w-3.5 text-indigo-400" />
-            <span className="font-medium">Headspace</span>
+            <span className="font-medium hidden sm:inline">Headspace</span>
           </button>
 
           <button
             type="button"
             onClick={() => setArsenalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs text-muted-foreground hover:text-foreground hover:border-amber-500/40 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs text-muted-foreground hover:text-foreground hover:border-amber-500/40 transition-all cursor-pointer shrink-0"
             title="Open Studio Arsenal: Punchlines & Hooks"
           >
             <Zap className="h-3.5 w-3.5 text-amber-400" />
-            <span className="font-medium">Arsenal</span>
+            <span className="font-medium hidden sm:inline">Arsenal</span>
           </button>
         </div>
       </div>
@@ -551,10 +553,47 @@ function ScribblePage() {
         )}
       </div>
 
+      {/* Mobile Studio Switcher (Visible on mobile/tablet only) */}
+      <div className="flex md:hidden items-center justify-between p-1 rounded-lg bg-card/80 border border-border/70 text-xs font-mono">
+        <button
+          type="button"
+          onClick={() => setMobileStudioTab("both")}
+          className={`flex-1 py-1 px-2 rounded text-center transition-all cursor-pointer ${
+            mobileStudioTab === "both"
+              ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Both
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileStudioTab("notepad")}
+          className={`flex-1 py-1 px-2 rounded text-center transition-all cursor-pointer ${
+            mobileStudioTab === "notepad"
+              ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Notepad
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileStudioTab("phonetics")}
+          className={`flex-1 py-1 px-2 rounded text-center transition-all cursor-pointer ${
+            mobileStudioTab === "phonetics"
+              ? "bg-primary text-primary-foreground font-semibold shadow-xs"
+              : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Phonetics
+        </button>
+      </div>
+
       {/* STRICT SIDE-BY-SIDE DUAL STUDIO (50% / 50%) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
         {/* LEFT COLUMN: 100% NORMALLY TYPABLE WRITING PAD */}
-        <div className="space-y-3">
+        <div className={`space-y-3 ${mobileStudioTab === "phonetics" ? "hidden md:block" : "block"}`}>
           <Card className="p-4 bg-card/70 border-border/80 space-y-3 shadow-sm">
             <div className="flex items-center justify-between pb-2 border-b border-border/50 flex-wrap gap-2">
               <div className="flex items-center gap-2">
@@ -621,7 +660,7 @@ because i got quite cries"
         </div>
 
         {/* RIGHT COLUMN: Live Phonetic Clusters (Side-by-Side) */}
-        <div className="space-y-4">
+        <div className={`space-y-4 ${mobileStudioTab === "notepad" ? "hidden md:block" : "block"}`}>
           {!result ? (
             <div className="space-y-4">
               <Card className="p-4 bg-card/70 border-border/80 space-y-3 shadow-sm">
@@ -653,7 +692,7 @@ because i got quite cries"
 
                 <div
                   ref={inspectorRef}
-                  className="max-h-[580px] overflow-y-auto studio-scroll pr-1.5 space-y-2 font-mono text-sm leading-relaxed p-1"
+                  className="max-h-[580px] overflow-y-auto overflow-x-hidden studio-scroll pr-1.5 space-y-2 font-mono text-sm leading-relaxed p-1"
                 >
                   {liveHighlighted.length > 0 && scribbleLines.some((l) => l.trim()) ? (
                     liveHighlighted.map((item, idx) => {
@@ -723,7 +762,7 @@ because i got quite cries"
                         <div
                           key={idx}
                           data-bar-idx={idx}
-                          className={`flex items-start justify-between gap-3 group px-2 py-1.5 rounded transition-all ${
+                          className={`flex items-start justify-between gap-2 sm:gap-3 group px-2 py-1.5 rounded transition-all max-w-full overflow-hidden ${
                             isActiveLine
                               ? "bg-primary/10 border border-primary/50 shadow-xs ring-1 ring-primary/30"
                               : "hover:bg-card/60"
