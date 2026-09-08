@@ -127,7 +127,7 @@ function ScribblePage() {
   const [journalDrawerOpen, setJournalDrawerOpen] = useState(false);
   const [arsenalOpen, setArsenalOpen] = useState(false);
   const [showMatra, setShowMatra] = useState(false);
-  const [mode, setMode] = useState<ScribbleMode>("full-song");
+  const [mode, setMode] = useState<ScribbleMode | null>("full-song");
   const [autoSync, setAutoSync] = useState(true);
   const [result, setResult] = useState<ScribbleResult | null>(null);
   const [copied, setCopied] = useState(false);
@@ -178,6 +178,15 @@ function ScribblePage() {
   }
 
   function handleModeSelect(newMode: ScribbleMode) {
+    if (mode === newMode) {
+      setMode(null);
+      const template = PREMADE_STRUCTURES[newMode];
+      if (template && scribbleText.trim() === template.trim()) {
+        handleTextChange("");
+      }
+      return;
+    }
+
     setMode(newMode);
     const template = PREMADE_STRUCTURES[newMode];
     if (template) {
@@ -193,7 +202,7 @@ function ScribblePage() {
 
     startTransition(async () => {
       try {
-        const res = await makeSenseOfScribble(scribbleText, mode);
+        const res = await makeSenseOfScribble(scribbleText, mode ?? "full-song");
         setResult(res);
         toast.success("Synthesized scribbles!", {
           description: `Detected: ${res.analysis.mood} · ${res.analysis.vibe}`,
