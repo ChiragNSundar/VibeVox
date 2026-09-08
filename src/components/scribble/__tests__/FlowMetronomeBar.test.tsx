@@ -95,4 +95,18 @@ describe("FlowMetronomeBar Component", () => {
 
     expect(handleBpmChange).toHaveBeenCalledWith(120);
   });
+
+  it("updates BPM via touch nudge minus and plus buttons", () => {
+    const handleBpmChange = vi.fn();
+    render(<FlowMetronomeBar bpm={100} onBpmChange={handleBpmChange} />);
+
+    const decBtn = screen.getByTitle("Decrease BPM (or scroll down)");
+    const incBtn = screen.getByTitle("Increase BPM (or scroll up)");
+
+    fireEvent.click(decBtn);
+    expect(handleBpmChange).toHaveBeenCalledWith(99);
+
+    fireEvent.click(incBtn);
+    expect(handleBpmChange).toHaveBeenCalledWith(101);
+  });
 });
