@@ -137,7 +137,7 @@ export function RhymeLookup({
     for (const item of all) {
       if (!item.word) continue;
       const w = item.word.toLowerCase();
-      const m = (item.meaning || "").toLowerCase();
+      const m = (item.meaning || item.definition || "").toLowerCase();
 
       if (w.startsWith(clean) || w === clean || m.includes(clean)) {
         matches.push(item);
