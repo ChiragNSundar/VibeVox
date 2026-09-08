@@ -80,7 +80,7 @@ export function ScribbleResultView({
             </div>
             <div className="flex flex-wrap gap-1.5">
               {result.analysis.rhymeClusters.map((cluster, i) => (
-                <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-background border border-border/60">
+                <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-background border border-border/60 break-words max-w-full">
                   <strong className="text-primary">{cluster.word}</strong> ↔ {cluster.rhymesWith.join(", ")}
                 </span>
               ))}
@@ -90,61 +90,61 @@ export function ScribbleResultView({
       </Card>
 
       {/* Synthesized Lyrics Section */}
-      <Card className="p-4 space-y-4 border-border/80 bg-card/60">
+      <Card className="p-3 sm:p-4 space-y-4 border-border/80 bg-card/60 max-w-full overflow-hidden">
         <div className="flex items-center justify-between border-b pb-2">
-          <div className="flex items-center gap-2">
-            <Music className="h-4 w-4 text-primary" />
-            <span className="font-semibold text-sm">Synthesized Lyric Blueprint</span>
+          <div className="flex items-center gap-2 min-w-0">
+            <Music className="h-4 w-4 text-primary shrink-0" />
+            <span className="font-semibold text-sm truncate">Synthesized Lyric Blueprint</span>
           </div>
-          <Button size="sm" variant="ghost" onClick={onCopy} className="h-7 text-xs">
+          <Button size="sm" variant="ghost" onClick={onCopy} className="h-7 text-xs shrink-0">
             {copied ? <Check className="h-3.5 w-3.5 mr-1 text-emerald-400" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
-            {copied ? "Copied" : "Copy"}
+            {copied ? "Copied!" : "Copy"}
           </Button>
         </div>
 
-        <div className="space-y-4">
-          {result.sections.map((section, sIdx) => {
-            const prevLinesCount = result.sections
-              .slice(0, sIdx)
-              .reduce((acc, s) => acc + s.lines.length, 0);
-
+        {/* Lines Container */}
+        <div className="space-y-4 max-h-[500px] overflow-y-auto overflow-x-hidden studio-scroll pr-1 font-mono text-sm leading-relaxed">
+          {result.sections.map((sec, secIdx) => {
             return (
-              <div key={sIdx} className="space-y-1.5">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
-                  [{section.type}]
+              <div key={secIdx} className="space-y-1.5">
+                <div className="text-xs font-bold text-primary/80 uppercase tracking-wide px-2 py-0.5 rounded bg-primary/10 inline-block">
+                  [{sec.type}]
                 </div>
-                <div className="bg-background/80 p-3 rounded-md border border-border/50 space-y-1.5 font-mono text-xs leading-relaxed">
-                  {section.lines.map((line, lIdx) => {
-                    const globalIdx = prevLinesCount + lIdx;
-                    const hItem = resultHighlighted[globalIdx];
+                <div className="space-y-1">
+                  {sec.lines.map((line, lineIdx) => {
+                    const absIdx = lineCounter++;
+                    const highlighted = resultHighlighted[absIdx];
+                    const syllables = countSyllables(line);
+
                     return (
-                      <div key={lIdx} className="flex items-center justify-between gap-3 text-muted-foreground">
-                        <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                          {hItem?.schemeLetter && (
+                      <div
+                        key={lineIdx}
+                        className="flex items-baseline justify-between gap-2 sm:gap-3 group px-2 py-1 rounded hover:bg-card/80 transition-colors max-w-full overflow-hidden"
+                      >
+                        <div className="flex items-baseline gap-2 flex-1 min-w-0">
+                          {highlighted?.schemeLetter && (
                             <span
-                              className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border border-border/40 shrink-0 ${
-                                hItem.rhymeGroupClass || "text-muted-foreground bg-muted/20"
+                              className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded border border-border/40 shrink-0 self-center ${
+                                highlighted.rhymeGroupClass || "text-muted-foreground bg-muted/20"
                               }`}
                             >
-                              {hItem.schemeLetter}
+                              {highlighted.schemeLetter}
                             </span>
                           )}
                           <span
-                            className="text-foreground select-text cursor-pointer"
+                            className="select-text cursor-pointer leading-relaxed text-sm font-medium break-words"
                             onClick={(e) => {
                               const target = (e.target as HTMLElement).closest(".word-hover") as HTMLElement | null;
                               if (target) {
                                 const w = target.getAttribute("data-word") || target.textContent || "";
-                                if (w.trim()) {
-                                  onWordClick(w.trim());
-                                }
+                                if (w.trim()) onWordClick(w.trim());
                               }
                             }}
-                            dangerouslySetInnerHTML={{ __html: hItem?.html || line }}
+                            dangerouslySetInnerHTML={{ __html: highlighted?.html || line }}
                           />
                         </div>
-                        <span className="text-[10px] opacity-60 shrink-0 font-mono">
-                          {countSyllables(line)} syl
+                        <span className="text-[10px] text-muted-foreground/70 shrink-0 font-mono">
+                          {syllables} syl
                         </span>
                       </div>
                     );
@@ -157,10 +157,11 @@ export function ScribbleResultView({
 
         {/* Actions & Brain Status */}
         <div className="pt-2 border-t flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
-          <div className="text-xs text-muted-foreground flex items-center gap-1.5">
+          <div className="text-xs text-muted-foreground flex items-center gap-1.5 min-w-0">
             {syncedPaths ? (
-              <span className="text-emerald-400 flex items-center gap-1 text-[11px] font-mono">
-                <CheckCircle2 className="h-3.5 w-3.5" /> Synced to {syncedPaths.lyricsPath}
+              <span className="text-emerald-400 flex items-center gap-1 text-[11px] font-mono truncate max-w-full" title={syncedPaths.lyricsPath}>
+                <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">Synced to {syncedPaths.lyricsPath}</span>
               </span>
             ) : (
               <Button size="sm" variant="secondary" onClick={onManualSync} className="text-xs">
