@@ -119,7 +119,10 @@ provider + endpoint + word, so second lookups are instant and offline-safe.
 ## Architecture Landmarks
 
 - `src/routes/__root.tsx` — shell + head metadata (SSR-safe).
-- `src/routes/_app/*` — authenticated app surface (studio, library, live).
+- `src/routes/_app/*` — authenticated app surface (studio, library, live, scribble).
+- `src/components/ui/multi-select.tsx` — reusable multi-select combobox with keyboard navigation.
+- `src/components/scribble/*` — VibeLyrics studio instruments (FlowMetronomeBar, InlineRhymeDock, ScribbleResultView).
+- `src/lib/exports.ts` — single and multi-track batch export helpers (JSON, PDF, MD, TXT).
 - `src/lib/*.functions.ts` — TanStack `createServerFn` RPC handlers.
 - `src/lib/*.server.ts` — server-only helpers; never imported from client code.
 - `src/lib/live-capture.ts` + `src/lib/live.functions.ts` — real-time punch-in
@@ -140,6 +143,15 @@ provider + endpoint + word, so second lookups are instant and offline-safe.
 - Server functions live in `*.functions.ts(x)` under `src/lib/` or
   co-located with routes. Never place them under `src/server/*`.
 
+## Knowledge Graph (Graphify)
+
+The codebase has a persistent AST knowledge graph with Louvain community detection:
+
+- **Update Graph**: `& (Get-Content graphify-out\.graphify_python) graphify-out\update_graph.py` (executes in ~6s, extracts all TypeScript/Python modules).
+- **Interactive Visualizer**: `graphify-out/graph.html` (D3 force-directed visualizer).
+- **Report & God Nodes**: `graphify-out/GRAPH_REPORT.md` (detailed architectural analysis).
+- **GraphRAG JSON**: `graphify-out/graph.json` (node and edge dataset).
+
 ## Antigravity / IDE Tips
 
 - The dev server listens on port `8080`. Add
@@ -147,8 +159,7 @@ provider + endpoint + word, so second lookups are instant and offline-safe.
   devcontainer if you build one.
 - Bun is preferred; the `bun.lock` is authoritative. `npm ci` also works
   from `package-lock.json` but will be slower.
-- Tests use Vitest + jsdom; browser-only modules import `fake-indexeddb/auto`
-  in `src/test/setup.ts`.
+- Tests use Vitest + jsdom; run via `npm test` or `bunx vitest run`.
 - Never run `tsc --noEmit` manually — the build harness uses `tsgo`.
 
 ## RhymeWave
@@ -157,3 +168,4 @@ RhymeWave has no public API. The integration is a deep-link:
 `https://www.rhymewave.com/#/{word}` opens the target word directly in
 RhymeWave's phonetic explorer. Combine with the local Datamuse lookup for
 fast in-app suggestions.
+
