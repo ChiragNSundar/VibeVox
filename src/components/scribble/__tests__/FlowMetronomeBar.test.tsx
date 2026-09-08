@@ -5,25 +5,30 @@ import { FlowMetronomeBar } from "../FlowMetronomeBar";
 describe("FlowMetronomeBar Component", () => {
   beforeEach(() => {
     // Mock Web Audio API
-    window.AudioContext = vi.fn().mockImplementation(() => ({
-      currentTime: 0,
-      createOscillator: vi.fn().mockReturnValue({
-        connect: vi.fn(),
-        start: vi.fn(),
-        stop: vi.fn(),
-        frequency: { value: 0 },
-      }),
-      createGain: vi.fn().mockReturnValue({
-        connect: vi.fn(),
-        gain: {
-          setValueAtTime: vi.fn(),
-          exponentialRampToValueAtTime: vi.fn(),
-        },
-      }),
-      destination: {},
-      state: "running",
-      resume: vi.fn().mockResolvedValue(undefined),
-    })) as any;
+    class MockAudioContext {
+      currentTime = 0;
+      createOscillator() {
+        return {
+          connect: vi.fn(),
+          start: vi.fn(),
+          stop: vi.fn(),
+          frequency: { value: 0 },
+        };
+      }
+      createGain() {
+        return {
+          connect: vi.fn(),
+          gain: {
+            setValueAtTime: vi.fn(),
+            exponentialRampToValueAtTime: vi.fn(),
+          },
+        };
+      }
+      destination = {};
+      state = "running";
+      resume = vi.fn().mockResolvedValue(undefined);
+    }
+    window.AudioContext = MockAudioContext as any;
   });
 
   it("renders BPM and title", () => {
@@ -38,7 +43,7 @@ describe("FlowMetronomeBar Component", () => {
       <FlowMetronomeBar bpm={90} onBpmChange={handleBpmChange} />
     );
 
-    const wheelTarget = container.querySelector("[title*='scroll up/down']") as HTMLElement;
+    const wheelTarget = container.querySelector("[title*='mouse wheel']") as HTMLElement;
     expect(wheelTarget).toBeInTheDocument();
 
     // Wheel scroll up (deltaY < 0) -> increment BPM by 1
@@ -56,7 +61,7 @@ describe("FlowMetronomeBar Component", () => {
       <FlowMetronomeBar bpm={240} onBpmChange={handleBpmChange} />
     );
 
-    const wheelTarget = container.querySelector("[title*='scroll up/down']") as HTMLElement;
+    const wheelTarget = container.querySelector("[title*='mouse wheel']") as HTMLElement;
     fireEvent.wheel(wheelTarget, { deltaY: -100 });
     expect(handleBpmChange).toHaveBeenCalledWith(240); // Clamped at 240
   });
