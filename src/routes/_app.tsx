@@ -52,7 +52,7 @@ function AppShell() {
 
   return (
     <NotificationProvider>
-      <div className="min-h-screen">
+      <div className="min-h-screen overflow-x-clip">
         <header className="border-b sticky top-0 z-40 bg-background/80 backdrop-blur-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2">
             <Link to="/library" className="flex items-center gap-2 shrink-0">
@@ -145,7 +145,7 @@ function AppShell() {
             </div>
           )}
         </header>
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4">
+        <main className="max-w-6xl mx-auto px-3 sm:px-6 py-3 sm:py-4 overflow-x-clip w-full">
           <Outlet />
         </main>
 
