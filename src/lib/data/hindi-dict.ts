@@ -737,6 +737,7 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "vaddi", display_word: "vaddi", language: "hinglish", pos: "adjective", definition: "heavy league / colossal", meaning: "heavy league / colossal", syllables: 2, rime_key: "i", multi_rime: "addi" },
   { word: "vairi", display_word: "vairi", language: "hinglish", pos: "noun", definition: "sworn opponent on border", meaning: "sworn opponent on border", syllables: 2, rime_key: "i", multi_rime: "airi" },
   { word: "vyapaari", display_word: "vyapaari", language: "hinglish", pos: "noun", definition: "calculating merchant of music", meaning: "calculating merchant of music", syllables: 3, rime_key: "i", multi_rime: "aari" },
+  { word: "yaari", display_word: "yaari", language: "hinglish", pos: "noun", definition: "brotherhood loyalty and friendship", meaning: "brotherhood loyalty and friendship", syllables: 2, rime_key: "i", multi_rime: "aari" },
   { word: "zimmedaari", display_word: "zimmedaari", language: "hinglish", pos: "noun", definition: "heavy weight of responsibility", meaning: "heavy weight of responsibility", syllables: 4, rime_key: "i", multi_rime: "aari" },
   { word: "vibe", display_word: "vibe", language: "hinglish", pos: "slang", definition: "frequency / feeling", meaning: "frequency / feeling", syllables: 1, rime_key: "ibe", multi_rime: "vibe" },
   { word: "munsif", display_word: "munsif", language: "hinglish", pos: "noun", definition: "fair judge weighing the scales", meaning: "fair judge weighing the scales", syllables: 2, rime_key: "if", multi_rime: "sif" },

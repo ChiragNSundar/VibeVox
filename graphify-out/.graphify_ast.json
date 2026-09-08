@@ -6973,7 +6973,7 @@
       "label": "DictEntry",
       "file_type": "code",
       "source_file": "src/lib/data/hindi-dict.ts",
-      "source_location": "L6",
+      "source_location": "L5",
       "_origin": "ast"
     },
     {
@@ -6997,7 +6997,7 @@
       "label": "DictEntry",
       "file_type": "code",
       "source_file": "src/lib/data/kannada-dict.ts",
-      "source_location": "L2",
+      "source_location": "L6",
       "_origin": "ast"
     },
     {
@@ -7005,7 +7005,7 @@
       "label": "KANNADA_DICTIONARY",
       "file_type": "code",
       "source_file": "src/lib/data/kannada-dict.ts",
-      "source_location": "L3",
+      "source_location": "L19",
       "_origin": "ast"
     },
     {
@@ -31063,7 +31063,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/data/hindi-dict.ts",
-      "source_location": "L6",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -31081,7 +31081,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/data/kannada-dict.ts",
-      "source_location": "L2",
+      "source_location": "L6",
       "weight": 1.0
     },
     {
@@ -31090,7 +31090,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/lib/data/kannada-dict.ts",
-      "source_location": "L3",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
