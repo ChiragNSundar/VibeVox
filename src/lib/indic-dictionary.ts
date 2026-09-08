@@ -191,3 +191,20 @@ export function getWordMetadata(word: string): DictEntry | null {
 
   return null;
 }
+
+/**
+ * Searches for dictionary words matching the Dwitiyakshara Prasa of a target word.
+ */
+export function findDwitiyaksharaMatches(
+  targetWord: string,
+  language: "kannada" | "hinglish" | "blend" | "auto" = "kannada",
+): DictEntry[] {
+  const dataset: DictEntry[] = [];
+  if (language === "kannada" || language === "blend" || language === "auto") {
+    dataset.push(...getKannadaDictSync());
+  }
+  if (language === "hinglish" || language === "blend") {
+    dataset.push(...getHindiDictSync());
+  }
+  return findDwitiyaksharaCandidates(targetWord, dataset);
+}
