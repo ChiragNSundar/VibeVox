@@ -73,45 +73,45 @@ export function InlineRhymeDock({
   return (
     <div
       className={cn(
-        "rounded-lg border border-border/80 bg-card/70 p-3 space-y-2.5 shadow-sm backdrop-blur-sm transition-all",
+        "rounded-lg border border-border/80 bg-card/70 p-2.5 sm:p-3 space-y-2.5 shadow-sm backdrop-blur-sm transition-all max-w-full overflow-hidden",
         className,
       )}
     >
       {/* Header bar */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-5 h-5 rounded-md bg-amber-500/15 text-amber-400">
+        <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+          <div className="flex items-center justify-center w-5 h-5 rounded-md bg-amber-500/15 text-amber-400 shrink-0">
             <Zap className="h-3 w-3" />
           </div>
-          <span className="text-xs font-mono font-semibold text-foreground">
+          <span className="text-xs font-mono font-semibold text-foreground truncate">
             Inline Rhyme Dock
           </span>
           {cleanWord ? (
             <Badge
               variant="outline"
-              className="text-[11px] font-mono font-bold bg-primary/10 text-primary border-primary/30"
+              className="text-[11px] font-mono font-bold bg-primary/10 text-primary border-primary/30 truncate max-w-[100px] sm:max-w-none"
             >
               &quot;{cleanWord}&quot;
             </Badge>
           ) : (
-            <span className="text-[11px] text-muted-foreground italic">
+            <span className="text-[11px] text-muted-foreground italic hidden sm:inline">
               (type or click any bar to explore)
             </span>
           )}
-          {loading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />}
+          {loading && <Loader2 className="h-3 w-3 animate-spin text-muted-foreground shrink-0" />}
         </div>
 
         {/* Filter categories & RhymeWave link */}
         <div className="flex items-center gap-1.5 flex-wrap">
           {cleanWord && hits.length > 0 && (
-            <div className="flex items-center gap-1 bg-muted/40 p-0.5 rounded-md text-[10px] font-medium border border-border/40">
+            <div className="flex items-center gap-1 bg-muted/40 p-0.5 rounded-md text-[10px] font-medium border border-border/40 overflow-x-auto no-scrollbar">
               {(["all", "perfect", "near", "multisyllable"] as const).map((tab) => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
                   className={cn(
-                    "px-2 py-0.5 rounded transition-all cursor-pointer capitalize",
+                    "px-2 py-0.5 rounded transition-all cursor-pointer capitalize shrink-0",
                     activeTab === tab
                       ? "bg-background text-foreground shadow-xs font-semibold"
                       : "text-muted-foreground hover:text-foreground",
@@ -128,7 +128,7 @@ export function InlineRhymeDock({
               href={rhymeWaveUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-amber-400 transition-colors px-1.5 py-0.5 rounded border border-border/40 hover:border-amber-500/30"
+              className="flex items-center gap-1 text-[10px] font-mono text-muted-foreground hover:text-amber-400 transition-colors px-1.5 py-0.5 rounded border border-border/40 hover:border-amber-500/30 shrink-0"
               title="Open full phonetic tree in RhymeWave"
             >
               <span>RhymeWave</span>
@@ -141,7 +141,7 @@ export function InlineRhymeDock({
       {/* Rhyme Chips Shelf */}
       {cleanWord ? (
         filteredHits.length > 0 ? (
-          <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto studio-scroll p-0.5">
+          <div className="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto overflow-x-hidden studio-scroll p-0.5">
             {filteredHits.map((h, i) => {
               const isJustInserted = lastInsertedWord === h.word;
               return (
@@ -151,7 +151,7 @@ export function InlineRhymeDock({
                   onClick={() => handleChipClick(h.word)}
                   title={`Click to insert "${h.word}" into active line (${h.kind})`}
                   className={cn(
-                    "group flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border transition-all cursor-pointer active:scale-95",
+                    "group flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium border transition-all cursor-pointer active:scale-95 shrink-0 max-w-full",
                     isJustInserted
                       ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/50 scale-105"
                       : h.kind === "perfect"
@@ -159,7 +159,7 @@ export function InlineRhymeDock({
                         : "bg-muted/30 text-muted-foreground hover:text-foreground hover:bg-muted/60 border-border/50",
                   )}
                 >
-                  <span>{h.word}</span>
+                  <span className="truncate max-w-[130px] sm:max-w-none">{h.word}</span>
                   {h.syllables && (
                     <span className="text-[9px] font-mono opacity-50">
                       {h.syllables}s
