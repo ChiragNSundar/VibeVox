@@ -94,28 +94,47 @@ const CRAFT = `HARD CRAFT RULES FOR ELITE LYRICISM:
 function languageBlueprint(region?: string): string {
   if (!region) return "";
   const reg = region.toLowerCase();
-  if (reg.includes("hinglish")) {
+  const isHi = reg.includes("hinglish") || reg.includes("hindi");
+  const isKn = reg.includes("kanglish") || reg.includes("kannada");
+
+  if (isHi && isKn) {
+    return `\n\nLANGUAGE & CULTURAL STYLE GUIDELINES (BILINGUAL CODE-SWITCH: KANGLISH + HINGLISH DHH):
+- WRITE IN ROMANIZED COLLOQUIAL SCRIPT (Latin script only, natural English/Kannada/Hindi code-switching).
+- CRITICAL HARD RULE: ZERO PRONUNCIATION MARKS. Absolutely NO macrons (ā, ī, ū, ē, ō), accents, or retroflex dots (ṭ, ḍ, ṇ, ḷ, ṛ). Use everyday Latin letters only (e.g. "macha", "guru", "sariyaagi", "wajood", "rooh", "haq se", NOT "macā", "gurū", "vajūd").
+- CODE-SWITCHING FLOW: Seamlessly blend Kannada street vernacular (macha, sariyaagi, scene-u, bisi oota, paata) with DHH hip-hop power words (wajood, toofan, bantai, haq se, dastaan).
+- DWITIYAKSHARA & QAFIYA SYNERGY: Match 2nd consonants on Kannada bar openings (Dwitiyakshara Prasa: Ma-cha / Pa-cha) or anchor couplets with locked Qafiya (naseeb / kareeb / ajeeb).
+- AD-LIBS: (macha), (malum hai na), (haq se), (guru), (skrr), (scene kya hai).`;
+  }
+
+  if (isHi) {
     return `\n\nLANGUAGE & CULTURAL STYLE GUIDELINES (DESI HIP-HOP / HINGLISH):
-- WRITE IN ROMANIZED HINDI / HINGLISH (Latin script only).
-- CRITICAL: ZERO PRONUNCIATION MARKS. Absolutely DO NOT use any macrons (ā, ī, ū, ē, ō), accents (á, é), retroflex dots (ṭ, ḍ, ṇ, ḷ, ṛ), or diacritics. Write pure colloquial Latin letters only (e.g. write "kya baat hai", "macha", "guru", "apna", "shanti", NOT "kyā bāt hai", "macā", "gurū", "śānti").
-- DICTIONARY & POS STRUCTURE: Use proper POS combinations (Noun + Adjective + Verb + Multisyllabic Rhyme).
-  - Nouns: naseeb (destiny), zeher (poison), chehra (face), raabta (connection), aks (reflection), lafz (words).
-  - Verbs: mitaoon (erase), bataoon (explain), badalta (changing), tehelta (strolling), chalaoon (operate).
-  - Adjectives: gehra (deep), rootha (estranged), haseen (beautiful), dhundhla (blurred).
-- MULTISYLLABIC RHYMES: Build 2-3 syllable end-rhyme chains (e.g. mitaoon/bataoon, naseeb/kareeb, chehra/gehra, scene/haseen).
-- ESSENTIAL SLANG & AD-LIBS: malum hai na, bantai, scene, gully, haq se, public, (skrr), (brrr), (bhaiya).
+- WRITE IN ROMANIZED HINDI / HINGLISH (Colloquial Latin script only).
+- CRITICAL HARD RULE: ZERO PRONUNCIATION MARKS. Absolutely NO macrons (ā, ī, ū, ē, ō), accents, or retroflex dots (ṭ, ḍ, ṇ, ḷ, ṛ). Write pure colloquial Latin letters only (e.g. write "kya baat hai", "macha", "guru", "apna", "shanti", NOT "kyā bāt hai", "macā", "gurū", "śānti").
+- QAFIYA & RADIF STRUCTURE: Build classic DHH couplets with tight Qafiya before Radif:
+  - Example: "rootha mera ye naseeb hai yahan pe" / "khada jo mere kareeb hai yahan pe" (Qafiya: naseeb/kareeb, Radif: hai yahan pe).
+- DICTIONARY & POS COMBINATIONS:
+  - Street Nouns: wajood (existence), rooh (soul), naseeb (fate), zeher (poison), toofan (storm), aukaat (status), dastaan (saga), lafz (word).
+  - Continuous Verbs: dhadakta (throbbing), bhatakta (wandering), garajta (thundering), sulagta (smoldering), mitaoon (erase), bataoon (explain).
+  - Adjectives: khunkhaar (ferocious), bebaak (fearless), bezaar (weary), gehra (deep), aawara (drifter).
+- MULTISYLLABIC RHYMES: Build 2-3 syllable end-rhyme chains (e.g. mitaoon/bataoon, wajood/barood, chehra/gehra, aukaat/haalaat/jazbaat).
+- ESSENTIAL SLANG & AD-LIBS: malum hai na, bantai, scene, gully, haq se, public, todfod, bawaal, (skrr), (bhaiya).
 - AVOID generic English filler poetry. Make every line sound like an authentic, hard-hitting DHH bar.`;
   }
-  if (reg.includes("kanglish")) {
+
+  if (isKn) {
     return `\n\nLANGUAGE & CULTURAL STYLE GUIDELINES (KANNADA RAP / KANGLISH):
-- WRITE IN ROMANIZED KANNADA / KANGLISH (Latin script only, extracted from KEED dictionary).
-- CRITICAL: ZERO PRONUNCIATION MARKS. Absolutely DO NOT use any macrons (ā, ī, ū, ē, ō), accents (á, é), retroflex dots (ṭ, ḍ, ṇ, ḷ, ṛ), or diacritics. Write pure colloquial Latin letters only (e.g. write "bengaluru", "macha", "guru", "sariyaagi", NOT "bengalūru", "macā", "gurū", "sariyāgi").
-- DICTIONARY & POS STRUCTURE: Use proper Kannada POS flow (Noun + Adjective + Verb + Multisyllabic Rhyme).
-  - Nouns: bengaluru, paata (lesson), haadu (song), preeti (love), kopa (anger), huduga (boy), hudugi (girl).
-  - Verbs: kaltivi (learned), maado (doing), barli (let come), kelo (listen), kettodhga (ruined).
-  - Adjectives: bisi (hot), sakkat (awesome), sariyaagi (properly).
-- MULTISYLLABIC RHYMES: Build 2-3 syllable end-rhyme chains (e.g. sariyaagi/kettodhga, gothu/mattu/suttu, huduga/magga, macha/locha).
-- ESSENTIAL SLANG & AD-LIBS: macha, magane, yenu, gothilla, guru, sariyaagi, scene-u, bekku, taage, (huu).
+- WRITE IN ROMANIZED KANNADA / KANGLISH (Colloquial Latin script only).
+- CRITICAL HARD RULE: ZERO PRONUNCIATION MARKS. Absolutely NO macrons (ā, ī, ū, ē, ō), accents, or retroflex dots (ṭ, ḍ, ṇ, ḷ, ṛ). Write pure colloquial Latin letters only (e.g. write "bengaluru", "macha", "guru", "sariyaagi", NOT "bengalūru", "macā", "gurū", "sariyāgi").
+- DWITIYAKSHARA PRASA (ದ್ವಿತೀಯಾಕ್ಷರ ಪ್ರಾಸ): Match the 2nd consonant/cluster of consecutive bar openings:
+  - Example: "Ma-cha bisi oota guru..." / "Pa-cha aagi hodha scene-u..." (2nd consonant: 'ch').
+  - Example: "Ka-stoori namma naadu..." / "Ni-steja aago baadu..." (2nd consonant: 'st').
+- ANTYAPRASAA & MULTISYLLABIC END-RHYMES:
+  - Suffix chains: -aagi (sariyaagi, bisiyaagi, dhooraagi), -odu (maadodu, nododu, kelodu), -illa (gothilla, bittilla, kettilla), -beku (barbeku, tarbeku, thilkolbeku).
+- DICTIONARY & POS FLOW:
+  - Nouns: bengaluru, paata (lesson), haadu (song), preeti (love), kopa (anger), huduga (boy), hudugi (girl), kastoori, dhoolu.
+  - Verbs: kaltivi (learned), maado (doing), barli (let come), kelo (listen), kettodhga (ruined), thilkolbeku (understand).
+  - Adjectives & Slang: bisi (hot), sakkat (awesome), sariyaagi (properly), kirik, khadak, bombaat, shoki.
+- ESSENTIAL AD-LIBS: macha, magane, guru, sariyaagi, scene-u, gothilla, (huu), (illi).
 - AVOID generic English filler. Keep the flow tightly cadence-matched and culturally authentic.`;
   }
   return "";
