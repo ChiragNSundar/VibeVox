@@ -119,27 +119,24 @@ export function extractQafiyaRadif(line: string): {
     return { qafiyaWord: w, qafiyaRime: w.slice(-3), radif: "" };
   }
 
-  // Common DHH / Hindi radifs (repeating post-rhyme refrains)
+  // Common DHH / Hindi radifs (repeating post-rhyme refrains and postpositions)
   const commonRadifKeywords = new Set([
-    "hai", "tha", "hoon", "main", "tu", "bhi", "na", "mera", "tera", "apna",
-    "yahan", "wahan", "sahiba", "meri", "tere", "mere", "saath", "liye", "bhai"
+    "hai", "tha", "the", "thi", "hoon", "main", "tu", "bhi", "na", "mera", "tera", "apna",
+    "yahan", "wahan", "sahiba", "meri", "tere", "mere", "saath", "liye", "bhai",
+    "pe", "par", "se", "ko", "ka", "ki", "ke", "hi", "mein", "tak"
   ]);
-
-  // Check if last 1 or 2 words form a Radif
-  const lastWord = words[words.length - 1].toLowerCase();
-  const secondLastWord = words.length > 2 ? words[words.length - 2].toLowerCase() : "";
 
   let radifWords: string[] = [];
   let qafiyaIndex = words.length - 1;
 
-  if (commonRadifKeywords.has(lastWord)) {
-    if (secondLastWord && commonRadifKeywords.has(secondLastWord)) {
-      radifWords = [secondLastWord, lastWord];
-      qafiyaIndex = words.length - 3;
-    } else {
-      radifWords = [lastWord];
-      qafiyaIndex = words.length - 2;
-    }
+  // Walk backwards over up to 3 refrain tokens
+  while (
+    qafiyaIndex >= 1 &&
+    commonRadifKeywords.has(words[qafiyaIndex].toLowerCase()) &&
+    radifWords.length < 3
+  ) {
+    radifWords.unshift(words[qafiyaIndex].toLowerCase());
+    qafiyaIndex--;
   }
 
   const qWord = (words[qafiyaIndex] || words[words.length - 1]).toLowerCase();
