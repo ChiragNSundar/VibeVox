@@ -81,8 +81,8 @@ describe("Indic Advanced RAG & Poetics Engine (Kannada & Hindi)", () => {
   });
 
   describe("Lexicon & Dictionary Expansions", () => {
-    it("expanded HINDI_DICTIONARY contains 100+ words with zero pronunciation marks", () => {
-      expect(HINDI_DICTIONARY.length).toBeGreaterThanOrEqual(100);
+    it("expanded HINDI_DICTIONARY contains 200+ words with zero pronunciation marks", () => {
+      expect(HINDI_DICTIONARY.length).toBeGreaterThanOrEqual(200);
 
       const diacriticRegex = /[āīūēōṛḷṇṭḍśṣṃḥúûűȧȥᶃáéíóú]/;
       for (const entry of HINDI_DICTIONARY) {
@@ -90,23 +90,32 @@ describe("Indic Advanced RAG & Poetics Engine (Kannada & Hindi)", () => {
         expect(entry.display_word || "").not.toMatch(diacriticRegex);
       }
 
-      // Verify presence of key DHH street vocabulary
+      // Verify presence of key DHH street vocabulary & Punjabi-DHH crossover
       const words = new Set(HINDI_DICTIONARY.map((e) => e.word));
       expect(words.has("bantai")).toBe(true);
       expect(words.has("wajood")).toBe(true);
       expect(words.has("rooh")).toBe(true);
       expect(words.has("dhadakta")).toBe(true);
       expect(words.has("bawaal")).toBe(true);
+      expect(words.has("veere")).toBe(true);
+      expect(words.has("gaddi")).toBe(true);
+      expect(words.has("yaari")).toBe(true);
+      expect(words.has("chadhai")).toBe(true);
     });
 
-    it("KANNADA_DICTIONARY includes curated Bengaluru rap vocabulary", () => {
-      const words = new Set(KANNADA_DICTIONARY.slice(0, 50).map((e) => e.word));
+    it("KANNADA_DICTIONARY includes extensive curated Bengaluru rap vocabulary and verbs", () => {
+      const words = new Set(KANNADA_DICTIONARY.slice(0, 150).map((e) => e.word));
       expect(words.has("macha")).toBe(true);
       expect(words.has("bisi")).toBe(true);
       expect(words.has("oota")).toBe(true);
       expect(words.has("sariyaagi")).toBe(true);
       expect(words.has("bengaluru")).toBe(true);
       expect(words.has("sakkat")).toBe(true);
+      expect(words.has("maadbeku")).toBe(true);
+      expect(words.has("nododu")).toBe(true);
+      expect(words.has("geluvu")).toBe(true);
+      expect(words.has("filter-coffee")).toBe(true);
+      expect(words.has("majestic")).toBe(true);
     });
 
     it("findRhymesWithPos supports single language and blended retrieval", () => {
