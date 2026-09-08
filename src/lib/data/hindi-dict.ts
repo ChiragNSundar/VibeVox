@@ -1,5 +1,7 @@
-// Curated Romanized Hinglish / Desi Hip-Hop Lyric Dictionary (400+ entries)
+// Extensive Romanized Hinglish / Desi Hip-Hop Lyric Dictionary (600+ curated entries)
 // Formatted strictly in colloquial Latin script without pronunciation marks or macrons.
+// Covers classical Urdu poetics, Mumbai/Delhi street slang, DHH multisyllabic rimes,
+// and Punjabi-DHH crossover terminology.
 
 export type DictEntry = {
   word: string;
@@ -14,7 +16,9 @@ export type DictEntry = {
 };
 
 export const HINDI_DICTIONARY: DictEntry[] = [
-  // --- MULTIRIME: -aoon (Verbs & Introspective Flow) ---
+  // =========================================================================
+  // 1. MULTIRIME: -aoon / -aaoon (Introspective Verbs & First-Person Cadence)
+  // =========================================================================
   { word: "mitaoon", display_word: "mitaoon", language: "hinglish", pos: "verb", definition: "to erase / wipe away", syllables: 3, rime_key: "aoon", multi_rime: "itaoon" },
   { word: "bataoon", display_word: "bataoon", language: "hinglish", pos: "verb", definition: "to explain / tell", syllables: 3, rime_key: "aoon", multi_rime: "ataoon" },
   { word: "jitaoon", display_word: "jitaoon", language: "hinglish", pos: "verb", definition: "to make win", syllables: 3, rime_key: "aoon", multi_rime: "itaoon" },
@@ -34,9 +38,27 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "sehlaoon", display_word: "sehlaoon", language: "hinglish", pos: "verb", definition: "to caress / soothe", syllables: 3, rime_key: "aoon", multi_rime: "laoon" },
   { word: "jhulsaoon", display_word: "jhulsaoon", language: "hinglish", pos: "verb", definition: "to scorch / burn", syllables: 3, rime_key: "aoon", multi_rime: "saoon" },
   { word: "daudaoon", display_word: "daudaoon", language: "hinglish", pos: "verb", definition: "to chase / run fast", syllables: 3, rime_key: "aoon", multi_rime: "udaoon" },
-  { word: "pehchanoon", display_word: "pehchanoon", language: "hinglish", pos: "verb", definition: "to recognize identity", syllables: 3, rime_key: "oon", multi_rime: "anoon" },
+  { word: "giraoon", display_word: "giraoon", language: "hinglish", pos: "verb", definition: "to drop / knock down", syllables: 3, rime_key: "aoon", multi_rime: "iraoon" },
+  { word: "chhipaoon", display_word: "chhipaoon", language: "hinglish", pos: "verb", definition: "to hide / stash", syllables: 3, rime_key: "aoon", multi_rime: "ipaoon" },
+  { word: "bhulaoon", display_word: "bhulaoon", language: "hinglish", pos: "verb", definition: "to forget / let go", syllables: 3, rime_key: "aoon", multi_rime: "ulaoon" },
+  { word: "sunaoon", display_word: "sunaoon", language: "hinglish", pos: "verb", definition: "to recite bars", syllables: 3, rime_key: "aoon", multi_rime: "unaoon" },
+  { word: "manaoon", display_word: "manaoon", language: "hinglish", pos: "verb", definition: "to appease / celebrate", syllables: 3, rime_key: "aoon", multi_rime: "anaoon" },
+  { word: "phailaoon", display_word: "phailaoon", language: "hinglish", pos: "verb", definition: "to spread / expand", syllables: 3, rime_key: "aoon", multi_rime: "laoon" },
+  { word: "jalaoon", display_word: "jalaoon", language: "hinglish", pos: "verb", definition: "to ignite / burn", syllables: 3, rime_key: "aoon", multi_rime: "alaoon" },
+  { word: "badhaoon", display_word: "badhaoon", language: "hinglish", pos: "verb", definition: "to increase / escalate", syllables: 3, rime_key: "aoon", multi_rime: "dhaoon" },
+  { word: "dubaoon", display_word: "dubaoon", language: "hinglish", pos: "verb", definition: "to submerge / drown", syllables: 3, rime_key: "aoon", multi_rime: "ubaoon" },
+  { word: "bachaoon", display_word: "bachaoon", language: "hinglish", pos: "verb", definition: "to protect / rescue", syllables: 3, rime_key: "aoon", multi_rime: "achaoon" },
+  { word: "rukwaoon", display_word: "rukwaoon", language: "hinglish", pos: "verb", definition: "to halt / pause", syllables: 3, rime_key: "aoon", multi_rime: "waoon" },
+  { word: "khilaoon", display_word: "khilaoon", language: "hinglish", pos: "verb", definition: "to feed / bloom", syllables: 3, rime_key: "aoon", multi_rime: "ilaoon" },
+  { word: "dikhaoon", display_word: "dikhaoon", language: "hinglish", pos: "verb", definition: "to reveal / flex", syllables: 3, rime_key: "aoon", multi_rime: "ikhaoon" },
+  { word: "pighlaoon", display_word: "pighlaoon", language: "hinglish", pos: "verb", definition: "to melt", syllables: 3, rime_key: "aoon", multi_rime: "laoon" },
+  { word: "sulgaoon", display_word: "sulgaoon", language: "hinglish", pos: "verb", definition: "to kindle flame", syllables: 3, rime_key: "aoon", multi_rime: "gaoon" },
+  { word: "jhatkaoon", display_word: "jhatkaoon", language: "hinglish", pos: "verb", definition: "to shake off", syllables: 3, rime_key: "aoon", multi_rime: "kaoon" },
+  { word: "pehnaoon", display_word: "pehnaoon", language: "hinglish", pos: "verb", definition: "to adorn with", syllables: 3, rime_key: "aoon", multi_rime: "naoon" },
 
-  // --- MULTIRIME: -aan (Nouns of Scale & Space) ---
+  // =========================================================================
+  // 2. MULTIRIME: -aan (Nouns of Scale, Space & Destiny)
+  // =========================================================================
   { word: "aasmaan", display_word: "aasmaan", language: "hinglish", pos: "noun", definition: "sky / heavens", syllables: 3, rime_key: "aan", multi_rime: "maan" },
   { word: "bezubaan", display_word: "bezubaan", language: "hinglish", pos: "adjective", definition: "speechless / voiceless", syllables: 3, rime_key: "aan", multi_rime: "ubaan" },
   { word: "dastaan", display_word: "dastaan", language: "hinglish", pos: "noun", definition: "epic saga / story", syllables: 2, rime_key: "aan", multi_rime: "taan" },
@@ -61,8 +83,18 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "maan", display_word: "maan", language: "hinglish", pos: "noun", definition: "honor / pride", syllables: 1, rime_key: "aan", multi_rime: "maan" },
   { word: "khaan", display_word: "khaan", language: "hinglish", pos: "noun", definition: "lineage / title", syllables: 1, rime_key: "aan", multi_rime: "khaan" },
   { word: "anjaan", display_word: "anjaan", language: "hinglish", pos: "adjective", definition: "stranger / unknown", syllables: 2, rime_key: "aan", multi_rime: "jaan" },
+  { word: "fauran", display_word: "fauran", language: "hinglish", pos: "adverb", definition: "immediately", syllables: 2, rime_key: "an", multi_rime: "ran" },
+  { word: "kaale-kaam", display_word: "kaale-kaam", language: "hinglish", pos: "noun", definition: "underground work", syllables: 3, rime_key: "aam", multi_rime: "kaam" },
+  { word: "badnaam", display_word: "badnaam", language: "hinglish", pos: "adjective", definition: "infamous", syllables: 2, rime_key: "aam", multi_rime: "naam" },
+  { word: "gumnaam", display_word: "gumnaam", language: "hinglish", pos: "adjective", definition: "anonymous / shadow", syllables: 2, rime_key: "aam", multi_rime: "naam" },
+  { word: "in-aam", display_word: "in-aam", language: "hinglish", pos: "noun", definition: "bounty / trophy", syllables: 2, rime_key: "aam", multi_rime: "aam" },
+  { word: "anjaam", display_word: "anjaam", language: "hinglish", pos: "noun", definition: "inevitable climax", syllables: 2, rime_key: "aam", multi_rime: "jaam" },
+  { word: "paighaam", display_word: "paighaam", language: "hinglish", pos: "noun", definition: "message sent", syllables: 2, rime_key: "aam", multi_rime: "ghaam" },
+  { word: "subah-shaam", display_word: "subah-shaam", language: "hinglish", pos: "phrase", definition: "around the clock", syllables: 3, rime_key: "aam", multi_rime: "shaam" },
 
-  // --- MULTIRIME: -eeb (Fate, Wealth, Distance) ---
+  // =========================================================================
+  // 3. MULTIRIME: -eeb (Fate, Wealth, Distance & Qafiya)
+  // =========================================================================
   { word: "naseeb", display_word: "naseeb", language: "hinglish", pos: "noun", definition: "destiny / fate", syllables: 2, rime_key: "eeb", multi_rime: "seeb" },
   { word: "kareeb", display_word: "kareeb", language: "hinglish", pos: "adjective", definition: "close / adjacent", syllables: 2, rime_key: "eeb", multi_rime: "reeb" },
   { word: "ghareeb", display_word: "ghareeb", language: "hinglish", pos: "noun", definition: "underdog / poor", syllables: 2, rime_key: "eeb", multi_rime: "reeb" },
@@ -72,8 +104,13 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "tarkeeb", display_word: "tarkeeb", language: "hinglish", pos: "noun", definition: "tactical method / plan", syllables: 2, rime_key: "eeb", multi_rime: "keeb" },
   { word: "habeeb", display_word: "habeeb", language: "hinglish", pos: "noun", definition: "trusted companion", syllables: 2, rime_key: "eeb", multi_rime: "beeb" },
   { word: "najeeb", display_word: "najeeb", language: "hinglish", pos: "adjective", definition: "noble / high-born", syllables: 2, rime_key: "eeb", multi_rime: "jeeb" },
+  { word: "khabeeb", display_word: "khabeeb", language: "hinglish", pos: "noun", definition: "champion fighter", syllables: 2, rime_key: "eeb", multi_rime: "beeb" },
+  { word: "shabeeb", display_word: "shabeeb", language: "hinglish", pos: "adjective", definition: "youthful / dynamic", syllables: 2, rime_key: "eeb", multi_rime: "beeb" },
+  { word: "saleeb", display_word: "saleeb", language: "hinglish", pos: "noun", definition: "cross / burden carried", syllables: 2, rime_key: "eeb", multi_rime: "leeb" },
 
-  // --- MULTIRIME: -ehra / -era (Visual & Night Imagery) ---
+  // =========================================================================
+  // 4. MULTIRIME: -ehra / -era (Visual, Night & Atmospheric Imagery)
+  // =========================================================================
   { word: "chehra", display_word: "chehra", language: "hinglish", pos: "noun", definition: "face / facade", syllables: 2, rime_key: "ehra", multi_rime: "ehra" },
   { word: "gehra", display_word: "gehra", language: "hinglish", pos: "adjective", definition: "profound / deep", syllables: 2, rime_key: "ehra", multi_rime: "ehra" },
   { word: "pehra", display_word: "pehra", language: "hinglish", pos: "noun", definition: "vigilant watch / guard", syllables: 2, rime_key: "ehra", multi_rime: "ehra" },
@@ -85,8 +122,12 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "ghera", display_word: "ghera", language: "hinglish", pos: "noun", definition: "perimeter / encirclement", syllables: 2, rime_key: "era", multi_rime: "era" },
   { word: "dera", display_word: "dera", language: "hinglish", pos: "noun", definition: "camp / studio hangout", syllables: 2, rime_key: "era", multi_rime: "era" },
   { word: "lutera", display_word: "lutera", language: "hinglish", pos: "noun", definition: "outlaw / robber", syllables: 3, rime_key: "era", multi_rime: "tera" },
+  { word: "mera", display_word: "mera", language: "hinglish", pos: "pronoun", definition: "mine / my own", syllables: 2, rime_key: "era", multi_rime: "era" },
+  { word: "tera", display_word: "tera", language: "hinglish", pos: "pronoun", definition: "yours", syllables: 2, rime_key: "era", multi_rime: "era" },
 
-  // --- MULTIRIME: -aana (Time, Places, Actions) ---
+  // =========================================================================
+  // 5. MULTIRIME: -aana (Time, Places, Cycles & Actions)
+  // =========================================================================
   { word: "zamaana", display_word: "zamaana", language: "hinglish", pos: "noun", definition: "the era / current society", syllables: 3, rime_key: "aana", multi_rime: "maana" },
   { word: "fasaana", display_word: "fasaana", language: "hinglish", pos: "noun", definition: "legend / tall tale", syllables: 3, rime_key: "aana", multi_rime: "saana" },
   { word: "thikaana", display_word: "thikaana", language: "hinglish", pos: "noun", definition: "hideout / home base", syllables: 3, rime_key: "aana", multi_rime: "kaana" },
@@ -102,8 +143,14 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "taraana", display_word: "taraana", language: "hinglish", pos: "noun", definition: "anthem / melody", syllables: 3, rime_key: "aana", multi_rime: "raana" },
   { word: "begaana", display_word: "begaana", language: "hinglish", pos: "adjective", definition: "alien / outsider", syllables: 3, rime_key: "aana", multi_rime: "gaana" },
   { word: "shana", display_word: "shana", language: "hinglish", pos: "slang", definition: "street smart operator", syllables: 2, rime_key: "aana", multi_rime: "ana" },
+  { word: "karkhana", display_word: "karkhana", language: "hinglish", pos: "noun", definition: "rhyme factory / workshop", syllables: 3, rime_key: "aana", multi_rime: "khana" },
+  { word: "nazrana", display_word: "nazrana", language: "hinglish", pos: "noun", definition: "rare offering / verse", syllables: 3, rime_key: "aana", multi_rime: "rana" },
+  { word: "dastana", display_word: "dastana", language: "hinglish", pos: "noun", definition: "leather glove", syllables: 3, rime_key: "aana", multi_rime: "tana" },
+  { word: "aana-jaana", display_word: "aana-jaana", language: "hinglish", pos: "phrase", definition: "transient foot traffic", syllables: 4, rime_key: "aana", multi_rime: "jaana" },
 
-  // --- MULTIRIME: -aani (Narratives, Water, Soul) ---
+  // =========================================================================
+  // 6. MULTIRIME: -aani (Narratives, Water, Life & Soul)
+  // =========================================================================
   { word: "zindagaani", display_word: "zindagaani", language: "hinglish", pos: "noun", definition: "mortal existence", syllables: 4, rime_key: "aani", multi_rime: "gaani" },
   { word: "kahaani", display_word: "kahaani", language: "hinglish", pos: "noun", definition: "true story", syllables: 3, rime_key: "aani", multi_rime: "haani" },
   { word: "rawaani", display_word: "rawaani", language: "hinglish", pos: "noun", definition: "unbroken flow", syllables: 3, rime_key: "aani", multi_rime: "waani" },
@@ -116,8 +163,15 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "roohaani", display_word: "roohaani", language: "hinglish", pos: "adjective", definition: "spiritual / ethereal", syllables: 3, rime_key: "aani", multi_rime: "haani" },
   { word: "shaitaani", display_word: "shaitaani", language: "hinglish", pos: "noun", definition: "mischief / malice", syllables: 3, rime_key: "aani", multi_rime: "taani" },
   { word: "toofaani", display_word: "toofaani", language: "hinglish", pos: "adjective", definition: "tempestuous / wild", syllables: 3, rime_key: "aani", multi_rime: "faani" },
+  { word: "hairani", display_word: "hairani", language: "hinglish", pos: "noun", definition: "bewilderment", syllables: 3, rime_key: "aani", multi_rime: "rani" },
+  { word: "veerani", display_word: "veerani", language: "hinglish", pos: "noun", definition: "desolation", syllables: 3, rime_key: "aani", multi_rime: "rani" },
+  { word: "meherbani", display_word: "meherbani", language: "hinglish", pos: "noun", definition: "kindness / benevolence", syllables: 4, rime_key: "aani", multi_rime: "bani" },
+  { word: "zabani", display_word: "zabani", language: "hinglish", pos: "adjective", definition: "spoken / oral tradition", syllables: 3, rime_key: "aani", multi_rime: "bani" },
+  { word: "nadani", display_word: "nadani", language: "hinglish", pos: "noun", definition: "naive youth", syllables: 3, rime_key: "aani", multi_rime: "dani" },
 
-  // --- MULTIRIME: -aar / -aftaar (Arsenal, Combat, Speed) ---
+  // =========================================================================
+  // 7. MULTIRIME: -aar / -aftaar (Arsenal, Combat, Speed & Character)
+  // =========================================================================
   { word: "shikaar", display_word: "shikaar", language: "hinglish", pos: "noun", definition: "the prey / hunt", syllables: 2, rime_key: "aar", multi_rime: "kaar" },
   { word: "khunkhaar", display_word: "khunkhaar", language: "hinglish", pos: "adjective", definition: "ferocious / lethal", syllables: 2, rime_key: "aar", multi_rime: "khaar" },
   { word: "aashkaar", display_word: "aashkaar", language: "hinglish", pos: "adjective", definition: "revealed / crystal clear", syllables: 2, rime_key: "aar", multi_rime: "kaar" },
@@ -135,17 +189,30 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "deedaar", display_word: "deedaar", language: "hinglish", pos: "noun", definition: "rare glimpse", syllables: 2, rime_key: "aar", multi_rime: "daar" },
   { word: "bekaar", display_word: "bekaar", language: "hinglish", pos: "adjective", definition: "useless / wasted", syllables: 2, rime_key: "aar", multi_rime: "kaar" },
   { word: "khumaar", display_word: "khumaar", language: "hinglish", pos: "noun", definition: "intoxication / haze", syllables: 2, rime_key: "aar", multi_rime: "maar" },
+  { word: "azaad", display_word: "azaad", language: "hinglish", pos: "adjective", definition: "liberated / sovereign", syllables: 2, rime_key: "aad", multi_rime: "zaad" },
+  { word: "faryaad", display_word: "faryaad", language: "hinglish", pos: "noun", definition: "plea / prayer", syllables: 2, rime_key: "aad", multi_rime: "yaad" },
+  { word: "barbaad", display_word: "barbaad", language: "hinglish", pos: "adjective", definition: "ruined / destroyed", syllables: 2, rime_key: "aad", multi_rime: "baad" },
+  { word: "aabaad", display_word: "aabaad", language: "hinglish", pos: "adjective", definition: "flourishing city", syllables: 2, rime_key: "aad", multi_rime: "baad" },
+  { word: "yaad", display_word: "yaad", language: "hinglish", pos: "noun", definition: "memory / recall", syllables: 1, rime_key: "aad", multi_rime: "yaad" },
+  { word: "fauji", display_word: "fauji", language: "hinglish", pos: "noun", definition: "soldier / infantryman", syllables: 2, rime_key: "i", multi_rime: "auji" },
 
-  // --- MULTIRIME: -ood / -ooh (Substance, Spirit, Soul) ---
+  // =========================================================================
+  // 8. MULTIRIME: -ood / -ooh (Substance, Spirit & Existential Depth)
+  // =========================================================================
   { word: "wajood", display_word: "wajood", language: "hinglish", pos: "noun", definition: "core existence / presence", syllables: 2, rime_key: "ood", multi_rime: "jood" },
   { word: "barood", display_word: "barood", language: "hinglish", pos: "noun", definition: "gunpowder / explosive bar", syllables: 2, rime_key: "ood", multi_rime: "rood" },
   { word: "shuhood", display_word: "shuhood", language: "hinglish", pos: "noun", definition: "witness / evidence", syllables: 2, rime_key: "ood", multi_rime: "hood" },
   { word: "sujood", display_word: "sujood", language: "hinglish", pos: "noun", definition: "prostration / surrender", syllables: 2, rime_key: "ood", multi_rime: "jood" },
+  { word: "masjood", display_word: "masjood", language: "hinglish", pos: "adjective", definition: "revered entity", syllables: 2, rime_key: "ood", multi_rime: "jood" },
   { word: "rooh", display_word: "rooh", language: "hinglish", pos: "noun", definition: "inner soul / psyche", syllables: 1, rime_key: "ooh", multi_rime: "rooh" },
   { word: "majrooh", display_word: "majrooh", language: "hinglish", pos: "adjective", definition: "wounded / battle-scarred", syllables: 2, rime_key: "ooh", multi_rime: "rooh" },
   { word: "shurooh", display_word: "shurooh", language: "hinglish", pos: "noun", definition: "genesis / start", syllables: 2, rime_key: "ooh", multi_rime: "rooh" },
+  { word: "mashrooh", display_word: "mashrooh", language: "hinglish", pos: "adjective", definition: "explained / laid bare", syllables: 2, rime_key: "ooh", multi_rime: "rooh" },
+  { word: "futooh", display_word: "futooh", language: "hinglish", pos: "noun", definition: "triumph / conquests", syllables: 2, rime_key: "ooh", multi_rime: "tooh" },
 
-  // --- MULTIRIME: -aat (Circumstances, Night, Words) ---
+  // =========================================================================
+  // 9. MULTIRIME: -aat (Circumstances, Night, Words & Power)
+  // =========================================================================
   { word: "baat", display_word: "baat", language: "hinglish", pos: "noun", definition: "word / conversation", syllables: 1, rime_key: "aat", multi_rime: "baat" },
   { word: "raat", display_word: "raat", language: "hinglish", pos: "noun", definition: "late night", syllables: 1, rime_key: "aat", multi_rime: "raat" },
   { word: "aukaat", display_word: "aukaat", language: "hinglish", pos: "noun", definition: "status / stature / worth", syllables: 2, rime_key: "aat", multi_rime: "kaat" },
@@ -155,8 +222,23 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "shuruwaat", display_word: "shuruwaat", language: "hinglish", pos: "noun", definition: "the kick-off / start", syllables: 3, rime_key: "aat", multi_rime: "waat" },
   { word: "qayaamat", display_word: "qayaamat", language: "hinglish", pos: "noun", definition: "reckoning / apocalypse", syllables: 3, rime_key: "at", multi_rime: "amat" },
   { word: "salaamat", display_word: "salaamat", language: "hinglish", pos: "adjective", definition: "safe / unscathed", syllables: 3, rime_key: "at", multi_rime: "amat" },
+  { word: "taaqat", display_word: "taaqat", language: "hinglish", pos: "noun", definition: "brute force / power", syllables: 2, rime_key: "at", multi_rime: "qat" },
+  { word: "fitrat", display_word: "fitrat", language: "hinglish", pos: "noun", definition: "inherent nature / disposition", syllables: 2, rime_key: "at", multi_rime: "rat" },
+  { word: "hasrat", display_word: "hasrat", language: "hinglish", pos: "noun", definition: "unfulfilled longing", syllables: 2, rime_key: "at", multi_rime: "rat" },
+  { word: "kismat", display_word: "kismat", language: "hinglish", pos: "noun", definition: "destiny / fortune", syllables: 2, rime_key: "at", multi_rime: "mat" },
+  { word: "barkat", display_word: "barkat", language: "hinglish", pos: "noun", definition: "abundance / blessing", syllables: 2, rime_key: "at", multi_rime: "kat" },
+  { word: "harkat", display_word: "harkat", language: "hinglish", pos: "noun", definition: "action / manoeuvre", syllables: 2, rime_key: "at", multi_rime: "kat" },
+  { word: "quwwat", display_word: "quwwat", language: "hinglish", pos: "noun", definition: "might / stamina", syllables: 2, rime_key: "at", multi_rime: "wat" },
+  { word: "shiddat", display_word: "shiddat", language: "hinglish", pos: "noun", definition: "ferocious intensity", syllables: 2, rime_key: "at", multi_rime: "dat" },
+  { word: "izzat", display_word: "izzat", language: "hinglish", pos: "noun", definition: "reputation / respect", syllables: 2, rime_key: "at", multi_rime: "zat" },
+  { word: "zillat", display_word: "zillat", language: "hinglish", pos: "noun", definition: "disgrace / shame", syllables: 2, rime_key: "at", multi_rime: "lat" },
+  { word: "nafrat", display_word: "nafrat", language: "hinglish", pos: "noun", definition: "pure animosity / hate", syllables: 2, rime_key: "at", multi_rime: "rat" },
+  { word: "jurrat", display_word: "jurrat", language: "hinglish", pos: "noun", definition: "audacity / nerve", syllables: 2, rime_key: "at", multi_rime: "rat" },
+  { word: "qudrat", display_word: "qudrat", language: "hinglish", pos: "noun", definition: "nature / divine order", syllables: 2, rime_key: "at", multi_rime: "rat" },
 
-  // --- MULTIRIME: -al / -awaal (Questions, Uproar, Excellence) ---
+  // =========================================================================
+  // 10. MULTIRIME: -al / -awaal (Questions, Uproar & Mastery)
+  // =========================================================================
   { word: "bawaal", display_word: "bawaal", language: "hinglish", pos: "slang", definition: "wild chaos / fire track", syllables: 2, rime_key: "aal", multi_rime: "waal" },
   { word: "sawaal", display_word: "sawaal", language: "hinglish", pos: "noun", definition: "pointed question", syllables: 2, rime_key: "aal", multi_rime: "waal" },
   { word: "khayaal", display_word: "khayaal", language: "hinglish", pos: "noun", definition: "concept / thought", syllables: 2, rime_key: "aal", multi_rime: "yaal" },
@@ -169,8 +251,14 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "haal", display_word: "haal", language: "hinglish", pos: "noun", definition: "present state / pulse", syllables: 1, rime_key: "aal", multi_rime: "haal" },
   { word: "jaal", display_word: "jaal", language: "hinglish", pos: "noun", definition: "trap / web", syllables: 1, rime_key: "aal", multi_rime: "jaal" },
   { word: "kaal", display_word: "kaal", language: "hinglish", pos: "noun", definition: "death / deep time", syllables: 1, rime_key: "aal", multi_rime: "kaal" },
+  { word: "dhaal", display_word: "dhaal", language: "hinglish", pos: "noun", definition: "protective shield", syllables: 1, rime_key: "aal", multi_rime: "dhaal" },
+  { word: "taal", display_word: "taal", language: "hinglish", pos: "noun", definition: "rhythmic cycle / tempo", syllables: 1, rime_key: "aal", multi_rime: "taal" },
+  { word: "laal", display_word: "laal", language: "hinglish", pos: "adjective", definition: "crimson / blood red", syllables: 1, rime_key: "aal", multi_rime: "laal" },
+  { word: "bahaal", display_word: "bahaal", language: "hinglish", pos: "adjective", definition: "restored / back online", syllables: 2, rime_key: "aal", multi_rime: "haal" },
 
-  // --- MULTIRIME: -aaye (Reflective Third-Person Verbs) ---
+  // =========================================================================
+  // 11. MULTIRIME: -aaye (Reflective Third-Person Verbs)
+  // =========================================================================
   { word: "samjhaaye", display_word: "samjhaaye", language: "hinglish", pos: "verb", definition: "makes understand", syllables: 3, rime_key: "aaye", multi_rime: "jhaaye" },
   { word: "bhatkaaye", display_word: "bhatkaaye", language: "hinglish", pos: "verb", definition: "leads astray", syllables: 3, rime_key: "aaye", multi_rime: "kaaye" },
   { word: "aazmaaye", display_word: "aazmaaye", language: "hinglish", pos: "verb", definition: "puts to test", syllables: 3, rime_key: "aaye", multi_rime: "maaye" },
@@ -183,8 +271,14 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "jhukaaye", display_word: "jhukaaye", language: "hinglish", pos: "verb", definition: "forces to bow", syllables: 3, rime_key: "aaye", multi_rime: "kaaye" },
   { word: "pighlaaye", display_word: "pighlaaye", language: "hinglish", pos: "verb", definition: "melts resolve", syllables: 3, rime_key: "aaye", multi_rime: "laaye" },
   { word: "jalaaye", display_word: "jalaaye", language: "hinglish", pos: "verb", definition: "ignites fire", syllables: 3, rime_key: "aaye", multi_rime: "laaye" },
+  { word: "ghabraaye", display_word: "ghabraaye", language: "hinglish", pos: "verb", definition: "panics under pressure", syllables: 3, rime_key: "aaye", multi_rime: "raaye" },
+  { word: "sharmaaye", display_word: "sharmaaye", language: "hinglish", pos: "verb", definition: "turns shy", syllables: 3, rime_key: "aaye", multi_rime: "maaye" },
+  { word: "lalchaaye", display_word: "lalchaaye", language: "hinglish", pos: "verb", definition: "tempts greed", syllables: 3, rime_key: "aaye", multi_rime: "chaaye" },
+  { word: "muskuraaye", display_word: "muskuraaye", language: "hinglish", pos: "verb", definition: "smiles through pain", syllables: 4, rime_key: "aaye", multi_rime: "raaye" },
 
-  // --- MULTIRIME: -akta / -alta (Continuous Cadence Verbs) ---
+  // =========================================================================
+  // 12. MULTIRIME: -akta / -alta / -arta (Continuous Cadence Verbs)
+  // =========================================================================
   { word: "dhadakta", display_word: "dhadakta", language: "hinglish", pos: "verb", definition: "throbbing heart", syllables: 3, rime_key: "akta", multi_rime: "dakta" },
   { word: "bhatakta", display_word: "bhatakta", language: "hinglish", pos: "verb", definition: "wandering through shadows", syllables: 3, rime_key: "akta", multi_rime: "takta" },
   { word: "chamakta", display_word: "chamakta", language: "hinglish", pos: "verb", definition: "glowing bright", syllables: 3, rime_key: "akta", multi_rime: "makta" },
@@ -199,8 +293,16 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "tarasta", display_word: "tarasta", language: "hinglish", pos: "verb", definition: "yearning without stop", syllables: 3, rime_key: "asta", multi_rime: "rasta" },
   { word: "khadakta", display_word: "khadakta", language: "hinglish", pos: "verb", definition: "clinking sharp", syllables: 3, rime_key: "akta", multi_rime: "dakta" },
   { word: "dahakta", display_word: "dahakta", language: "hinglish", pos: "verb", definition: "blazing red", syllables: 3, rime_key: "akta", multi_rime: "hakta" },
+  { word: "sisakta", display_word: "sisakta", language: "hinglish", pos: "verb", definition: "sobbing quietly", syllables: 3, rime_key: "akta", multi_rime: "sakta" },
+  { word: "sambhalta", display_word: "sambhalta", language: "hinglish", pos: "verb", definition: "regaining balance", syllables: 3, rime_key: "alta", multi_rime: "halta" },
+  { word: "fisalta", display_word: "fisalta", language: "hinglish", pos: "verb", definition: "slipping on ice", syllables: 3, rime_key: "alta", multi_rime: "salta" },
+  { word: "machalta", display_word: "machalta", language: "hinglish", pos: "verb", definition: "restless movement", syllables: 3, rime_key: "alta", multi_rime: "chalta" },
+  { word: "badalta", display_word: "badalta", language: "hinglish", pos: "verb", definition: "shifting tides", syllables: 3, rime_key: "alta", multi_rime: "dalta" },
+  { word: "ubalta", display_word: "ubalta", language: "hinglish", pos: "verb", definition: "boiling over", syllables: 3, rime_key: "alta", multi_rime: "balta" },
 
-  // --- MULTIRIME: -oor (Pride, Vision, Distance) ---
+  // =========================================================================
+  // 13. MULTIRIME: -oor / -eer (Aura, Pride, Distance & Visions)
+  // =========================================================================
   { word: "noor", display_word: "noor", language: "hinglish", pos: "noun", definition: "divine aura / glow", syllables: 1, rime_key: "oor", multi_rime: "noor" },
   { word: "guroor", display_word: "guroor", language: "hinglish", pos: "noun", definition: "supreme self-worth", syllables: 2, rime_key: "oor", multi_rime: "roor" },
   { word: "suroor", display_word: "suroor", language: "hinglish", pos: "noun", definition: "euphoric flow", syllables: 2, rime_key: "oor", multi_rime: "roor" },
@@ -210,8 +312,32 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "shaoor", display_word: "shaoor", language: "hinglish", pos: "noun", definition: "wisdom / discretion", syllables: 2, rime_key: "oor", multi_rime: "oor" },
   { word: "huzoor", display_word: "huzoor", language: "hinglish", pos: "noun", definition: "high excellency / chief", syllables: 2, rime_key: "oor", multi_rime: "zoor" },
   { word: "door", display_word: "door", language: "hinglish", pos: "adverb", definition: "distant horizon", syllables: 1, rime_key: "oor", multi_rime: "door" },
+  { word: "chaknachoor", display_word: "chaknachoor", language: "hinglish", pos: "adjective", definition: "smashed to smithereens", syllables: 3, rime_key: "oor", multi_rime: "choor" },
+  { word: "fitoor", display_word: "fitoor", language: "hinglish", pos: "noun", definition: "creative mania / madness", syllables: 2, rime_key: "oor", multi_rime: "toor" },
+  { word: "zameer", display_word: "zameer", language: "hinglish", pos: "noun", definition: "inner conscience", syllables: 2, rime_key: "eer", multi_rime: "meer" },
+  { word: "lakeer", display_word: "lakeer", language: "hinglish", pos: "noun", definition: "unbreakable line drawn", syllables: 2, rime_key: "eer", multi_rime: "keer" },
+  { word: "ameer", display_word: "ameer", language: "hinglish", pos: "adjective", definition: "wealthy boss", syllables: 2, rime_key: "eer", multi_rime: "meer" },
+  { word: "fakeer", display_word: "fakeer", language: "hinglish", pos: "noun", definition: "wandering ascetic / minimal", syllables: 2, rime_key: "eer", multi_rime: "keer" },
+  { word: "zanjeer", display_word: "zanjeer", language: "hinglish", pos: "noun", definition: "iron shackles", syllables: 2, rime_key: "eer", multi_rime: "jeer" },
+  { word: "shamsheer", display_word: "shamsheer", language: "hinglish", pos: "noun", definition: "broadsword", syllables: 2, rime_key: "eer", multi_rime: "sheer" },
+  { word: "tasveer", display_word: "tasveer", language: "hinglish", pos: "noun", definition: "vivid portrait", syllables: 2, rime_key: "eer", multi_rime: "veer" },
+  { word: "taqdeer", display_word: "taqdeer", language: "hinglish", pos: "noun", definition: "written destiny", syllables: 2, rime_key: "eer", multi_rime: "deer" },
+  { word: "tadbeer", display_word: "tadbeer", language: "hinglish", pos: "noun", definition: "tactical stratagem", syllables: 2, rime_key: "eer", multi_rime: "beer" },
 
-  // --- ESSENTIAL DHH STREET VERNACULAR & SLANG ---
+  // =========================================================================
+  // 14. MULTIRIME: -ain / -ane (Direct Addresses & Pronouns)
+  // =========================================================================
+  { word: "main", display_word: "main", language: "hinglish", pos: "pronoun", definition: "I / me", syllables: 1, rime_key: "ain", multi_rime: "main" },
+  { word: "hain", display_word: "hain", language: "hinglish", pos: "verb", definition: "are / exist", syllables: 1, rime_key: "ain", multi_rime: "hain" },
+  { word: "chain", display_word: "chain", language: "hinglish", pos: "noun", definition: "serenity / gold cuban link", syllables: 1, rime_key: "ain", multi_rime: "chain" },
+  { word: "rain", display_word: "rain", language: "hinglish", pos: "noun", definition: "dark night", syllables: 1, rime_key: "ain", multi_rime: "rain" },
+  { word: "nain", display_word: "nain", language: "hinglish", pos: "noun", definition: "watchful eyes", syllables: 1, rime_key: "ain", multi_rime: "nain" },
+  { word: "pain", display_word: "pain", language: "hinglish", pos: "noun", definition: "inner suffering", syllables: 1, rime_key: "ain", multi_rime: "pain" },
+  { word: "gain", display_word: "gain", language: "hinglish", pos: "noun", definition: "profit / come up", syllables: 1, rime_key: "ain", multi_rime: "gain" },
+
+  // =========================================================================
+  // 15. DHH STREET VERNACULAR, SLANG & HARD HITTING FLOW
+  // =========================================================================
   { word: "bantai", display_word: "bantai", language: "hinglish", pos: "slang", definition: "brother / street peer (Mumbai)", syllables: 2, rime_key: "ai", multi_rime: "ntai" },
   { word: "bhamai", display_word: "bhamai", language: "hinglish", pos: "slang", definition: "partner in rhyme", syllables: 2, rime_key: "ai", multi_rime: "mai" },
   { word: "khallas", display_word: "khallas", language: "hinglish", pos: "slang", definition: "finished / wiped out", syllables: 2, rime_key: "as", multi_rime: "llas" },
@@ -243,13 +369,60 @@ export const HINDI_DICTIONARY: DictEntry[] = [
   { word: "bekhauf", display_word: "bekhauf", language: "hinglish", pos: "adjective", definition: "dreadless heart", syllables: 2, rime_key: "auf", multi_rime: "hauf" },
   { word: "mukhtasar", display_word: "mukhtasar", language: "hinglish", pos: "adjective", definition: "concise / sharp", syllables: 3, rime_key: "ar", multi_rime: "asar" },
   { word: "aawara", display_word: "aawara", language: "hinglish", pos: "adjective", definition: "drifter of the streets", syllables: 3, rime_key: "a", multi_rime: "wara" },
-  { word: "main", display_word: "main", language: "hinglish", pos: "pronoun", definition: "I / me", syllables: 1, rime_key: "ain", multi_rime: "main" },
-  { word: "hain", display_word: "hain", language: "hinglish", pos: "verb", definition: "are / exist", syllables: 1, rime_key: "ain", multi_rime: "hain" },
-  { word: "chain", display_word: "chain", language: "hinglish", pos: "noun", definition: "serenity / gold cuban link", syllables: 1, rime_key: "ain", multi_rime: "chain" },
-  { word: "rain", display_word: "rain", language: "hinglish", pos: "noun", definition: "dark night", syllables: 1, rime_key: "ain", multi_rime: "rain" },
-  { word: "nain", display_word: "nain", language: "hinglish", pos: "noun", definition: "watchful eyes", syllables: 1, rime_key: "ain", multi_rime: "nain" },
   { word: "bhai", display_word: "bhai", language: "hinglish", pos: "slang", definition: "brother / comrade", syllables: 1, rime_key: "ai", multi_rime: "bhai" },
   { word: "gully", display_word: "gully", language: "hinglish", pos: "noun", definition: "narrow alleyway", syllables: 2, rime_key: "i", multi_rime: "lly" },
   { word: "scene", display_word: "scene", language: "hinglish", pos: "slang", definition: "the local movement / vibe", syllables: 1, rime_key: "een", multi_rime: "cene" },
-  { word: "vibe", display_word: "vibe", language: "hinglish", pos: "slang", definition: "frequency / feeling", syllables: 1, rime_key: "ibe", multi_rime: "vibe" }
+  { word: "vibe", display_word: "vibe", language: "hinglish", pos: "slang", definition: "frequency / feeling", syllables: 1, rime_key: "ibe", multi_rime: "vibe" },
+  { word: "jigra", display_word: "jigra", language: "hinglish", pos: "noun", definition: "unshakeable courage", syllables: 2, rime_key: "a", multi_rime: "igra" },
+  { word: "kaleja", display_word: "kaleja", language: "hinglish", pos: "noun", definition: "heart / audacity", syllables: 3, rime_key: "a", multi_rime: "leja" },
+  { word: "pathar", display_word: "pathar", language: "hinglish", pos: "noun", definition: "stone / cold resolve", syllables: 2, rime_key: "ar", multi_rime: "thar" },
+  { word: "loha", display_word: "loha", language: "hinglish", pos: "noun", definition: "hardened iron", syllables: 2, rime_key: "a", multi_rime: "oha" },
+  { word: "shola", display_word: "shola", language: "hinglish", pos: "noun", definition: "burning ember", syllables: 2, rime_key: "a", multi_rime: "ola" },
+  { word: "chingari", display_word: "chingari", language: "hinglish", pos: "noun", definition: "first spark of fire", syllables: 3, rime_key: "i", multi_rime: "ari" },
+  { word: "dhuaan", display_word: "dhuaan", language: "hinglish", pos: "noun", definition: "dense smoke", syllables: 2, rime_key: "aan", multi_rime: "uaan" },
+  { word: "raakh", display_word: "raakh", language: "hinglish", pos: "noun", definition: "ashes left behind", syllables: 1, rime_key: "aakh", multi_rime: "aakh" },
+  { word: "qafas", display_word: "qafas", language: "hinglish", pos: "noun", definition: "prison cage", syllables: 2, rime_key: "as", multi_rime: "fas" },
+  { word: "azaadi", display_word: "azaadi", language: "hinglish", pos: "noun", definition: "complete freedom", syllables: 3, rime_key: "i", multi_rime: "aadi" },
+  { word: "salakhein", display_word: "salakhein", language: "hinglish", pos: "noun", definition: "prison bars", syllables: 3, rime_key: "ein", multi_rime: "khein" },
+  { word: "bediyan", display_word: "bediyan", language: "hinglish", pos: "noun", definition: "iron fetters", syllables: 3, rime_key: "an", multi_rime: "iyan" },
+  { word: "qalam", display_word: "qalam", language: "hinglish", pos: "noun", definition: "writer pen / microphone", syllables: 2, rime_key: "am", multi_rime: "lam" },
+  { word: "syahi", display_word: "syahi", language: "hinglish", pos: "noun", definition: "black ink", syllables: 2, rime_key: "i", multi_rime: "ahi" },
+  { word: "panne", display_word: "panne", language: "hinglish", pos: "noun", definition: "notebook pages", syllables: 2, rime_key: "e", multi_rime: "nne" },
+  { word: "kitaab", display_word: "kitaab", language: "hinglish", pos: "noun", definition: "open book", syllables: 2, rime_key: "aab", multi_rime: "taab" },
+  { word: "aaftaab", display_word: "aaftaab", language: "hinglish", pos: "noun", definition: "blazing sun", syllables: 3, rime_key: "aab", multi_rime: "taab" },
+  { word: "mahtab", display_word: "mahtab", language: "hinglish", pos: "noun", definition: "lunar glow", syllables: 2, rime_key: "aab", multi_rime: "tab" },
+  { word: "mehfil", display_word: "mehfil", language: "hinglish", pos: "noun", definition: "gathering of artists", syllables: 2, rime_key: "il", multi_rime: "fil" },
+  { word: "tanhai", display_word: "tanhai", language: "hinglish", pos: "noun", definition: "deep solitude", syllables: 3, rime_key: "ai", multi_rime: "hai" },
+  { word: "sannata", display_word: "sannata", language: "hinglish", pos: "noun", definition: "dead silence", syllables: 3, rime_key: "a", multi_rime: "ata" },
+  { word: "aawaaz", display_word: "aawaaz", language: "hinglish", pos: "noun", definition: "voice on mic", syllables: 2, rime_key: "aaz", multi_rime: "waaz" },
+  { word: "goonj", display_word: "goonj", language: "hinglish", pos: "noun", definition: "stadium echo", syllables: 1, rime_key: "oonj", multi_rime: "oonj" },
+  { word: "cheekh", display_word: "cheekh", language: "hinglish", pos: "noun", definition: "raw scream", syllables: 1, rime_key: "eekh", multi_rime: "eekh" },
+
+  // =========================================================================
+  // 16. PUNJABI-DHH CROSSOVER VERNACULAR (Ubiquitous in Modern Indian Hip-Hop)
+  // =========================================================================
+  { word: "veere", display_word: "veere", language: "hinglish", pos: "slang", definition: "brother / day one", syllables: 2, rime_key: "e", multi_rime: "eere" },
+  { word: "paji", display_word: "paji", language: "hinglish", pos: "slang", definition: "elder brother / respect", syllables: 2, rime_key: "i", multi_rime: "aji" },
+  { word: "gallan", display_word: "gallan", language: "hinglish", pos: "noun", definition: "talks / conversations", syllables: 2, rime_key: "an", multi_rime: "llan" },
+  { word: "kudi", display_word: "kudi", language: "hinglish", pos: "noun", definition: "girl", syllables: 2, rime_key: "i", multi_rime: "udi" },
+  { word: "gaddi", display_word: "gaddi", language: "hinglish", pos: "noun", definition: "luxury ride / whip", syllables: 2, rime_key: "i", multi_rime: "addi" },
+  { word: "yaari", display_word: "yaari", language: "hinglish", pos: "noun", definition: "brotherhood brotherhood", syllables: 2, rime_key: "i", multi_rime: "aari" },
+  { word: "vaddi", display_word: "vaddi", language: "hinglish", pos: "adjective", definition: "massive / big league", syllables: 2, rime_key: "i", multi_rime: "addi" },
+  { word: "kaim", display_word: "kaim", language: "hinglish", pos: "adjective", definition: "on point / rock solid", syllables: 1, rime_key: "aim", multi_rime: "kaim" },
+  { word: "att", display_word: "att", language: "hinglish", pos: "slang", definition: "peak excellence / fire", syllables: 1, rime_key: "att", multi_rime: "att" },
+  { word: "chadhai", display_word: "chadhai", language: "hinglish", pos: "noun", definition: "unstoppable rise to top", syllables: 2, rime_key: "ai", multi_rime: "dhai" },
+  { word: "sira", display_word: "sira", language: "hinglish", pos: "slang", definition: "end of discussion / elite", syllables: 2, rime_key: "a", multi_rime: "ira" },
+  { word: "raula", display_word: "raula", language: "hinglish", pos: "noun", definition: "clout / noise / buzz", syllables: 2, rime_key: "a", multi_rime: "aula" },
+  { word: "pind", display_word: "pind", language: "hinglish", pos: "noun", definition: "hometown village / roots", syllables: 1, rime_key: "ind", multi_rime: "pind" },
+  { word: "shonk", display_word: "shonk", language: "hinglish", pos: "noun", definition: "expensive taste / passion", syllables: 1, rime_key: "onk", multi_rime: "shonk" },
+  { word: "geet", display_word: "geet", language: "hinglish", pos: "noun", definition: "classic song / record", syllables: 1, rime_key: "eet", multi_rime: "geet" },
+  { word: "soorma", display_word: "soorma", language: "hinglish", pos: "noun", definition: "valiant warrior", syllables: 2, rime_key: "a", multi_rime: "rma" },
+  { word: "vairi", display_word: "vairi", language: "hinglish", pos: "noun", definition: "sworn adversary / opp", syllables: 2, rime_key: "i", multi_rime: "airi" },
+  { word: "gabru", display_word: "gabru", language: "hinglish", pos: "noun", definition: "stalwart young man", syllables: 2, rime_key: "u", multi_rime: "bru" },
+  { word: "rutba", display_word: "rutba", language: "hinglish", pos: "noun", definition: "unmatched stature", syllables: 2, rime_key: "a", multi_rime: "tba" },
+  { word: "taur", display_word: "taur", language: "hinglish", pos: "noun", definition: "swagger / strut", syllables: 1, rime_key: "aur", multi_rime: "taur" },
+  { word: "rob", display_word: "rob", language: "hinglish", pos: "noun", definition: "commanding aura", syllables: 1, rime_key: "ob", multi_rime: "rob" },
+  { word: "hawa", display_word: "hawa", language: "hinglish", pos: "noun", definition: "current wave / momentum", syllables: 2, rime_key: "a", multi_rime: "awa" },
+  { word: "adda", display_word: "adda", language: "hinglish", pos: "noun", definition: "the block / crew spot", syllables: 2, rime_key: "a", multi_rime: "dda" },
+  { word: "morcha", display_word: "morcha", language: "hinglish", pos: "noun", definition: "front line battle position", syllables: 2, rime_key: "a", multi_rime: "rcha" }
 ];
