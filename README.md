@@ -56,30 +56,43 @@ While cloud-based tools rely on remote APIs and monthly credits, **VibeVox** bri
 - **Latency-Compensated Bar Slicing**: Record vocal takes bar-by-bar with automatic delay compensation and sub-millisecond audio alignment.
 - **Live Punch-In Studio**: Web Audio oscilloscope waveform visualizer, tempo metronome pulse ring, and OPFS audio persistence.
 
-### 2. ⚡ VibeLyrics Studio & Flagship 4-Superpowers
-- **Scribble-to-Song Synthesizer**: Paste fragments, ideas, or half-baked punchlines. Select a structure mode (*Full Song*, *16-Bar Verse*, *Hook Anthem*, *Rhyme Couplets*) to instantly generate structured, cadence-locked song blueprints.
+### 2. ⚡ VibeLyrics Studio & Flagship Polish Enhancements
+- **Scribble-to-Song Synthesizer**: Paste fragments, ideas, or half-baked punchlines. Select a structure mode (*Full Song*, *16-Bar Verse*, *Hook Anthem*, *Rhyme Couplets*) with toggle-to-deselect support to instantly generate structured song blueprints.
+- **Dual-Pane Cursor Tracking & Cadence Deltas**: Typing or clicking in the notepad dynamically highlights the corresponding bar in the phonetic inspector, smoothly auto-scrolls it into view, and displays syllable delta badges (`+2 syl`, `-1 syl`) relative to previous bars.
+- **Inline Non-Blocking Rhyme Dock**: Zero-latency rhyme suggestions positioned directly beneath the notepad, filtering across *All*, *Perfect*, *Near*, and *Multi-syllable* rhymes with 1-click word insertion and deep-linking into RhymeWave.
+- **Flow Metronome Bar**: Hover over the BPM box to adjust tempo with your mouse wheel (±1 step, Shift ±5, safely clamped 40–240 BPM). Includes Web Audio tick synthesis, 4-beat visual LED meter, tap tempo, and mute toggling.
+- **Seamless "Use in Track Studio"**: 1-click conversion from synthesized scribbles into persistent `LocalTrack` and `LocalBar[]` records in IndexedDB, navigating directly to `/track/:id`.
 - **6-Channel Phonetic Rhyme Vision**: Real-time phoneme clustering coloring assonance, consonants, and compound family rhymes directly as you type.
 - **Matra Prosody & Stress Matrix**: Indian classical Matra counting alongside English metrical foot stress analysis (`/` stressed, `x` unstressed) for precise cadence pocket locking.
-- **Auto-Sync to Brain Memory**: 1-click or automatic background sync of your best written bars into your local artist style memory.
+- **Permanent Background Auto-Sync**: Synthesized lyrics and rhyme clusters automatically sync to your local brain with zero UI clutter.
 
-### 3. 📓 Writer's Headspace (Private Emotional State RAG)
+### 3. 📚 Track Library Multi-Track Batch Operations & MultiSelect
+- **Multi-Track Selection Mode**: Toggle selection mode in `/library` to select multiple tracks with card checkboxes.
+- **Batch Export Suite**: Export selected tracks to VibeVox portable `.json` bundles, printable multi-page PDF songbooks, Genius-style Markdown (`.md`), or plain text compilation (`.txt`).
+- **Bulk Safe Deletion**: Multi-track deletion with safety confirmation modal clearing local IndexedDB, OPFS audio takes, and cloud records in a single batch.
+- **Multi-Status Filtering**: Filter the library by combining multiple statuses (e.g. *Ready* + *In Progress*) simultaneously.
+- **Reusable `MultiSelect` Component**: Searchable combobox with interactive tag badges, tooltip overflow folding (`+N more`), and full keyboard navigation (`ArrowUp`/`ArrowDown`/`Enter`/`Backspace`/`Escape`).
+- **Multi-Option Style Blending**: Select multiple musical genres and regional slang dialects in `StyleBriefForm`, and combine multiple moods in `StudioArsenalDrawer`.
+
+### 4. 📓 Writer's Headspace (Private Emotional State RAG)
 - **100% Local-First IndexedDB Journal**: Private diary capturing raw emotions, late-night reflections, and unfiltered thoughts (*Raw, Introspective, Aggressive, Melancholic, Triumphant, Late Night*).
 - **Semantic RAG Ingestion**: Automatically retrieves relevant diary thoughts matching your track's mood and theme, feeding real-life emotion into the AI ghostwriter without cliché imitation.
 - **In-Studio Headspace Drawer**: Slide-out drawer accessible directly inside the lyrics editor and scribble pad to jot thoughts or drop reflections into active bars.
 
-### 4. 🎯 Studio Arsenal: Punchlines & Hooks
+### 5. 🎯 Studio Arsenal: Punchlines & Hooks
 - **Punchline & Double Entendre Engine**: Scores punchline potential (0–100 pts) based on contrast keywords, wordplay, reversals, and alliteration. Dual-engine: uses active LLM with zero-LLM algorithmic fallback (rhymes + sensory metaphors).
 - **Hook & Anthem Builder**: Crafts catchy 2-to-4-line choruses, trap pockets, and chants with matching syllable counts per line.
+- **Multi-Mood Blending**: Combine multiple moods simultaneously (e.g. *Confident* + *Witty* or *Anthemic* + *Melodic*).
 - **Unified Slide-Over Drawer**: 1-click copy or direct insertion into the active writing pad.
 
-### 5. 📊 Lyrical Evolution & Stats Dashboard (`/stats`)
+### 6. 📊 Lyrical Evolution & Stats Dashboard (`/stats`)
 - **Cadence Pocket Distribution**: Interactive **Recharts** bar chart showing syllable frequencies (6 to 18 syllables/bar).
 - **Session Progression**: Area chart displaying bar volume and pacing over time.
 - **Vocabulary Diversity Ratio**: Tracks unique word percentage and vocabulary expansion.
 - **Dominant Rhyme Sound Families**: Detects recurring phonetic anchors (`/aɪ/`, `/eː/`, etc.).
 - **Writing Activity Streak**: Tracks consecutive studio days.
 
-### 6. 🧠 Artistic Ghostwriter & Multi-Level Hybrid RAG
+### 7. 🧠 Artistic Ghostwriter & Multi-Level Hybrid RAG
 - **Reciprocal Rank Fusion ($RRF$)**: Combines vector cosine similarity, cadence density matching, and POS grammar scoring.
 - **Zero-LLM Offline RAG Mode**: Even with no LLM connected, assembles rhythmic lines using POS grammars, style memory, and phonetics.
 - **Critic Council**: Multi-critic evaluation of pocket rhythm, wordplay quality, and authenticity.
