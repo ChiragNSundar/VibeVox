@@ -129,20 +129,20 @@ Cohesion: 0.09
 Nodes (27): BarPocketItem, COLOR_PALETTE, PocketGrid(), PocketGridProps, CommitBar, CommitInput, commitLiveTake, DeviceId (+19 more)
 
 ### Community 10 - "Module Cluster 10"
-Cohesion: 0.14
-Nodes (26): buildCadence(), ChatOpts, criticPass(), fillToCadence(), formatRepair(), group(), heuristicCadence(), LocalBrief (+18 more)
-
-### Community 11 - "Module Cluster 11"
 Cohesion: 0.12
 Nodes (22): RhymeLookup(), RhymeLookupProps, DictEntry, HINDI_DICTIONARY, DictEntry, KANNADA_DICTIONARY, CaesuraResult, calculateRhythmicScore() (+14 more)
 
-### Community 12 - "Module Cluster 12"
+### Community 11 - "Module Cluster 11"
 Cohesion: 0.16
 Nodes (21): ReferencesPage(), BarDiff(), diffWords(), tokenize(), buildFingerprint(), loadFingerprints(), removeFingerprint(), saveFingerprints() (+13 more)
 
-### Community 13 - "Module Cluster 13"
+### Community 12 - "Module Cluster 12"
 Cohesion: 0.09
 Nodes (24): getRouter(), AppBrainRoute, AppConnectRoute, AppJournalRoute, AppLibraryRoute, AppLiveRoute, AppNewRoute, AppOnboardingRoute (+16 more)
+
+### Community 13 - "Module Cluster 13"
+Cohesion: 0.17
+Nodes (21): buildCadence(), ChatOpts, criticPass(), fillToCadence(), formatRepair(), group(), heuristicCadence(), PipelineOptions (+13 more)
 
 ### Community 14 - "Module Cluster 14"
 Cohesion: 0.13
@@ -201,48 +201,48 @@ Cohesion: 0.22
 Nodes (13): CadenceMap, AudioPlayer(), BarProposal, BarRow(), BarRowProps, BarVersion, RewriteOpts, StressTimeline() (+5 more)
 
 ### Community 28 - "Module Cluster 28"
+Cohesion: 0.17
+Nodes (14): LocalBrief, LocalLyrics, LocalPipelineResult, LocalQuality, runLocalPipeline(), ENGLISH_PATTERNS, generateOfflineRagLyrics(), getRegionalAdlib() (+6 more)
+
+### Community 29 - "Module Cluster 29"
 Cohesion: 0.18
 Nodes (13): cmudictLookup(), customLookup(), datamuse(), DatamuseHit, datamuseLookup(), lookupRhymes(), RhymeHit, RhymeKind (+5 more)
 
-### Community 29 - "Module Cluster 29"
+### Community 30 - "Module Cluster 30"
 Cohesion: 0.17
 Nodes (15): harvestThresholdFor(), adaptiveChunkBars(), budgetFor(), budgetForProfile(), defaultContext(), HOSTED_FAMILIES, isHostedFamily(), IterationBudget (+7 more)
 
-### Community 30 - "Module Cluster 30"
+### Community 31 - "Module Cluster 31"
 Cohesion: 0.16
 Nodes (5): CapturedError, formatDiagnostics(), reportCustomError(), Toaster(), ToasterProps
 
-### Community 31 - "Module Cluster 31"
+### Community 32 - "Module Cluster 32"
 Cohesion: 0.18
 Nodes (8): LiveCapture, LiveCaptureOpts, playClick(), State, blobToBase64(), encodeWav(), rms(), writeString()
 
-### Community 32 - "Module Cluster 32"
+### Community 33 - "Module Cluster 33"
 Cohesion: 0.19
 Nodes (12): DEVANAGARI_CONSONANTS, DEVANAGARI_INDEPENDENT_VOWELS, DEVANAGARI_MATRAS, devanagariToHinglish(), DIACRITIC_MAP, hasDevanagariScript(), hasKannadaScript(), KANNADA_CONSONANTS (+4 more)
 
-### Community 33 - "Module Cluster 33"
+### Community 34 - "Module Cluster 34"
 Cohesion: 0.15
 Nodes (13): Route, Route, Route, Route, Route, Route, Route, Route (+5 more)
 
-### Community 34 - "Module Cluster 34"
+### Community 35 - "Module Cluster 35"
 Cohesion: 0.27
 Nodes (9): BarTimelineProps, SOURCE_LABELS, BarVersion, clearBarHistory(), getBarHistory(), getLatestBarVersion(), loadAll(), recordBarVersion() (+1 more)
 
-### Community 35 - "Module Cluster 35"
+### Community 36 - "Module Cluster 36"
 Cohesion: 0.24
 Nodes (9): WhisperScanPanel(), WhisperScanPanelProps, corsHint(), DiscoveredWhisper, CardContent, CardDescription, CardFooter, CardHeader (+1 more)
 
-### Community 36 - "Module Cluster 36"
+### Community 37 - "Module Cluster 37"
 Cohesion: 0.23
 Nodes (10): cleanWord(), syllablesInWord(), ARPABET_VOWELS, decomposeWordSyllables(), extractCoda(), extractPrimaryVowelNucleus(), LearnedRhymeEntry, LineSyllableMap (+2 more)
 
-### Community 37 - "Module Cluster 37"
+### Community 38 - "Module Cluster 38"
 Cohesion: 0.25
 Nodes (10): CalibrateOpts, calibrateWithRetry(), clearCalibratedLatencyMs(), detectPeaks(), LatencyResult, loadCalibratedLatencyMs(), measureMicLatencyMs(), mergeChunks() (+2 more)
-
-### Community 38 - "Module Cluster 38"
-Cohesion: 0.24
-Nodes (9): LocalLyrics, LocalQuality, ENGLISH_PATTERNS, generateOfflineRagLyrics(), getRegionalAdlib(), HINGLISH_PATTERNS, KANGLISH_PATTERNS, matchCadenceLength() (+1 more)
 
 ### Community 39 - "Module Cluster 39"
 Cohesion: 0.38
@@ -276,11 +276,11 @@ Nodes (3): BpmResult, detectBpm(), snapBpm()
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `countSyllables()` connect `Module Cluster 18` to `Module Cluster 32`, `Cadence, Stress & Indic Romanizer`, `Style Memory & Artistic Ghostwriter RAG`, `Track Management & Studio Pipeline`, `Module Cluster 36`, `Headspace Journal & Evolution Analytics`, `Module Cluster 38`, `Module Cluster 9`, `Module Cluster 10`, `Module Cluster 11`, `Module Cluster 12`, `Module Cluster 14`, `Module Cluster 15`, `Module Cluster 20`, `Module Cluster 21`, `Module Cluster 22`, `Module Cluster 27`?**
+- **Why does `countSyllables()` connect `Module Cluster 18` to `Track Management & Studio Pipeline`, `Module Cluster 33`, `Style Memory & Artistic Ghostwriter RAG`, `Cadence, Stress & Indic Romanizer`, `Module Cluster 37`, `Headspace Journal & Evolution Analytics`, `Module Cluster 9`, `Module Cluster 10`, `Module Cluster 11`, `Module Cluster 13`, `Module Cluster 14`, `Module Cluster 15`, `Module Cluster 20`, `Module Cluster 21`, `Module Cluster 22`, `Module Cluster 27`, `Module Cluster 28`?**
   _High betweenness centrality (0.064) - this node is a cross-community bridge._
-- **Why does `Button` connect `Module Cluster 14` to `Cadence, Stress & Indic Romanizer`, `Style Memory & Artistic Ghostwriter RAG`, `Audio Capture, Latency & Live Punch-In`, `Studio Arsenal & Lyrical Intelligence`, `Headspace Journal & Evolution Analytics`, `Module Cluster 6`, `Module Cluster 8`, `Module Cluster 11`, `Module Cluster 12`, `Module Cluster 15`, `Module Cluster 18`, `Module Cluster 19`, `Module Cluster 23`, `Module Cluster 25`, `Module Cluster 27`, `Module Cluster 30`, `Module Cluster 34`, `Module Cluster 35`, `Module Cluster 40`, `Module Cluster 44`, `Module Cluster 45`?**
+- **Why does `Button` connect `Module Cluster 14` to `Cadence, Stress & Indic Romanizer`, `Style Memory & Artistic Ghostwriter RAG`, `Audio Capture, Latency & Live Punch-In`, `Studio Arsenal & Lyrical Intelligence`, `Headspace Journal & Evolution Analytics`, `Module Cluster 6`, `Module Cluster 8`, `Module Cluster 10`, `Module Cluster 11`, `Module Cluster 15`, `Module Cluster 18`, `Module Cluster 19`, `Module Cluster 23`, `Module Cluster 25`, `Module Cluster 27`, `Module Cluster 31`, `Module Cluster 35`, `Module Cluster 36`, `Module Cluster 40`, `Module Cluster 44`, `Module Cluster 45`?**
   _High betweenness centrality (0.034) - this node is a cross-community bridge._
-- **Why does `Badge()` connect `Module Cluster 6` to `Cadence, Stress & Indic Romanizer`, `Style Memory & Artistic Ghostwriter RAG`, `Audio Capture, Latency & Live Punch-In`, `Studio Arsenal & Lyrical Intelligence`, `Headspace Journal & Evolution Analytics`, `Module Cluster 8`, `Module Cluster 9`, `Module Cluster 11`, `Module Cluster 12`, `Module Cluster 14`, `Module Cluster 18`, `Module Cluster 19`, `Module Cluster 23`, `Module Cluster 25`, `Module Cluster 28`, `Module Cluster 30`, `Module Cluster 34`, `Module Cluster 35`, `Module Cluster 44`, `Module Cluster 45`?**
+- **Why does `Badge()` connect `Module Cluster 6` to `Cadence, Stress & Indic Romanizer`, `Style Memory & Artistic Ghostwriter RAG`, `Audio Capture, Latency & Live Punch-In`, `Studio Arsenal & Lyrical Intelligence`, `Headspace Journal & Evolution Analytics`, `Module Cluster 8`, `Module Cluster 9`, `Module Cluster 10`, `Module Cluster 11`, `Module Cluster 14`, `Module Cluster 18`, `Module Cluster 19`, `Module Cluster 23`, `Module Cluster 25`, `Module Cluster 29`, `Module Cluster 31`, `Module Cluster 35`, `Module Cluster 36`, `Module Cluster 44`, `Module Cluster 45`?**
   _High betweenness centrality (0.027) - this node is a cross-community bridge._
 - **What connects `AppRoute`, `IndexRoute`, `AppStatsRoute` to the rest of the system?**
   _261 weakly-connected nodes found - possible documentation gaps or missing edges._
