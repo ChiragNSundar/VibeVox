@@ -455,7 +455,11 @@ async function writeOneChunk(
   brief: LocalBrief | undefined,
   examples: { bars: string[]; meta: string }[],
 ): Promise<WriteShape | null> {
-  const lang = brief?.slangRegion?.includes("hinglish") ? "hinglish" : brief?.slangRegion?.includes("kanglish") ? "kannada" : "auto";
+  const reg = (brief?.slangRegion || "").toLowerCase();
+  const isHi = reg.includes("hinglish") || reg.includes("hindi");
+  const isKn = reg.includes("kanglish") || reg.includes("kannada");
+  const lang = (isHi && isKn) ? "blend" : isKn ? "kannada" : isHi ? "hinglish" : "auto";
+
   const metaphorBp = synthesizeMetaphors(brief?.topic, brief?.attitude, brief?.slangRegion);
   const rhymePlan = planRhymeLadders(cadence, lang);
   const brainDirectives = getBrainPromptDirectives(brief);
@@ -517,8 +521,8 @@ async function writeLyrics(
     try {
       const parsed = await writeOneChunk(config, profile, cadence, slice, brief, examples);
       if (parsed) {
-        if (c === 0 && parsed.title) title = parsed.title;
-        const lines = parsed.sections.flatMap((s) => s.lines).map((l) => l.trim()).filter(Boolean);
+        if (c === 0 && parsed.title) title = stripPronunciationMarks(parsed.title);
+        const lines = parsed.sections.flatMap((s) => s.lines).map((l) => stripPronunciationMarks(l.trim())).filter(Boolean);
         // Pad/trim to slice length so cadence alignment stays exact
         while (lines.length < slice.length) lines.push(slice[lines.length].text || "Locked in the pocket");
         allLines.push(...lines.slice(0, slice.length));
@@ -546,9 +550,23 @@ async function criticPass(
   cadence: LocalCadence,
   onProgress: (e: ProgressEvent) => void,
   iter: number,
+  brief?: LocalBrief,
 ): Promise<{ overall: number; weakest: { index: number; line: string; why: string; rewrite?: string }[]; notes: string[] }> {
   onProgress({ stage: "critic", message: `Critic pass ${iter}…`, iteration: iter });
-  const sys = `You are a ruthless A&R critic trained on Drake/Kendrick/Cole/Future/Brent/PARTY/The Weeknd. Score lyrics 1-10 on: wordplay, imagery, cadencePocket, rhymeCraft, emotionalTruth, memorability, originality. Surface up to 6 weakest bars with concrete rewrites. Be honest — Drake-tier is 8.5+.
+  const reg = (brief?.slangRegion || "").toLowerCase();
+  const isHi = reg.includes("hinglish") || reg.includes("hindi");
+  const isKn = reg.includes("kanglish") || reg.includes("kannada");
+
+  let indicRubric = "";
+  if (isKn) {
+    indicRubric += "\nKANNADA POETICS RUBRIC: Reward Dwitiyakshara Prasa (2nd consonant match on bar openings) and Antyaprasa (-aagi, -odu, -illa). Flag broken cadence.";
+  }
+  if (isHi) {
+    indicRubric += "\nHINDI / DHH RUBRIC: Reward Qafiya-Radif precision and authentic street terms (wajood, rooh, bantai, haq se). Flag generic pop clichés.";
+  }
+  indicRubric += "\nHARD CRITIC RULE: Flag ANY words with macrons or pronunciation marks (ā, ī, ū, ṭ, ḍ) as weakestBars with rewrite into clean colloquial Latin.";
+
+  const sys = `You are a ruthless A&R critic trained on Drake/Kendrick/Cole/Future/Brent/PARTY/The Weeknd. Score lyrics 1-10 on: wordplay, imagery, cadencePocket, rhymeCraft, emotionalTruth, memorability, originality.${indicRubric} Surface up to 6 weakest bars with concrete rewrites. Be honest — Drake-tier is 8.5+.
 Output JSON only.
 Shape: {"scores":{"wordplay":7.5,"imagery":7,"cadencePocket":8,"rhymeCraft":7.5,"emotionalTruth":7,"memorability":7,"originality":7},"overall":7.4,"weakestBars":[{"index":3,"line":"...","why":"...","rewrite":"..."}],"notes":["..."]}`;
   try {
@@ -587,57 +605,71 @@ async function refine(
 ): Promise<LocalLyrics> {
   onProgress({ stage: "refine", message: `Refining weak bars (pass ${iter})…`, iteration: iter });
   const sys = `Targeted rewrite. Keep what works. Rewrite ONLY bars the critic flagged + bars sharing the same weakness. Preserve bar count, sections, syllables (±1), end-sound.
+Hard craft rules: concrete details, no generic fluff, preserve rhyme scheme. Return full updated lyrics with same title and section structure.
+Output format: same JSON as write stage.`;
+  const prompt = `CURRENT DRAFT:
+${JSON.stringify(lyrics, null, 2)}
 
-${CRAFT}
+WEAKEST BARS IDENTIFIED BY CRITIC:
+${critique.weakest.map((w) => `Bar ${w.index}: "${w.line}" — Reason: ${w.why}${w.rewrite ? ` (Suggested: "${w.rewrite}")` : ""}`).join("\n")}
 
-${briefBlock(brief)}
+CRITIC NOTES:
+${critique.notes.join("\n")}
 
-${formatHint(profile)}`;
-  const prompt = `CURRENT LYRICS:\n${JSON.stringify(lyrics, null, 2)}\n\nCADENCE:\n${JSON.stringify(cadence.bars, null, 2)}\n\nNOTES: ${critique.notes.join(" | ")}\n\nWEAKEST BARS:\n${JSON.stringify(critique.weakest, null, 2)}\n\nReturn full updated lyrics.`;
+CADENCE TARGETS:
+${JSON.stringify(cadence.bars, null, 2)}
+
+Rewrite the flagged bars now. Keep everything else intact.`;
   try {
-    const text = await rawChat(config, sys, prompt, { ...profile.sampling.editor, max_tokens: 4096 });
+    const text = await rawChat(config, sys, prompt, { ...profile.sampling.refine, max_tokens: 4096 });
     let parsed = tryExtractLyrics(text);
     if (!parsed) parsed = await formatRepair(config, text);
-    return fillToCadence(parsed, cadence);
-  } catch {
-    return lyrics;
-  }
+    if (parsed) return fillToCadence(parsed, cadence);
+  } catch { /* fall back to input */ }
+  return lyrics;
 }
 
 // ---------------------------------------------------------------------------
-// Public entry point
+// Public entry points
 // ---------------------------------------------------------------------------
 
-function resolveProfile(config: LlmConfig): LocalProfile {
-  const base = profileFor(config.model);
-  // Apply user overrides if set (tier override is the most common — user
-  // knows they're running a heavy quant they wouldn't want auto-detected).
-  const family = (config.familyOverride as LocalProfile["family"] | undefined) ?? base.family;
-  const tier = config.tierOverride ?? base.tier;
-  return { ...base, family, tier };
-}
+export type PipelineOptions = {
+  brief?: LocalBrief;
+  budget?: { maxIterations?: number; targetScore?: number; chunkBars?: number };
+  onProgress?: (e: ProgressEvent) => void;
+};
 
-import { generateOfflineRagLyrics } from "./offline-rag-generator";
-
+/**
+ * Full end-to-end local generation pipeline:
+ *   transcript -> cadence -> recall -> write -> [critic -> refine]* -> harvest -> lyrics
+ *
+ * All state is written to cache under `pipeline:${sha256(transcript + brief)}`.
+ * Progress events are fired along the way for the UI.
+ */
 export async function runLocalPipeline(
   config: LlmConfig,
   transcript: string,
-  brief: LocalBrief | undefined,
-  onProgress: (e: ProgressEvent) => void = () => {},
+  opts: PipelineOptions = {},
 ): Promise<LocalPipelineResult> {
-  const isExplicitOffline = config.baseUrl === "offline" || config.baseUrl === "none";
+  const onProgress = opts.onProgress ?? (() => {});
+  const brief = opts.brief;
 
+  // Derive profile and budget
   const profile = resolveProfile(config);
   const baseBudget = budgetForProfile(profile);
-  const ctx = config.contextTokens || profile.defaultContextTokens;
-  const chunkBars = adaptiveChunkBars(ctx, baseBudget.chunkBars);
-  const budget = { ...baseBudget, chunkBars };
+  const chunkBars = opts.budget?.chunkBars ?? baseBudget.chunkBars;
+  const budget = {
+    maxIterations: opts.budget?.maxIterations ?? baseBudget.maxIterations,
+    targetScore: opts.budget?.targetScore ?? baseBudget.targetScore,
+    chunkBars,
+  };
 
-  // Pipeline-level cache: identical (model + transcript + brief + profile)
-  // returns the prior result instantly.
+  const isExplicitOffline = config.baseUrl === "offline" || config.baseUrl === "none";
+
+  // Pipeline-level cache
   const pipelineKey = await hashInputs([
-    config.baseUrl, config.model, ctx, transcript, brief ?? null,
-    profile.family, profile.tier, profile.writeFormat, budget.maxIterations, budget.targetScore, chunkBars,
+    config.baseUrl, config.model, transcript, brief ?? null,
+    profile.family, profile.tier, budget.maxIterations, budget.targetScore, chunkBars,
   ]);
   const cached = await cacheGet<LocalPipelineResult>("pipeline", pipelineKey);
   if (cached) {
@@ -649,7 +681,7 @@ export async function runLocalPipeline(
     stage: "cadence",
     message: isExplicitOffline
       ? "Running Zero-LLM Offline RAG Mode (No LLM required)"
-      : `Detected ${profile.family} · ${profile.tier} tier · ${ctx} ctx · chunk ${chunkBars} bars`,
+      : `Detected ${profile.family} · ${profile.tier} tier · chunk ${chunkBars} bars`,
   });
 
   const cadence = await buildCadence(config, profile, transcript, onProgress);
@@ -672,12 +704,18 @@ export async function runLocalPipeline(
     customSlang: brief?.customSlang,
     genre: brief?.genre,
   });
+
+  const regRecall = (brief?.slangRegion || "").toLowerCase();
+  const isHiRecall = regRecall.includes("hinglish") || regRecall.includes("hindi");
+  const isKnRecall = regRecall.includes("kanglish") || regRecall.includes("kannada");
+  const recallLang = (isHiRecall && isKnRecall) ? "blend" : isKnRecall ? "kannada" : isHiRecall ? "hinglish" : "auto";
+
   const examples = await recallHybridStyleExamples(recallQuery, {
     count: 4,
     targetSyllables: cadence.bars[0]?.syllables ?? 10,
     vibe: cadence.detectedVibe,
     genre: brief?.genre,
-    language: brief?.slangRegion?.includes("hinglish") ? "hinglish" : brief?.slangRegion?.includes("kanglish") ? "kannada" : "auto",
+    language: recallLang,
   });
 
   let lyrics: LocalLyrics;
@@ -688,7 +726,7 @@ export async function runLocalPipeline(
     let bestScore = 0;
     let bestLyrics = lyrics;
     for (let i = 1; i <= budget.maxIterations; i++) {
-      const crit = await criticPass(config, profile, lyrics, cadence, onProgress, i);
+      const crit = await criticPass(config, profile, lyrics, cadence, onProgress, i, brief);
       notes.push(`pass ${i}: ${crit.overall.toFixed(1)}/10`);
       if (crit.notes.length) notes.push(...crit.notes.slice(0, 2));
       onProgress({ stage: "critic", message: `Pass ${i}: ${crit.overall.toFixed(1)}/10`, iteration: i, score: crit.overall });
