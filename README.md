@@ -255,7 +255,7 @@ VibeVox
 │   │   └── RhymeLookup.tsx             # Datamuse & CMUdict rhyme explorer
 │   ├── hooks/                          # useShortcuts, useNotifications, useMobile
 │   ├── lib/                            # Core Algorithms & Local Intelligence
-│   │   ├── __tests__/                  # 27 Vitest test suites (165/165 passing)
+│   │   ├── __tests__/                  # 27 Vitest test suites (166/166 passing)
 │   │   │   ├── arsenal-and-stats.test.ts # Punchlines, hooks, and stats tests
 │   │   │   ├── multi-export.test.ts    # Multi-track batch export tests
 │   │   │   ├── journal.test.ts         # Journal storage and RAG recall tests
