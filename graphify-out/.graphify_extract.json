@@ -6485,7 +6485,7 @@
       "label": "StatusPill()",
       "file_type": "code",
       "source_file": "src/routes/_app/library.tsx",
-      "source_location": "L701",
+      "source_location": "L702",
       "_origin": "ast"
     },
     {
@@ -26354,7 +26354,7 @@
       "relation": "contains",
       "confidence": "EXTRACTED",
       "source_file": "src/routes/_app/library.tsx",
-      "source_location": "L701",
+      "source_location": "L702",
       "weight": 1.0
     },
     {
@@ -39274,58 +39274,38 @@
       "weight": 1.0
     },
     {
-      "source": "app_scribble_handlemakesense",
+      "source": "app_scribble_scribblepage",
       "target": "lib_scribble_synthesizer_makesenseofscribble",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/routes/_app/scribble.tsx",
-      "source_location": "L205",
+      "source_location": "L206",
       "weight": 1.0
     },
     {
-      "source": "app_scribble_handlemakesense",
+      "source": "app_scribble_scribblepage",
       "target": "lib_scribble_synthesizer_syncscribbletobrain",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/routes/_app/scribble.tsx",
-      "source_location": "L214",
+      "source_location": "L215",
       "weight": 1.0
     },
     {
-      "source": "app_scribble_handlemanualsynctobrain",
-      "target": "lib_scribble_synthesizer_syncscribbletobrain",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/routes/_app/scribble.tsx",
-      "source_location": "L232",
-      "weight": 1.0
-    },
-    {
-      "source": "app_scribble_handlesendtostudio",
+      "source": "app_scribble_scribblepage",
       "target": "lib_device_id_getdeviceid",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/routes/_app/scribble.tsx",
-      "source_location": "L257",
+      "source_location": "L258",
       "weight": 1.0
     },
     {
-      "source": "app_scribble_handlesendtostudio",
+      "source": "app_scribble_scribblepage",
       "target": "lib_phonetics_countsyllables",
-      "relation": "calls",
-      "context": "call",
-      "confidence": "EXTRACTED",
-      "source_file": "src/routes/_app/scribble.tsx",
-      "source_location": "L266",
-      "weight": 1.0
-    },
-    {
-      "source": "app_scribble_handlesendtostudio",
-      "target": "lib_phonetics_endrhymekey",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
@@ -39334,23 +39314,93 @@
       "weight": 1.0
     },
     {
-      "source": "app_scribble_handlesendtostudio",
+      "source": "app_scribble_scribblepage",
+      "target": "lib_phonetics_endrhymekey",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/_app/scribble.tsx",
+      "source_location": "L268",
+      "weight": 1.0
+    },
+    {
+      "source": "app_scribble_scribblepage",
       "target": "lib_local_store_puttrack",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/routes/_app/scribble.tsx",
-      "source_location": "L297",
+      "source_location": "L298",
       "weight": 1.0
     },
     {
-      "source": "app_scribble_handlesendtostudio",
+      "source": "app_scribble_scribblepage",
       "target": "lib_local_store_putbars",
       "relation": "calls",
       "context": "call",
       "confidence": "EXTRACTED",
       "source_file": "src/routes/_app/scribble.tsx",
-      "source_location": "L309",
+      "source_location": "L310",
+      "weight": 1.0
+    },
+    {
+      "source": "app_scribble_scribblepage",
+      "target": "lib_rhyme_highlighter_highlightlyrics",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/_app/scribble.tsx",
+      "source_location": "L324",
+      "weight": 1.0
+    },
+    {
+      "source": "app_scribble_scribblepage",
+      "target": "lib_rhyme_highlighter_getstanzarhymescheme",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/_app/scribble.tsx",
+      "source_location": "L371",
+      "weight": 1.0
+    },
+    {
+      "source": "app_scribble_scribblepage",
+      "target": "lib_rhyme_highlighter_detectflowinsight",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/_app/scribble.tsx",
+      "source_location": "L375",
+      "weight": 1.0
+    },
+    {
+      "source": "app_scribble_scribblepage",
+      "target": "lib_diagnostics_scorecomplexity",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/_app/scribble.tsx",
+      "source_location": "L382",
+      "weight": 1.0
+    },
+    {
+      "source": "app_scribble_scribblepage",
+      "target": "lib_diagnostics_detectsemanticdrift",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/_app/scribble.tsx",
+      "source_location": "L388",
+      "weight": 1.0
+    },
+    {
+      "source": "app_scribble_scribblepage",
+      "target": "lib_cadence_flow_getlinestressanalysis",
+      "relation": "calls",
+      "context": "call",
+      "confidence": "EXTRACTED",
+      "source_file": "src/routes/_app/scribble.tsx",
+      "source_location": "L392",
       "weight": 1.0
     },
     {
