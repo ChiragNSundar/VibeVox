@@ -557,21 +557,21 @@ function LibraryPage() {
 
       {/* Sticky Bottom Floating Bulk Action Bar */}
       {selectMode && (
-        <div className="fixed bottom-6 inset-x-0 mx-auto max-w-xl px-4 z-40 animate-in fade-in slide-in-from-bottom-4 duration-200">
-          <Card className="p-3 shadow-2xl border-primary/50 bg-background/95 backdrop-blur-md flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2 text-xs font-display">
+        <div className="fixed bottom-4 sm:bottom-6 inset-x-0 mx-auto max-w-xl px-2 sm:px-4 z-40 animate-in fade-in slide-in-from-bottom-4 duration-200">
+          <Card className="p-2.5 sm:p-3 shadow-2xl border-primary/50 bg-background/95 backdrop-blur-md flex flex-wrap sm:flex-nowrap items-center justify-between gap-1.5 sm:gap-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 text-xs font-display">
               <span className="font-semibold text-foreground">
-                {selectedTrackIds.size} of {filtered.length} selected
+                {selectedTrackIds.size} <span className="hidden sm:inline">of {filtered.length}</span> selected
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={selectedTrackIds.size === filtered.length ? clearSelection : selectAllVisible}
-                className="text-xs h-8"
+                className="text-xs h-8 px-2 sm:px-3"
               >
-                {selectedTrackIds.size === filtered.length ? "Deselect all" : "Select all"}
+                {selectedTrackIds.size === filtered.length ? "Deselect" : "Select all"}
               </Button>
 
               <DropdownMenu>
@@ -580,10 +580,11 @@ function LibraryPage() {
                     variant="outline"
                     size="sm"
                     disabled={selectedTrackIds.size === 0}
-                    className="text-xs h-8 border-primary/30 hover:border-primary"
+                    className="text-xs h-8 px-2 sm:px-3 border-primary/30 hover:border-primary"
                   >
-                    <Download className="h-3.5 w-3.5 mr-1.5" />
-                    Export ({selectedTrackIds.size})
+                    <Download className="h-3.5 w-3.5 sm:mr-1.5" />
+                    <span className="hidden sm:inline">Export ({selectedTrackIds.size})</span>
+                    <span className="sm:hidden font-mono">({selectedTrackIds.size})</span>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-56">
@@ -627,10 +628,10 @@ function LibraryPage() {
                 size="sm"
                 disabled={selectedTrackIds.size === 0}
                 onClick={() => setDeleteConfirmOpen(true)}
-                className="text-xs h-8"
+                className="text-xs h-8 px-2 sm:px-3"
               >
-                <Trash2 className="h-3.5 w-3.5 mr-1" />
-                Delete
+                <Trash2 className="h-3.5 w-3.5 sm:mr-1" />
+                <span className="hidden sm:inline">Delete</span>
               </Button>
 
               <Button
