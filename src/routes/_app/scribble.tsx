@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useEffect, useTransition, useMemo } from "react";
+import { useState, useEffect, useTransition, useMemo, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
@@ -25,12 +25,20 @@ import {
 import { highlightLyrics, getStanzaRhymeScheme, detectFlowInsight, type RhymeVisionMode } from "@/lib/rhyme-highlighter";
 import { RhymeLookup } from "@/components/RhymeLookup";
 import { ComplexityGauge, SemanticDriftBar } from "@/components/track";
-import { SuperpowersBanner, ScribbleResultView } from "@/components/scribble";
+import {
+  SuperpowersBanner,
+  ScribbleResultView,
+  FlowMetronomeBar,
+  InlineRhymeDock,
+} from "@/components/scribble";
 import { JournalDrawer } from "@/components/journal";
 import { StudioArsenalDrawer } from "@/components/studio-arsenal";
 import { scoreComplexity, detectSemanticDrift } from "@/lib/diagnostics";
 import { getLineStressAnalysis, calculateMatra, detectFlowMetric } from "@/lib/cadence-flow";
 import { countSyllables } from "@/lib/phonetics";
+import { endRhymeKey } from "@/lib/lyrics-analysis";
+import { putTrack, putBars, type LocalTrack, type LocalBar } from "@/lib/local-store";
+import { getDeviceId } from "@/lib/device-id";
 
 const DRAFT_KEY = "vibevox:scribble-draft";
 
