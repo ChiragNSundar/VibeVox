@@ -103,7 +103,7 @@ export function findRhymesWithPos(
  */
 export function searchDictionaryWords(
   query: string,
-  language: "kannada" | "hinglish" | "auto" = "auto",
+  language: "kannada" | "hinglish" | "blend" | "auto" = "auto",
 ): WordMatch[] {
   const q = normalizeIndicWord(query);
   if (!q) return [];
@@ -112,10 +112,10 @@ export function searchDictionaryWords(
   const kannada = getKannadaDictSync();
   const hindi = getHindiDictSync();
 
-  if (language === "kannada" || language === "auto") {
+  if (language === "kannada" || language === "blend" || language === "auto") {
     if (kannada.length) dataset.push({ data: kannada, lang: "kannada" });
   }
-  if (language === "hinglish" || language === "auto") {
+  if (language === "hinglish" || language === "blend" || language === "auto") {
     if (hindi.length) dataset.push({ data: hindi, lang: "hinglish" });
   }
 
