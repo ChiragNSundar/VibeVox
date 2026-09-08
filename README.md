@@ -135,7 +135,7 @@ flowchart TD
     subgraph StorageLayer["100% Local Persistence"]
         IndexedDB[("💾 IndexedDB (voxscript-local)\nTracks, Bars, Style Memory, Journal")]
         OPFS[("📂 OPFS Storage\nVocal Audio Takes")]
-        GraphifyKG[("🕸️ Graphify Knowledge Graph\n1045 Nodes · 2811 Edges")]
+        GraphifyKG[("🕸️ Graphify Knowledge Graph\n1060 Nodes · 2885 Edges · 49 Communities")]
     end
 
     LiveStudio --> OPFS
@@ -245,17 +245,19 @@ VibeVox
 │   ├── components/                     # Modular Studio Components
 │   │   ├── connect/                    # Barrel: LlmScanPanel, WhisperScanPanel
 │   │   ├── journal/                    # Barrel: JournalDrawer
-│   │   ├── scribble/                   # Barrel: SuperpowersBanner, ScribbleResultView
+│   │   ├── scribble/                   # Barrel: SuperpowersBanner, ScribbleResultView, FlowMetronomeBar, InlineRhymeDock
 │   │   ├── settings/                   # Barrel: StyleTrainingPanel, StyleMemoryPanel
 │   │   ├── studio-arsenal/             # Barrel: StudioArsenalDrawer (Punchlines & Hooks)
 │   │   ├── track/                      # Barrel: BarRow, TrackToolbar, TrackScorecard, etc.
+│   │   ├── ui/                         # UI primitives including MultiSelect combobox
 │   │   ├── NotificationCenter.tsx      # Real-time pipeline progress drawer
 │   │   ├── PocketGrid.tsx              # Syllable cadence grid & rhyme scheme tagging
 │   │   └── RhymeLookup.tsx             # Datamuse & CMUdict rhyme explorer
 │   ├── hooks/                          # useShortcuts, useNotifications, useMobile
 │   ├── lib/                            # Core Algorithms & Local Intelligence
-│   │   ├── __tests__/                  # 23 Vitest test suites (149/149 passing)
+│   │   ├── __tests__/                  # 27 Vitest test suites (165/165 passing)
 │   │   │   ├── arsenal-and-stats.test.ts # Punchlines, hooks, and stats tests
+│   │   │   ├── multi-export.test.ts    # Multi-track batch export tests
 │   │   │   ├── journal.test.ts         # Journal storage and RAG recall tests
 │   │   │   ├── scribble-synthesizer.test.ts
 │   │   │   ├── cadence-flow.test.ts
@@ -263,6 +265,7 @@ VibeVox
 │   │   │   └── style-memory.merge.test.ts
 │   │   ├── cadence-flow.ts             # Matra calculation & stress pattern analysis
 │   │   ├── cmudict-rhymes.ts           # Offline CMU phonetic dictionary
+│   │   ├── exports.ts                  # Single and multi-track export helpers (JSON, PDF, MD, TXT)
 │   │   ├── hook-engine.ts              # Anthemic chorus & chant builder
 │   │   ├── journal-rag.ts              # Emotional state journal RAG retriever
 │   │   ├── local-pipeline.ts           # Ghostwriter prompt building & multi-pass generation
@@ -275,8 +278,8 @@ VibeVox
 │       ├── __root.tsx                  # Root shell & SSR HTML metadata
 │       ├── _app.tsx                    # Shell layout with sticky nav & connection pill
 │       ├── _app/
-│       │   ├── library.tsx             # /library — Track library & bundle import/export
-│       │   ├── scribble.tsx            # /scribble — VibeLyrics studio & superpowers
+│       │   ├── library.tsx             # /library — Track library, batch selection & multi-export
+│       │   ├── scribble.tsx            # /scribble — VibeLyrics studio, inline rhyme dock & flow metronome
 │       │   ├── journal.tsx             # /journal — Writer's Headspace & emotional diary
 │       │   ├── stats.tsx               # /stats — Lyrical Evolution & Stats dashboard
 │       │   ├── brain.tsx               # /brain — Local style memory & vector indexer
@@ -302,8 +305,8 @@ bun install   # or: npm install
 # 2. Start development server (http://localhost:8080)
 bun dev       # or: npm run dev
 
-# 3. Run full unit test suite (149 tests across 23 files)
-npx vitest run
+# 3. Run full unit test suite (165 tests across 27 files)
+npm test      # or: npx vitest run
 
 # 4. Production build
 npm run build
@@ -314,9 +317,9 @@ npm run build
 ## 🕸️ Knowledge Graph (Graphify)
 
 The entire codebase is indexed into a persistent, queryable knowledge graph powered by **Graphify**:
-- **Interactive Visualization**: Open `graphify-out/graph.html` in your browser for an interactive D3 graph of all 1,045 nodes and 2,811 cross-module edges.
+- **Interactive Visualization**: Open `graphify-out/graph.html` in your browser for an interactive D3 graph of all 1,060 nodes and 2,885 cross-module edges across 49 communities.
 - **Architectural Report**: See [`graphify-out/GRAPH_REPORT.md`](graphify-out/GRAPH_REPORT.md) for community detection breakdowns, cohesion metrics, and god nodes.
-- **Fast AST Update**: Rebuild the graph anytime in ~7s using:
+- **Fast AST Update**: Rebuild the graph anytime in ~6s using:
   ```powershell
   & (Get-Content graphify-out\.graphify_python) graphify-out\update_graph.py
   ```
