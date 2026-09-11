@@ -6,7 +6,7 @@
 //
 // Nothing here writes config — the connect page decides what to save.
 
-export type LlmBackend = "ollama" | "lm-studio" | "llama.cpp" | "text-gen-webui" | "vllm" | "unknown";
+export type LlmBackend = "ollama" | "lm-studio" | "llama.cpp" | "text-gen-webui" | "vllm" | "unsloth" | "unknown";
 
 export type DiscoveredLlm = {
   backend: LlmBackend;
@@ -24,6 +24,7 @@ export type DiscoveredWhisper = {
 };
 
 const LLM_CANDIDATES: { backend: LlmBackend; baseUrl: string }[] = [
+  { backend: "unsloth", baseUrl: "http://127.0.0.1:8888" },
   { backend: "ollama", baseUrl: "http://localhost:11434" },
   { backend: "lm-studio", baseUrl: "http://localhost:1234" },
   { backend: "llama.cpp", baseUrl: "http://localhost:8080" },
@@ -111,6 +112,23 @@ export async function probeLlmBackend(candidate: { backend: LlmBackend; baseUrl:
     if (backend === "ollama") {
       const models = await listOllamaModels(baseUrl);
       return { backend, baseUrl: `${baseUrl}/v1`, models, reachable: true };
+    }
+    if (backend === "unsloth") {
+      try {
+        const models = await listOpenAIModels(baseUrl);
+        return { backend, baseUrl: `${baseUrl}/v1`, models, reachable: true };
+      } catch (e) {
+        if (e instanceof Error && e.message.includes("401")) {
+          return {
+            backend,
+            baseUrl: `${baseUrl}/v1`,
+            models: [{ id: "QQZ2026/Qwen3.8-27B-ZeroRefusal-UD-IQ4_XS-MTP-GGUF" }],
+            reachable: true,
+            error: "Requires API key from Unsloth 'API settings'",
+          };
+        }
+        throw e;
+      }
     }
     const models = await listOpenAIModels(baseUrl);
     return { backend, baseUrl: `${baseUrl}/v1`, models, reachable: true };
@@ -212,6 +230,8 @@ export function corsHint(backend: LlmBackend | "whisper"): string {
       return "In LM Studio: Local Server tab → enable 'CORS' → restart server.";
     case "vllm":
       return "Start vLLM with: vllm serve <model> --port 8000 --allowed-origins '*'";
+    case "unsloth":
+      return "Click 'API settings' in the top-right of Unsloth to view or copy your API key.";
     case "llama.cpp":
       return "Start with: ./server --host 0.0.0.0 --port 8080 --api-key '' (CORS is on by default).";
     case "whisper":

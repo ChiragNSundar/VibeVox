@@ -221,14 +221,32 @@ async function rawChat(config: LlmConfig, system: string, user: string, opts: Ch
     if (hit !== null) return hit;
   }
 
-  const res = await fetch(`${target.baseUrl}/chat/completions`, {
-    method: "POST",
-    headers: target.headers,
-    body: JSON.stringify(applyBodyCompat(body, target)),
-  });
-  if (!res.ok) throw new Error(`${res.status} ${await res.text().catch(() => "").then((s) => s.slice(0, 200))}`);
-  const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-  const content = json.choices?.[0]?.message?.content ?? "";
+  let content = "";
+  try {
+    const res = await fetch(`${target.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: target.headers,
+      body: JSON.stringify(applyBodyCompat(body, target)),
+    });
+    if (!res.ok) throw new Error(`${res.status} ${await res.text().catch(() => "").then((s) => s.slice(0, 200))}`);
+    const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    content = json.choices?.[0]?.message?.content ?? "";
+  } catch (err) {
+    if (/localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]/.test(target.baseUrl)) {
+      const { proxyChatFn } = await import("./llm.functions");
+      content = await proxyChatFn({
+        data: {
+          baseUrl: target.baseUrl,
+          model: target.model,
+          apiKey: target.apiKey,
+          body: applyBodyCompat(body, target),
+        },
+      });
+    } else {
+      throw err;
+    }
+  }
+
   if (cacheKey && content) {
     await cacheSet("chat", cacheKey, content, { model: target.model, temp: opts.temperature ?? 0.7 });
   }

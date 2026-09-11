@@ -379,10 +379,28 @@ export async function fetchCatalog(input: TargetInput): Promise<CatalogModel[]> 
     headers.Authorization = `Bearer ${key}`;
   }
 
-  const res = await fetch(url, { headers });
-  if (!res.ok) throw new Error(`Model list failed (${res.status})`);
-  const json = (await res.json()) as { data?: unknown[] };
-  const rows = Array.isArray(json.data) ? json.data : [];
+  let rows: unknown[] = [];
+  try {
+    const res = await fetch(url, { headers });
+    if (!res.ok) throw new Error(`Model list failed (${res.status})`);
+    const json = (await res.json()) as { data?: unknown[] };
+    rows = Array.isArray(json.data) ? json.data : [];
+  } catch (err) {
+    if (/localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]/.test(url)) {
+      try {
+        const { proxyCatalogFn } = await import("./llm.functions");
+        const r = await proxyCatalogFn({
+          data: { baseUrl: url.replace(/\/models$/, ""), apiKey: input.apiKey },
+        });
+        if (r.models.length > 0) {
+          return r.models.map((m) => ({ id: m.id, label: m.id, contextTokens: m.contextTokens }));
+        }
+      } catch {
+        /* ignore */
+      }
+    }
+    throw err;
+  }
 
   if (input.providerId === "openrouter") {
     return rows

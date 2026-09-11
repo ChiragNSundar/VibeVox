@@ -258,6 +258,19 @@ export async function pingLlm(config: LlmConfig): Promise<{ ok: boolean; message
     const content = json.choices?.[0]?.message?.content ?? "";
     return { ok: true, message: `Connected to ${provider.label}. Response: "${content.trim().slice(0, 80)}"` };
   } catch (e) {
+    // If direct browser fetch failed (e.g. CORS block from Unsloth / local server)
+    // and the target is on localhost/127.0.0.1, try the server-side relay!
+    if (/localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]/.test(target.baseUrl)) {
+      try {
+        const { proxyPingFn } = await import("./llm.functions");
+        const relayRes = await proxyPingFn({
+          data: { baseUrl: target.baseUrl, model: target.model, apiKey: target.apiKey },
+        });
+        if (relayRes.ok) return relayRes;
+      } catch {
+        /* fall through to error message below */
+      }
+    }
     const msg = e instanceof Error ? e.message : String(e);
     const hint = isLocalProvider(config.providerId)
       ? ". If you're using Ollama, run: OLLAMA_ORIGINS='*' ollama serve"
