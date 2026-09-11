@@ -294,12 +294,10 @@ Make sense of this scribble and return the structured JSON object.`;
               };
             }
           }
+        } catch (err) {
+          // Fall through to offline heuristic synthesis
         }
       }
-    } catch (err) {
-      // Fall through to offline heuristic synthesis
-    }
-  }
 
   // Offline fallback
   const cleanTrimmed = stripPronunciationMarks(romanizeIndic(trimmed));

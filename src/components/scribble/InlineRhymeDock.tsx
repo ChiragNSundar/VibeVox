@@ -1,5 +1,6 @@
-import React, { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { lookupRhymes, type RhymeHit, type RhymeKind } from "@/lib/rhymes";
+import { generateAiRhymes } from "@/lib/ai-rhymes";
 import { Badge } from "@/components/ui/badge";
 import { Zap, Music, ExternalLink, Plus, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -10,7 +11,7 @@ interface InlineRhymeDockProps {
   className?: string;
 }
 
-type TabType = "all" | "perfect" | "near" | "multisyllable";
+type TabType = "all" | "ai" | "perfect" | "near" | "multisyllable";
 
 export function InlineRhymeDock({
   targetWord,
@@ -18,7 +19,9 @@ export function InlineRhymeDock({
   className,
 }: InlineRhymeDockProps) {
   const [hits, setHits] = useState<RhymeHit[]>([]);
+  const [aiHits, setAiHits] = useState<RhymeHit[]>([]);
   const [loading, setLoading] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [lastInsertedWord, setLastInsertedWord] = useState<string | null>(null);
 
@@ -54,13 +57,37 @@ export function InlineRhymeDock({
     };
   }, [cleanWord]);
 
+  useEffect(() => {
+    if (activeTab === "ai" && cleanWord && cleanWord.length >= 2) {
+      setAiLoading(true);
+      generateAiRhymes(cleanWord)
+        .then((res) => {
+          const items: RhymeHit[] = [];
+          for (const grp of res.groups) {
+            for (const it of grp.items) {
+              items.push({
+                word: it.word,
+                score: grp.category === "multi" ? 95 : 85,
+                kind: grp.category === "multi" ? "perfect" : "near",
+                syllables: it.syllables,
+              });
+            }
+          }
+          setAiHits(items);
+        })
+        .catch(() => setAiHits([]))
+        .finally(() => setAiLoading(false));
+    }
+  }, [cleanWord, activeTab]);
+
   const filteredHits = useMemo(() => {
+    if (activeTab === "ai") return aiHits;
     if (activeTab === "all") return hits.slice(0, 36);
     if (activeTab === "perfect") return hits.filter((h) => h.kind === "perfect").slice(0, 36);
     if (activeTab === "near") return hits.filter((h) => h.kind === "near" || h.kind === "sound-like").slice(0, 36);
     if (activeTab === "multisyllable") return hits.filter((h) => (h.syllables || 1) >= 2).slice(0, 36);
     return hits.slice(0, 36);
-  }, [hits, activeTab]);
+  }, [hits, aiHits, activeTab]);
 
   const handleChipClick = (word: string) => {
     onSelectWord(word);
@@ -103,21 +130,26 @@ export function InlineRhymeDock({
 
         {/* Filter categories & RhymeWave link */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          {cleanWord && hits.length > 0 && (
+          {cleanWord && (
             <div className="flex items-center gap-1 bg-muted/40 p-0.5 rounded-md text-[10px] font-medium border border-border/40 overflow-x-auto no-scrollbar">
-              {(["all", "perfect", "near", "multisyllable"] as const).map((tab) => (
+              {(["all", "ai", "perfect", "near", "multisyllable"] as const).map((tab) => (
                 <button
                   key={tab}
                   type="button"
                   onClick={() => setActiveTab(tab)}
                   className={cn(
-                    "px-2 py-0.5 rounded transition-all cursor-pointer capitalize shrink-0",
+                    "px-2 py-0.5 rounded transition-all cursor-pointer capitalize shrink-0 flex items-center gap-1",
                     activeTab === tab
-                      ? "bg-background text-foreground shadow-xs font-semibold"
-                      : "text-muted-foreground hover:text-foreground",
+                      ? tab === "ai"
+                        ? "bg-purple-600 text-white shadow-xs font-semibold"
+                        : "bg-background text-foreground shadow-xs font-semibold"
+                      : tab === "ai"
+                        ? "text-purple-400 hover:text-purple-300 font-semibold"
+                        : "text-muted-foreground hover:text-foreground",
                   )}
                 >
-                  {tab === "multisyllable" ? "Multi (2+)" : tab}
+                  {tab === "ai" && <Sparkles className="h-2.5 w-2.5" />}
+                  {tab === "ai" ? "AI Rhymes" : tab === "multisyllable" ? "Multi (2+)" : tab}
                 </button>
               ))}
             </div>
@@ -170,10 +202,44 @@ export function InlineRhymeDock({
               );
             })}
           </div>
+        ) : activeTab === "ai" && aiLoading ? (
+          <div className="text-[11px] text-purple-400 font-mono py-2 flex items-center gap-2">
+            <Loader2 className="h-3 w-3 animate-spin text-purple-400" />
+            <span>Consulting Unsloth AI ghostwriter for &quot;{cleanWord}&quot; rhymes…</span>
+          </div>
         ) : loading ? (
           <div className="text-[11px] text-muted-foreground font-mono py-2 flex items-center gap-2">
             <Loader2 className="h-3 w-3 animate-spin text-primary" />
-            <span>Scanning Datamuse & CMUdict rhyming dictionary for &quot;{cleanWord}&quot;…</span>
+            <span>Scanning Datamuse &amp; CMUdict rhyming dictionary for &quot;{cleanWord}&quot;…</span>
+          </div>
+        ) : activeTab === "ai" ? (
+          <div className="text-[11px] text-muted-foreground italic py-1 flex items-center gap-2">
+            <span>No AI rhymes generated yet for &quot;{cleanWord}&quot;.</span>
+            <button
+              type="button"
+              onClick={() => {
+                setAiLoading(true);
+                generateAiRhymes(cleanWord)
+                  .then((res) => {
+                    const items: RhymeHit[] = [];
+                    for (const grp of res.groups) {
+                      for (const it of grp.items) {
+                        items.push({
+                          word: it.word,
+                          score: 90,
+                          kind: "perfect",
+                          syllables: it.syllables,
+                        });
+                      }
+                    }
+                    setAiHits(items);
+                  })
+                  .finally(() => setAiLoading(false));
+              }}
+              className="text-purple-400 hover:underline cursor-pointer font-medium"
+            >
+              Generate AI Rhymes
+            </button>
           </div>
         ) : (
           <div className="text-[11px] text-muted-foreground italic py-1">

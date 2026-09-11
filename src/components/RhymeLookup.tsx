@@ -35,6 +35,8 @@ import {
 import { KANNADA_DICTIONARY, type DictEntry } from "@/lib/data/kannada-dict";
 import { HINDI_DICTIONARY } from "@/lib/data/hindi-dict";
 import { normalizeIndicWord } from "@/lib/indic-romanizer";
+import { generateAiRhymes, type AiRhymeResult, type AiRhymeItem } from "@/lib/ai-rhymes";
+import { loadLlmConfig } from "@/lib/llm-config";
 
 export type RhymeLookupProps = {
   trigger?: React.ReactNode;
@@ -60,7 +62,19 @@ export function RhymeLookup({
   const isOpen = isControlled ? controlledOpen : internalOpen;
   const setIsOpen = isControlled ? setControlledOpen! : setInternalOpen;
 
-  const [activeTab, setActiveTab] = useState<"doppelreim" | "bilingual" | "quick">("quick");
+  const [activeTab, setActiveTab] = useState<"doppelreim" | "bilingual" | "quick" | "ai">("quick");
+
+  // AI Rhyme state
+  const [aiResult, setAiResult] = useState<AiRhymeResult | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiErr, setAiErr] = useState<string | null>(null);
+  const activeLlmModel = useMemo(() => {
+    try {
+      return loadLlmConfig().model || "Local AI";
+    } catch {
+      return "Local AI";
+    }
+  }, []);
 
   // Doppelreim state
   const [word, setWord] = useState(defaultWord);
@@ -77,10 +91,24 @@ export function RhymeLookup({
   const [quickLoading, setQuickLoading] = useState(false);
   const [quickErr, setQuickErr] = useState<string | null>(null);
 
+  async function runAiRhymes(w: string) {
+    const q = w.trim();
+    if (!q) return;
+    setAiLoading(true);
+    setAiErr(null);
+    try {
+      const res = await generateAiRhymes(q);
+      setAiResult(res);
+    } catch (e) {
+      setAiErr(e instanceof Error ? e.message : "Failed to generate AI rhymes");
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
   useEffect(() => {
     if (defaultWord) {
       setWord(defaultWord);
-      setActiveTab("quick");
       runDoppelreim(defaultWord, lang, flowAligned);
       runQuickRhymes(defaultWord);
     }
@@ -186,10 +214,14 @@ export function RhymeLookup({
           className="flex-1 flex flex-col min-h-0"
         >
           <div className="px-4 pt-3 border-b bg-muted/20">
-            <TabsList className="grid grid-cols-3 w-full max-w-md h-8">
+            <TabsList className="grid grid-cols-4 w-full max-w-lg h-8">
               <TabsTrigger value="quick" className="text-xs gap-1.5">
                 <Music2 className="h-3.5 w-3.5 text-blue-400" />
-                Quick / RhymeWave
+                Quick / Wave
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="text-xs gap-1.5 text-purple-400 font-semibold data-[state=active]:text-purple-400">
+                <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+                AI Rhymes
               </TabsTrigger>
               <TabsTrigger value="doppelreim" className="text-xs gap-1.5">
                 <Activity className="h-3.5 w-3.5 text-primary" />
@@ -456,16 +488,164 @@ export function RhymeLookup({
               )}
             </div>
 
-            <div className="pt-2 border-t flex justify-between items-center text-xs">
-              <span className="text-[10px] text-muted-foreground">Datamuse · local cache</span>
-              <a
-                href={rhymeWaveUrl(word || "flow")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline inline-flex items-center gap-1 font-medium"
+            <div className="pt-2 border-t flex flex-col gap-2 text-xs">
+              <div className="rounded-lg border border-purple-500/30 bg-purple-500/10 p-2.5 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-purple-400 shrink-0" />
+                  <span className="text-xs text-foreground font-medium">Want complex Doppelreim slant rhymes or street slang?</span>
+                </div>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="h-7 text-xs gap-1 text-purple-400 hover:text-purple-300 shrink-0"
+                  onClick={() => {
+                    setActiveTab("ai");
+                    runAiRhymes(word);
+                  }}
+                >
+                  Ask AI Rhymes <Sparkles className="h-3 w-3" />
+                </Button>
+              </div>
+
+              <div className="flex justify-between items-center pt-1">
+                <span className="text-[10px] text-muted-foreground">Datamuse · local cache</span>
+                <a
+                  href={rhymeWaveUrl(word || "flow")}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary hover:underline inline-flex items-center gap-1 font-medium"
+                >
+                  Open in RhymeWave <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* TAB: AI Rhymes & Slang */}
+          <TabsContent value="ai" className="flex-1 flex flex-col p-4 gap-3 overflow-hidden m-0">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter word for AI multi-syllables & punchline wordplay…"
+                value={word}
+                onChange={(e) => setWord(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") runAiRhymes(word);
+                }}
+                className="font-medium text-sm"
+              />
+              <Button
+                size="sm"
+                onClick={() => runAiRhymes(word)}
+                disabled={aiLoading || !word.trim()}
+                className="bg-purple-600 hover:bg-purple-700 text-white gap-1.5 shrink-0"
               >
-                Open in RhymeWave <ExternalLink className="h-3 w-3" />
-              </a>
+                {aiLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {aiLoading ? "Generating…" : "Ask AI"}
+              </Button>
+            </div>
+
+            <div className="flex items-center justify-between text-xs text-muted-foreground px-1">
+              <span className="flex items-center gap-1.5">
+                <Badge variant="outline" className="text-[10px] font-mono text-purple-400 border-purple-500/30">
+                  Model: {activeLlmModel}
+                </Badge>
+                <span>Generates multi-syllables, slant assonances & street slang</span>
+              </span>
+            </div>
+
+            <div className="flex-1 overflow-auto space-y-3 pr-1 min-h-[220px]">
+              {aiErr && (
+                <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-xs">
+                  {aiErr}
+                </div>
+              )}
+
+              {aiLoading && (
+                <div className="flex flex-col items-center justify-center h-48 text-center text-muted-foreground text-xs space-y-2">
+                  <Loader2 className="h-8 w-8 text-purple-400 animate-spin" />
+                  <p className="font-medium text-foreground">Consulting your Unsloth AI ghostwriter…</p>
+                  <p className="text-[11px] opacity-70">
+                    Crafting multi-syllabic Doppelreim chains, hip-hop assonances, and punchline rhymes.
+                  </p>
+                </div>
+              )}
+
+              {!aiLoading && (!aiResult || aiResult.groups.length === 0) && !aiErr && (
+                <div className="flex flex-col items-center justify-center h-48 text-center text-muted-foreground text-xs space-y-2">
+                  <Sparkles className="h-8 w-8 text-purple-400/40" />
+                  <p className="font-medium text-foreground">AI Rhyme & Hip-Hop Wordplay Studio</p>
+                  <p className="text-[11px] opacity-70 max-w-sm">
+                    Enter any word above and click <strong>Ask AI</strong> to have your connected custom model generate complex multisyllabic rhymes and punchlines.
+                  </p>
+                  {word.trim() && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="mt-2 text-xs text-purple-400 border-purple-500/30 hover:bg-purple-500/10"
+                      onClick={() => runAiRhymes(word)}
+                    >
+                      <Sparkles className="h-3.5 w-3.5 mr-1" /> Rhyme &quot;{word}&quot; with AI
+                    </Button>
+                  )}
+                </div>
+              )}
+
+              {!aiLoading && aiResult && aiResult.groups.length > 0 && (
+                <div className="space-y-3">
+                  {aiResult.groups.map((grp) => (
+                    <div key={grp.category} className="space-y-1.5">
+                      <div className="text-[11px] uppercase font-mono tracking-wider text-purple-400 font-semibold flex items-center gap-1.5">
+                        <Sparkles className="h-3 w-3" />
+                        {grp.title} ({grp.items.length})
+                      </div>
+
+                      {grp.category === "bars" ? (
+                        <div className="space-y-1.5">
+                          {grp.items.map((item, idx) => (
+                            <div
+                              key={`${item.word}-${idx}`}
+                              onClick={() => {
+                                onSelectWord?.(item.word);
+                                if (onSelectWord) setIsOpen(false);
+                              }}
+                              className={`p-2.5 rounded-lg border border-purple-500/20 bg-purple-500/5 hover:bg-purple-500/15 hover:border-purple-500/50 transition-all text-xs font-mono flex items-center justify-between ${
+                                onSelectWord ? "cursor-pointer group" : ""
+                              }`}
+                            >
+                              <span className="text-foreground group-hover:text-purple-300 transition-colors">
+                                &quot;{item.word}&quot;
+                              </span>
+                              <Badge variant="outline" className="text-[10px] text-purple-400 border-purple-500/30">
+                                Insert Bar ↵
+                              </Badge>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-1.5">
+                          {grp.items.map((item, idx) => (
+                            <Badge
+                              key={`${item.word}-${idx}`}
+                              variant="secondary"
+                              className={`font-mono text-xs py-1 px-2.5 bg-background/80 hover:bg-purple-500/20 hover:text-purple-300 border border-border/60 hover:border-purple-500/40 transition-all ${
+                                onSelectWord ? "cursor-pointer" : ""
+                              }`}
+                              onClick={() => {
+                                onSelectWord?.(item.word);
+                                if (onSelectWord) setIsOpen(false);
+                              }}
+                            >
+                              <span>{item.word}</span>
+                              {item.syllables && <span className="opacity-50 text-[10px] ml-1">·{item.syllables}s</span>}
+                              {item.meaning && <span className="text-[10px] text-muted-foreground ml-1.5">({item.meaning})</span>}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </TabsContent>
         </Tabs>
