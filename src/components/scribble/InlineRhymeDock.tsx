@@ -81,7 +81,11 @@ export function InlineRhymeDock({
   }, [cleanWord, activeTab]);
 
   const filteredHits = useMemo(() => {
-    if (activeTab === "ai") return aiHits;
+    if (activeTab === "ai") {
+      if (aiHits.length > 0) return aiHits;
+      // Progressive instant display while AI finishes generating
+      return hits.filter((h) => (h.syllables || 1) >= 2 || h.kind === "near").slice(0, 30);
+    }
     if (activeTab === "all") return hits.slice(0, 36);
     if (activeTab === "perfect") return hits.filter((h) => h.kind === "perfect").slice(0, 36);
     if (activeTab === "near") return hits.filter((h) => h.kind === "near" || h.kind === "sound-like").slice(0, 36);
