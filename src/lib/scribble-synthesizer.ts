@@ -121,56 +121,31 @@ function synthesizeOfflineLyrics(
 ): SynthesizedSection[] {
   const cleanLines = lines.map((l) => l.trim()).filter((l) => l && !l.startsWith("#"));
 
-  // Fetch candidate memory bars from local brain & style memory
-  const memories = loadUnifiedStyleMemory();
-  const memoryBars = memories.flatMap((m) => m.bars).filter((b) => b && b.trim().length >= 8);
+  if (cleanLines.length === 0) {
+    return [{ type: "verse", lines: [] }];
+  }
 
-  const candidatePool = [...memoryBars, "locked in the rhythm till the morning breaks", "walking through the static with the tape deck loud"];
-
-  const getCandidateBar = (index: number) => candidatePool[index % candidatePool.length];
-
+  // Purely structure what the artist wrote — never inject canned dummy bars
   if (mode === "hook-anthem") {
-    const hookLines = cleanLines.slice(0, 4);
-    let i = 0;
-    while (hookLines.length < 4) {
-      hookLines.push(getCandidateBar(i++));
-    }
-    return [{ type: "hook", lines: hookLines }];
+    return [{ type: "hook", lines: cleanLines }];
   }
 
   if (mode === "verse-16") {
-    const verseLines = cleanLines.slice(0, 16);
-    let i = 0;
-    while (verseLines.length < 8) {
-      verseLines.push(getCandidateBar(i++));
-    }
-    return [{ type: "verse", lines: verseLines }];
+    return [{ type: "verse", lines: cleanLines }];
   }
 
-  // Full song mode: Hook + Verse
-  const hook = cleanLines.slice(0, 4);
-  let hIdx = 0;
-  if (hook.length < 4) {
-    hook.push(
-      "standing on the corner where the night runs deep",
-      "counting all the promises we meant to keep",
-    );
+  // Full song mode: if <= 3 lines, keep in verse. If more, split first 2-4 into hook and rest in verse.
+  if (cleanLines.length <= 3) {
+    return [{ type: "verse", lines: cleanLines }];
   }
 
-  const verse1 = cleanLines.slice(4, 12);
-  let vIdx = 0;
-  if (verse1.length < 4) {
-    verse1.push(
-      getCandidateBar(vIdx++),
-      getCandidateBar(vIdx++),
-      getCandidateBar(vIdx++),
-      getCandidateBar(vIdx++),
-    );
-  }
+  const hookSize = Math.min(4, Math.max(2, Math.floor(cleanLines.length / 3)));
+  const hook = cleanLines.slice(0, hookSize);
+  const verse = cleanLines.slice(hookSize);
 
   return [
     { type: "hook", lines: hook },
-    { type: "verse", lines: verse1 },
+    { type: "verse", lines: verse },
   ];
 }
 
@@ -268,8 +243,8 @@ Make sense of this scribble and return the structured JSON object.`;
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: userPrompt },
         ],
-        temperature: 0.75,
-        max_tokens: 4096,
+        temperature: 0.7,
+        max_tokens: 1024,
       });
 
       if (content) {
