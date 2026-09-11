@@ -11,6 +11,7 @@ import { loadUnifiedStyleMemory } from "./style-memory";
 import { getBrainPromptDirectives } from "./brain-indexer";
 import { romanizeIndic, stripPronunciationMarks } from "./indic-romanizer";
 import { recallRelevantJournalEntries, formatJournalContextForPrompt } from "./journal-rag";
+import { callChatLlm } from "./chat-client";
 
 export type ScribbleMode = "full-song" | "verse-16" | "hook-anthem" | "rhyme-slang";
 
@@ -261,34 +262,18 @@ Make sense of this scribble and return the structured JSON object.`;
 
     // Attempt LLM generation
     try {
-      const target = resolveTarget(chatTarget(config));
+      const content = await callChatLlm({
+        config,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userPrompt },
+        ],
+        temperature: 0.75,
+        max_tokens: 4096,
+      });
 
-      if (target.baseUrl && target.model) {
-        const body: Record<string, unknown> = {
-          model: target.model,
-          messages: [
-            { role: "system", content: SYSTEM_PROMPT },
-            { role: "user", content: userPrompt },
-          ],
-          temperature: 0.75,
-          max_tokens: 4096,
-        };
-
-        const compatBody = applyBodyCompat(body, target);
-        const res = await fetch(`${target.baseUrl.replace(/\/+$/, "")}/chat/completions`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...target.headers,
-          },
-          body: JSON.stringify(compatBody),
-        });
-
-        if (res.ok) {
-          const json = await res.json();
-          const content = json.choices?.[0]?.message?.content;
-          if (content) {
-            const parsed = parseModelJsonResponse(content);
+      if (content) {
+        const parsed = parseModelJsonResponse(content);
             if (parsed) {
               const cleanTitle = stripPronunciationMarks(romanizeIndic(parsed.title || "Midnight Scribbles"));
               const cleanSections = (parsed.sections || []).map((sec: any) => ({
