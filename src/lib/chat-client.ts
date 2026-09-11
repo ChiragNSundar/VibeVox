@@ -24,7 +24,10 @@ export type ChatClientOptions = {
 export function cleanModelOutput(raw: string): string {
   if (!raw) return "";
   let cleaned = raw.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
-  cleaned = cleaned.replace(/^We need (?:to )?answer user's request[\s\S]*?:\s*/i, "").trim();
+  // Strip unclosed <think> tags if model cut off before closing
+  cleaned = cleaned.replace(/<think>[\s\S]*$/gi, "").trim();
+  // Strip reasoning monologues that start with "We need", "Thinking Process:", etc.
+  cleaned = cleaned.replace(/^(?:(?:We|I) need (?:to )?answer user's request|Thinking Process:|Reasoning:|\*\*Reasoning:\*\*)[\s\S]*?(?:\n\n+|\n(?=[A-Z0-9"']))/i, "").trim();
   return cleaned;
 }
 

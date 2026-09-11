@@ -26,6 +26,7 @@ export type RhymeHit = {
   score: number;
   syllables?: number;
   kind: RhymeKind;
+  meaning?: string;
 };
 
 export type RhymeProviderId = "datamuse" | "custom" | "cmudict";
@@ -123,8 +124,8 @@ async function cmudictLookup(word: string): Promise<RhymeHit[]> {
   }));
 }
 
-import { findRhymesWithPos } from "./indic-dictionary";
-import { romanizeIndic, normalizeIndicWord } from "./indic-romanizer";
+import { findRhymesWithPos, isKnownIndicWord } from "./indic-dictionary";
+import { romanizeIndic, normalizeIndicWord, hasIndicScript, stripPronunciationMarks } from "./indic-romanizer";
 
 export function lookupIndicRhymes(word: string): RhymeHit[] {
   const w = normalizeIndicWord(word);
@@ -133,11 +134,14 @@ export function lookupIndicRhymes(word: string): RhymeHit[] {
 
   const matches = findRhymesWithPos(w, "auto");
   for (const m of matches) {
+    const rawWord = m.display_word || m.word;
+    const cleanWord = stripPronunciationMarks(rawWord).trim();
     hits.push({
-      word: `${m.display_word || m.word} (${m.pos}: ${m.definition})`,
+      word: cleanWord,
       score: m.score,
       syllables: m.syllables,
       kind: m.score >= 90 ? "perfect" : "near",
+      meaning: m.definition ? `${m.pos}: ${m.definition}` : undefined,
     });
   }
 
@@ -162,12 +166,15 @@ export async function lookupRhymes(word: string, cfg: RhymeProviderConfig = load
     hits = await datamuseLookup(clean);
   }
 
-  // Merge Indic phonetic rhymes if clean word matches Indic patterns
-  const indicHits = lookupIndicRhymes(clean);
-  if (indicHits.length) {
-    const existing = new Set(hits.map((h) => h.word));
-    for (const ih of indicHits) {
-      if (!existing.has(ih.word)) hits.unshift(ih);
+  // Merge Indic phonetic rhymes ONLY if the query word is Indic or has Indic script
+  const isIndic = hasIndicScript(word) || isKnownIndicWord(clean);
+  if (isIndic) {
+    const indicHits = lookupIndicRhymes(clean);
+    if (indicHits.length) {
+      const existing = new Set(hits.map((h) => h.word.toLowerCase()));
+      for (const ih of indicHits) {
+        if (!existing.has(ih.word.toLowerCase())) hits.unshift(ih);
+      }
     }
   }
 

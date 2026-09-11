@@ -236,6 +236,7 @@ export async function generateGhostwriteNextBars(
   const lines = trimmed.split("\n").filter((l) => l.trim().length > 0);
   const contextLines = lines.slice(-4).join("\n");
   const lastLine = lines[lines.length - 1] || "";
+  const existingLinesLower = new Set(lines.map((l) => l.trim().toLowerCase()));
 
   const prompt = `Artist's latest lines:
 """
@@ -246,7 +247,7 @@ Output only the new lyric lines.`;
 
   try {
     const timeoutPromise = new Promise<string>((_, reject) =>
-      setTimeout(() => reject(new Error("Ghostwrite timed out")), 14000)
+      setTimeout(() => reject(new Error("Ghostwrite timed out")), 22000)
     );
 
     const callPromise = callChatLlm({
@@ -262,35 +263,78 @@ Output only the new lyric lines.`;
 
     const raw = await Promise.race([callPromise, timeoutPromise]);
 
+    const isReasoningOrMeta = (line: string) => {
+      const lower = line.toLowerCase();
+      if (line.length < 4) return true;
+      if (lower.endsWith(":")) return true;
+      if (
+        /^(we need|need to|need ensure|need likely|need punchy|they say|could be|maybe each|output only|no intro|no quotes|here are|verse|hook|bar \d|<think>|<\/think>|thinking|thought|assistant:)/i.test(
+          lower
+        )
+      ) {
+        return true;
+      }
+      if (
+        lower.includes("user's request") ||
+        lower.includes("rhyme with") ||
+        lower.includes("rhyming with") ||
+        lower.includes("hip-hop lines")
+      ) {
+        return true;
+      }
+      return false;
+    };
+
     const resultLines = raw
       .replace(/<think>[\s\S]*?<\/think>/gi, "")
+      .replace(/<think>[\s\S]*$/gi, "")
       .split("\n")
       .map((l) => l.trim().replace(/^[-*#\d.]+\s*/, "").replace(/^["']|["']$/g, ""))
-      .filter((l) => {
-        const lower = l.toLowerCase();
-        return (
-          l.length > 5 &&
-          !/^(here are|verse|hook|bar \d|<think>|we need|need to|need ensure|output only)/i.test(lower) &&
-          !lower.includes("user's request") &&
-          !lower.includes("rhyme with") &&
-          !lower.endsWith(":")
-        );
-      })
+      .filter((l) => !isReasoningOrMeta(l) && !existingLinesLower.has(l.toLowerCase()))
       .slice(0, count);
 
-    if (resultLines.length > 0) return resultLines;
+    if (resultLines.length >= count) return resultLines;
   } catch (e) {
     console.warn("Ghostwrite fallback:", e);
   }
 
-  // Fallback: cadence-locked clean algorithmic bar continuation (no dictionary parentheticals)
-  const lastWord = lastLine.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
-  const rhymes = await lookupRhymes(lastWord).catch(() => []);
-  const rawRhymeWord = rhymes[0]?.word || "grind";
-  const cleanRhymeWord = rawRhymeWord.replace(/\s*\(.*?\)/g, "").trim() || "grind";
+  // Dynamic algorithmic continuation: find clean rhyme words and generate fresh bars that never duplicate existing user lines
+  const lastWordClean = lastLine.replace(/[^a-zA-Z0-9]/g, " ").trim().split(/\s+/).pop()?.toLowerCase() || "";
+  const rhymes = lastWordClean ? await lookupRhymes(lastWordClean).catch(() => []) : [];
+  
+  const cleanRhymes = rhymes
+    .map((r) => r.word.replace(/\s*\(.*?\)/g, "").trim())
+    .filter((w) => w.length > 1 && !w.toLowerCase().includes(lastWordClean) && !trimmed.toLowerCase().includes(w.toLowerCase()));
 
-  return [
-    `Locked into the cadence till the whole design align`,
-    `Standing in the pressure turning static into ${cleanRhymeWord}`,
-  ].slice(0, count);
+  const topRhyme1 = cleanRhymes[0] || (lastWordClean.endsWith("e") ? "clarity" : "mind");
+  const topRhyme2 = cleanRhymes[1] || cleanRhymes[0] || "time";
+
+  const templatePairs = [
+    [
+      `Stepping through the static with the focus magnified`,
+      `Every single angle verified, locked into the ${topRhyme1}`,
+    ],
+    [
+      `Cut the unnecessary noise and let the frequency rise`,
+      `Turn the dial up heavy till they witness the ${topRhyme1}`,
+    ],
+    [
+      `Heavy on the grind while the counter keeps running`,
+      `Writing out the blueprint, nobody saw it coming or could doubt the ${topRhyme1}`,
+    ],
+    [
+      `Stacking every syllable to set the rhythm right`,
+      `Never lose the hunger in the middle of the ${topRhyme1}`,
+    ],
+  ];
+
+  // Pick a pair whose lines do not exist in the artist's notepad
+  const freshPair = templatePairs.find(
+    (pair) => !existingLinesLower.has(pair[0].toLowerCase()) && !existingLinesLower.has(pair[1].toLowerCase())
+  ) || [
+    `Stacking every syllable to set the rhythm right`,
+    `Pushing past the boundary to master the ${topRhyme1}`,
+  ];
+
+  return freshPair.slice(0, count);
 }

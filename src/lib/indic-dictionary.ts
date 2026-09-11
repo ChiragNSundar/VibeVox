@@ -6,7 +6,7 @@
 
 import { KANNADA_DICTIONARY, type DictEntry } from "./data/kannada-dict";
 import { HINDI_DICTIONARY } from "./data/hindi-dict";
-import { romanizeIndic, stripPronunciationMarks, normalizeIndicWord } from "./indic-romanizer";
+import { romanizeIndic, stripPronunciationMarks, normalizeIndicWord, hasIndicScript } from "./indic-romanizer";
 import {
   extractDwitiyakshara,
   matchDwitiyakshara,
@@ -29,6 +29,18 @@ function getKannadaDictSync(): DictEntry[] {
 
 function getHindiDictSync(): DictEntry[] {
   return HINDI_DICTIONARY;
+}
+
+export function isKnownIndicWord(word: string): boolean {
+  if (!word) return false;
+  const clean = normalizeIndicWord(word);
+  if (!clean) return false;
+  const kannada = getKannadaDictSync();
+  const hindi = getHindiDictSync();
+  return (
+    kannada.some((e) => stripPronunciationMarks(e.word) === clean) ||
+    hindi.some((e) => stripPronunciationMarks(e.word) === clean)
+  );
 }
 
 /**
@@ -57,6 +69,7 @@ export function findRhymesWithPos(
 
   const endSound = clean.slice(-3);
   const targetRime = clean.slice(-2);
+  const isIndic = hasIndicScript(targetWord) || isKnownIndicWord(clean);
   const matches: WordMatch[] = [];
 
   for (const { data, lang } of dataset) {
@@ -69,14 +82,17 @@ export function findRhymesWithPos(
 
       let score = 0;
 
-      // Perfect multi-rime match
-      if (entry.multi_rime && clean.endsWith(entry.multi_rime)) {
+      // Multi-syllable / multicharacter rime match
+      if (entry.multi_rime && entry.multi_rime.length >= 2 && clean.endsWith(entry.multi_rime)) {
         score = 95;
-      } else if (entry.rime_key && clean.endsWith(entry.rime_key)) {
+      } else if (entry.rime_key && entry.rime_key.length >= 2 && clean.endsWith(entry.rime_key)) {
         score = 80;
-      } else if (entry.word.endsWith(endSound)) {
+      } else if (clean.length >= 3 && endSound.length >= 3 && entry.word.endsWith(endSound)) {
         score = 75;
-      } else if (entry.word.endsWith(targetRime)) {
+      } else if (isIndic && entry.rime_key && clean.endsWith(entry.rime_key)) {
+        // Single vowel rime keys only apply to confirmed Indic words
+        score = 70;
+      } else if (isIndic && clean.length >= 3 && targetRime.length >= 2 && entry.word.endsWith(targetRime)) {
         score = 60;
       }
 
