@@ -198,7 +198,7 @@ async function rawChat(config: LlmConfig, system: string, user: string, opts: Ch
       { role: "user", content: user },
     ],
     temperature: opts.temperature ?? 0.7,
-    max_tokens: opts.max_tokens ?? 4096,
+    max_tokens: opts.max_tokens ?? 512,
   };
   if (opts.top_p !== undefined) body.top_p = opts.top_p;
   // Ollama-style repetition penalty is non-standard for OpenAI-compat — also
@@ -513,7 +513,7 @@ Write punch-in lyrics for EVERY bar above.`;
 
   let text: string;
   try {
-    text = await rawChat(config, sys, prompt, { ...profile.sampling.write, max_tokens: 4096 });
+    text = await rawChat(config, sys, prompt, { ...profile.sampling.write, max_tokens: 512 });
   } catch (e) { throw e; }
   let parsed = tryExtractLyrics(text);
   if (!parsed) parsed = await formatRepair(config, text);
