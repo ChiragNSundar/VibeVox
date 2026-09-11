@@ -17,6 +17,7 @@ interface ScribbleResultViewProps {
   onManualSync: () => void;
   onSendToStudio: () => void;
   onWordClick: (word: string) => void;
+  onDismiss?: () => void;
 }
 
 export function ScribbleResultView({
@@ -30,88 +31,53 @@ export function ScribbleResultView({
   onManualSync,
   onSendToStudio,
   onWordClick,
+  onDismiss,
 }: ScribbleResultViewProps) {
   return (
     <div className="space-y-4 animate-in fade-in-50 duration-300">
-      {/* Sense-Making Executive Card */}
-      <Card className="p-4 space-y-3 bg-card/80 border-emerald-500/40 shadow-sm">
-        <div className="flex items-start justify-between gap-2">
-          <div>
-            <h2 className="text-base font-bold font-display">{result.title}</h2>
-            <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-              {result.analysis.centralNarrative}
-            </p>
-          </div>
-          <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-mono shrink-0">
-            ~{result.analysis.suggestedBpm} BPM
-          </Badge>
-        </div>
-
-        {/* Mood & Vibe Chips */}
-        <div className="flex flex-wrap gap-1.5 pt-1">
-          <Badge variant="outline" className="text-[10px]">
-            Mood: {result.analysis.mood}
-          </Badge>
-          <Badge variant="outline" className="text-[10px]">
-            Genre: {result.analysis.genre}
-          </Badge>
-          <Badge variant="outline" className="text-[10px]">
-            Vibe: {result.analysis.vibe}
-          </Badge>
-        </div>
-
-        {/* Standout Gems */}
-        {result.analysis.standoutGems.length > 0 && (
-          <div className="space-y-1.5 pt-1 border-t border-border/60">
-            <div className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
-              <Sparkles className="h-3 w-3 text-amber-400" /> Extracted Standout Gems:
-            </div>
-            <div className="space-y-1">
-              {result.analysis.standoutGems.map((gem, i) => (
-                <div key={i} className="text-xs font-mono p-1.5 rounded bg-background/60 border border-border/40 text-foreground italic">
-                  &quot;{gem}&quot;
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Rhyme Pockets */}
-        {result.analysis.rhymeClusters.length > 0 && (
-          <div className="space-y-1.5 pt-1 border-t border-border/60">
-            <div className="text-[11px] font-semibold text-muted-foreground flex items-center gap-1">
-              <Zap className="h-3 w-3 text-emerald-400" /> Discovered Rhyme Pockets:
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {result.analysis.rhymeClusters.map((cluster, i) => (
-                <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-background border border-border/60 break-words max-w-full">
-                  <strong className="text-primary">{cluster.word}</strong> ↔ {cluster.rhymesWith.join(", ")}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-      </Card>
-
       {/* Synthesized Lyrics Section */}
       <Card className="p-3 sm:p-4 space-y-4 border-border/80 bg-card/60 max-w-full overflow-hidden">
         <div className="flex items-center justify-between border-b pb-2 flex-wrap gap-2">
           <div className="flex items-center gap-2 min-w-0">
+            {onDismiss && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={onDismiss}
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 cursor-pointer"
+                title="Return to live phonetic studio"
+              >
+                ← Back
+              </Button>
+            )}
             <Music className="h-4 w-4 text-primary shrink-0" />
-            <span className="font-semibold text-sm truncate">Synthesized Lyric Blueprint</span>
+            <span className="font-semibold text-sm truncate">{result.title}</span>
+            <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-[10px] font-mono shrink-0">
+              ~{result.analysis.suggestedBpm || 90} BPM
+            </Badge>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
             {onExportPdf && (
-              <Button size="sm" variant="outline" onClick={onExportPdf} className="h-7 text-xs gap-1 border-purple-500/40 text-purple-300 hover:text-purple-200">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onExportPdf}
+                className="h-7 text-xs gap-1 border-purple-500/40 text-purple-300 hover:text-purple-200 cursor-pointer"
+              >
                 <Printer className="h-3.5 w-3.5" /> PDF
               </Button>
             )}
             {onExportWord && (
-              <Button size="sm" variant="outline" onClick={onExportWord} className="h-7 text-xs gap-1 border-blue-500/40 text-blue-300 hover:text-blue-200">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={onExportWord}
+                className="h-7 text-xs gap-1 border-blue-500/40 text-blue-300 hover:text-blue-200 cursor-pointer"
+              >
                 <FileText className="h-3.5 w-3.5" /> Word
               </Button>
             )}
-            <Button size="sm" variant="ghost" onClick={onCopy} className="h-7 text-xs">
+            <Button size="sm" variant="ghost" onClick={onCopy} className="h-7 text-xs cursor-pointer">
               {copied ? <Check className="h-3.5 w-3.5 mr-1 text-emerald-400" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
               {copied ? "Copied!" : "Copy"}
             </Button>
