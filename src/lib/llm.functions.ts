@@ -28,13 +28,26 @@ export const proxyPingFn = createServerFn({ method: "POST" })
     if (data.apiKey) headers.Authorization = `Bearer ${data.apiKey}`;
 
     try {
+      // 1. Lightweight health check via GET /models (Zero inference, zero GPU slots occupied!)
+      const modelsRes = await fetch(`${cleanBase}/models`, {
+        method: "GET",
+        headers,
+      });
+      if (modelsRes.ok) {
+        return { ok: true, message: `Connected via local relay. Server is ready.` };
+      }
+
+      // 2. Fallback only if /models is not supported by backend
       const res = await fetch(`${cleanBase}/chat/completions`, {
         method: "POST",
         headers,
         body: JSON.stringify({
           model: data.model,
-          messages: [{ role: "user", content: "Reply with just OK" }],
-          max_tokens: 32,
+          messages: [
+            { role: "user", content: "Reply with OK" },
+            { role: "assistant", content: "<think>\n</think>\nOK" },
+          ],
+          max_tokens: 4,
         }),
       });
 
@@ -43,10 +56,7 @@ export const proxyPingFn = createServerFn({ method: "POST" })
         return { ok: false, message: `${res.status} ${res.statusText} — ${txt.slice(0, 200)}` };
       }
 
-      const json = (await res.json()) as { choices?: { message?: { content?: string; reasoning_content?: string } }[] };
-      const msg = json.choices?.[0]?.message;
-      const content = msg?.content || msg?.reasoning_content || "OK";
-      return { ok: true, message: `Connected via local relay. Response: "${content.trim().slice(0, 80)}"` };
+      return { ok: true, message: `Connected via local relay.` };
     } catch (e) {
       return { ok: false, message: e instanceof Error ? e.message : String(e) };
     }
