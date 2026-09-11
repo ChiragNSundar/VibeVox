@@ -127,7 +127,12 @@ function synthesizeOfflineLyrics(
 
   // Purely structure what the artist wrote — never inject canned dummy bars
   if (mode === "hook-anthem") {
-    return [{ type: "hook", lines: cleanLines }];
+    const hookLines = [...cleanLines];
+    // In hook-anthem mode, anthems are 4-bar refrains: repeat the key anthem line rather than injecting fake words
+    while (hookLines.length < 4 && hookLines.length > 0) {
+      hookLines.push(hookLines[0]);
+    }
+    return [{ type: "hook", lines: hookLines }];
   }
 
   if (mode === "verse-16") {

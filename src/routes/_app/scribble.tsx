@@ -591,6 +591,37 @@ function ScribblePage() {
             <Zap className="h-3.5 w-3.5 text-amber-400" />
             <span className="font-medium hidden sm:inline">Arsenal</span>
           </button>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-card border border-border/80 text-xs text-muted-foreground hover:text-foreground hover:border-emerald-500/50 transition-all cursor-pointer shrink-0"
+                title="Export lyrics with color scheme"
+              >
+                <Download className="h-3.5 w-3.5 text-emerald-400" />
+                <span className="font-medium hidden sm:inline">Export</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 bg-card border-border/80">
+              <DropdownMenuLabel className="text-xs uppercase tracking-wider font-mono">VibeLyrics Export</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleExportDecorativePdf} className="cursor-pointer gap-2 py-2">
+                <Printer className="h-4 w-4 text-purple-400 shrink-0" />
+                <div>
+                  <div className="font-medium text-xs text-foreground">Decorative PDF (Colored)</div>
+                  <div className="text-[10px] text-muted-foreground">Print-ready manuscript preserving rhyme scheme</div>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportColoredWord} className="cursor-pointer gap-2 py-2">
+                <FileText className="h-4 w-4 text-blue-400 shrink-0" />
+                <div>
+                  <div className="font-medium text-xs text-foreground">Word Document (.doc)</div>
+                  <div className="text-[10px] text-muted-foreground">Formatted with native color-coded highlights</div>
+                </div>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -736,15 +767,103 @@ because i got quite cries"
             onSelectWord={handleInsertRhyme}
           />
 
-          <Button
-            size="lg"
-            className="w-full text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-900/20 cursor-pointer"
-            onClick={handleMakeSense}
-            disabled={isPending || !scribbleText.trim()}
-          >
-            <Sparkles className={`h-4 w-4 mr-2 ${isPending ? "animate-spin text-amber-300" : ""}`} />
-            {isPending ? "Deconstructing & Synthesizing…" : "Make Sense of This →"}
-          </Button>
+          {/* Ghostwrite Candidate Suggestion Panel (when active) */}
+          {ghostwriteOptions.length > 0 && (
+            <div className="rounded-lg border border-purple-500/40 bg-purple-950/20 p-3 space-y-2 backdrop-blur-sm">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-xs font-semibold text-purple-300">
+                  <Sparkles className="h-3.5 w-3.5 text-purple-400" />
+                  <span>AI Ghostwritten Follow-up Bars</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setGhostwriteOptions([])}
+                  className="text-[10px] text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  Dismiss
+                </button>
+              </div>
+              <div className="space-y-1.5">
+                {ghostwriteOptions.map((bar, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between gap-2 p-2 rounded-md bg-background/80 border border-purple-500/20 hover:border-purple-400/50 transition-all text-xs font-mono group"
+                  >
+                    <span className="text-foreground flex-1 select-all">{bar}</span>
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      className="h-6 text-[11px] px-2 bg-purple-600/20 hover:bg-purple-600 hover:text-white text-purple-300 gap-1 shrink-0 cursor-pointer"
+                      onClick={() => handleInsertGhostwrittenBar(bar)}
+                    >
+                      <Plus className="h-3 w-3" /> Insert
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Primary Studio Action Bar */}
+          <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {/* 1. Ghostwrite Next Bar (Primary AI Flow) */}
+              <Button
+                size="lg"
+                className="text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md shadow-purple-950/30 cursor-pointer h-10"
+                onClick={handleGhostwrite}
+                disabled={ghostwriteLoading || !scribbleText.trim()}
+              >
+                {ghostwriteLoading ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin text-purple-200" />
+                ) : (
+                  <Sparkles className="h-4 w-4 mr-2 text-purple-200" />
+                )}
+                {ghostwriteLoading ? "Ghostwriting Next Bar…" : "✨ AI Write Next Bar"}
+              </Button>
+
+              {/* 2. Export Decorative Sheet (PDF / Word) */}
+              <div className="flex gap-1.5">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="flex-1 text-xs font-medium border-border/80 hover:border-purple-500/50 text-foreground gap-1.5 h-10 cursor-pointer"
+                  onClick={handleExportDecorativePdf}
+                  disabled={!scribbleText.trim()}
+                  title="Export decorative studio manuscript PDF with color-coded rhyme scheme"
+                >
+                  <Printer className="h-3.5 w-3.5 text-purple-400" />
+                  <span>Export PDF</span>
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="flex-1 text-xs font-medium border-border/80 hover:border-blue-500/50 text-foreground gap-1.5 h-10 cursor-pointer"
+                  onClick={handleExportColoredWord}
+                  disabled={!scribbleText.trim()}
+                  title="Download formatted Word document (.doc) preserving color scheme"
+                >
+                  <FileText className="h-3.5 w-3.5 text-blue-400" />
+                  <span>Word (.doc)</span>
+                </Button>
+              </div>
+            </div>
+
+            {/* Secondary Structuring Action (Zero canned lyrics) */}
+            <div className="pt-1 flex items-center justify-between text-xs text-muted-foreground px-1">
+              <button
+                type="button"
+                onClick={handleMakeSense}
+                disabled={isPending || !scribbleText.trim()}
+                className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-foreground text-[11px] underline underline-offset-4 decoration-muted-foreground/40 hover:decoration-foreground cursor-pointer disabled:opacity-50"
+              >
+                <Layers className="h-3 w-3" />
+                {isPending ? "Structuring track into sections…" : "Structure into Full Song / Sections →"}
+              </button>
+              <span className="text-[10px] opacity-60">Zero canned lyrics</span>
+            </div>
+          </div>
         </div>
 
         {/* RIGHT COLUMN: Live Phonetic Clusters (Side-by-Side) */}
@@ -1015,6 +1134,8 @@ because i got quite cries"
               resultHighlighted={resultHighlighted}
               copied={copied}
               onCopy={handleCopy}
+              onExportPdf={handleExportDecorativePdf}
+              onExportWord={handleExportColoredWord}
               syncedPaths={syncedPaths}
               onManualSync={handleManualSyncToBrain}
               onSendToStudio={handleSendToStudio}

@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Zap, Music, Copy, Check, FolderSync, CheckCircle2, ArrowRight } from "lucide-react";
+import { Sparkles, Zap, Music, Copy, Check, FolderSync, CheckCircle2, ArrowRight, Printer, FileText } from "lucide-react";
 import { countSyllables } from "@/lib/phonetics";
 import type { ScribbleResult } from "@/lib/scribble-synthesizer";
 
@@ -11,6 +11,8 @@ interface ScribbleResultViewProps {
   resultHighlighted: Array<{ html?: string; schemeLetter?: string; rhymeGroupClass?: string }>;
   copied: boolean;
   onCopy: () => void;
+  onExportPdf?: () => void;
+  onExportWord?: () => void;
   syncedPaths: { lyricsPath?: string; rhymesPath?: string } | null;
   onManualSync: () => void;
   onSendToStudio: () => void;
@@ -22,6 +24,8 @@ export function ScribbleResultView({
   resultHighlighted,
   copied,
   onCopy,
+  onExportPdf,
+  onExportWord,
   syncedPaths,
   onManualSync,
   onSendToStudio,
@@ -91,15 +95,27 @@ export function ScribbleResultView({
 
       {/* Synthesized Lyrics Section */}
       <Card className="p-3 sm:p-4 space-y-4 border-border/80 bg-card/60 max-w-full overflow-hidden">
-        <div className="flex items-center justify-between border-b pb-2">
+        <div className="flex items-center justify-between border-b pb-2 flex-wrap gap-2">
           <div className="flex items-center gap-2 min-w-0">
             <Music className="h-4 w-4 text-primary shrink-0" />
             <span className="font-semibold text-sm truncate">Synthesized Lyric Blueprint</span>
           </div>
-          <Button size="sm" variant="ghost" onClick={onCopy} className="h-7 text-xs shrink-0">
-            {copied ? <Check className="h-3.5 w-3.5 mr-1 text-emerald-400" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
-            {copied ? "Copied!" : "Copy"}
-          </Button>
+          <div className="flex items-center gap-1.5 shrink-0">
+            {onExportPdf && (
+              <Button size="sm" variant="outline" onClick={onExportPdf} className="h-7 text-xs gap-1 border-purple-500/40 text-purple-300 hover:text-purple-200">
+                <Printer className="h-3.5 w-3.5" /> PDF
+              </Button>
+            )}
+            {onExportWord && (
+              <Button size="sm" variant="outline" onClick={onExportWord} className="h-7 text-xs gap-1 border-blue-500/40 text-blue-300 hover:text-blue-200">
+                <FileText className="h-3.5 w-3.5" /> Word
+              </Button>
+            )}
+            <Button size="sm" variant="ghost" onClick={onCopy} className="h-7 text-xs">
+              {copied ? <Check className="h-3.5 w-3.5 mr-1 text-emerald-400" /> : <Copy className="h-3.5 w-3.5 mr-1" />}
+              {copied ? "Copied!" : "Copy"}
+            </Button>
+          </div>
         </div>
 
         {/* Lines Container */}
