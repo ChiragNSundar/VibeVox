@@ -1139,6 +1139,7 @@ because i got quite cries"
               syncedPaths={syncedPaths}
               onManualSync={handleManualSyncToBrain}
               onSendToStudio={handleSendToStudio}
+              onDismiss={() => setResult(null)}
               onWordClick={(w) => {
                 setRhymeLookupWord(w);
                 setRhymeLookupOpen(true);
