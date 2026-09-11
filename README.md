@@ -270,7 +270,7 @@ VibeVox
 │   │   └── RhymeLookup.tsx             # Datamuse & CMUdict rhyme explorer
 │   ├── hooks/                          # useShortcuts, useNotifications, useMobile
 │   ├── lib/                            # Core Algorithms & Local Intelligence
-│   │   ├── __tests__/                  # 27 Vitest test suites (166/166 passing)
+│   │   ├── __tests__/                  # 28 Vitest test suites (180/180 passing)
 │   │   │   ├── arsenal-and-stats.test.ts # Punchlines, hooks, and stats tests
 │   │   │   ├── multi-export.test.ts    # Multi-track batch export tests
 │   │   │   ├── journal.test.ts         # Journal storage and RAG recall tests
@@ -320,7 +320,7 @@ bun install   # or: npm install
 # 2. Start development server (http://localhost:8080)
 bun dev       # or: npm run dev
 
-# 3. Run full unit test suite (166 tests across 27 files)
+# 3. Run full unit test suite (180 tests across 28 files)
 npm test      # or: npx vitest run
 
 # 4. Production build
