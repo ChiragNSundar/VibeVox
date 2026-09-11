@@ -29,9 +29,11 @@ import {
 import { lookupRhymes, rhymeWaveUrl, type RhymeHit } from "@/lib/rhymes";
 import {
   searchDoppelreim,
+  calculateRhythmicScore,
   type DoppelreimResult,
   type LanguageCode,
 } from "@/lib/cadence-flow";
+import { countSyllables } from "@/lib/lyrics-analysis";
 import { KANNADA_DICTIONARY, type DictEntry } from "@/lib/data/kannada-dict";
 import { HINDI_DICTIONARY } from "@/lib/data/hindi-dict";
 import { normalizeIndicWord } from "@/lib/indic-romanizer";
@@ -81,6 +83,7 @@ export function RhymeLookup({
   const [lang, setLang] = useState<LanguageCode>("auto");
   const [flowAligned, setFlowAligned] = useState(Boolean(targetSyllables || targetStress));
   const [doppelResults, setDoppelResults] = useState<DoppelreimResult[]>([]);
+  const [doppelLoading, setDoppelLoading] = useState(false);
 
   // Bilingual Dictionary state
   const [dictQuery, setDictQuery] = useState("");
@@ -121,19 +124,59 @@ export function RhymeLookup({
     }
   }, [targetSyllables, targetStress]);
 
-  function runDoppelreim(q: string, selectedLang: LanguageCode, isFlowAligned: boolean) {
-    if (!q.trim()) {
+  async function runDoppelreim(q: string, selectedLang: LanguageCode, isFlowAligned: boolean) {
+    const clean = q.trim();
+    if (!clean) {
       setDoppelResults([]);
       return;
     }
-    const res = searchDoppelreim(q, {
-      language: selectedLang,
-      flowAligned: isFlowAligned,
-      targetSyllables,
-      targetStress,
-      maxResults: 45,
-    });
-    setDoppelResults(res);
+    setDoppelLoading(true);
+    try {
+      // 1. Search static datasets (Kannada, Hindi, English cadence bank)
+      const res = searchDoppelreim(clean, {
+        language: selectedLang,
+        flowAligned: isFlowAligned,
+        targetSyllables,
+        targetStress,
+        maxResults: 45,
+      });
+
+      // 2. If results are sparse (< 6) and language is auto or en, expand with phonetic multi-syllables from lookupRhymes!
+      if (res.length < 8 && (selectedLang === "auto" || selectedLang === "en")) {
+        const hits = await lookupRhymes(clean).catch(() => []);
+        const seen = new Set(res.map((r) => r.word.toLowerCase()));
+        seen.add(clean.toLowerCase());
+
+        for (const h of hits) {
+          const wLower = h.word.toLowerCase();
+          if (seen.has(wLower)) continue;
+          const syl = h.syllables || countSyllables(h.word);
+          // Only multi-syllabic words for Doppelreim
+          if (syl >= 2) {
+            seen.add(wLower);
+            const rScore = isFlowAligned
+              ? calculateRhythmicScore(syl, "", targetSyllables, targetStress)
+              : 1.0;
+            const baseScore = h.kind === "perfect" ? 92 : 78;
+            res.push({
+              word: h.word,
+              language: "en",
+              syllables: syl,
+              score: isFlowAligned ? Math.round(baseScore * (0.6 + 0.4 * rScore)) : baseScore,
+              rhythmicScore: rScore,
+              matchType: h.kind === "perfect" ? "exact-multi" : "slant",
+            });
+          }
+        }
+        res.sort((a, b) => b.score - a.score);
+      }
+
+      setDoppelResults(res);
+    } catch (err) {
+      console.warn("Doppelreim search error:", err);
+    } finally {
+      setDoppelLoading(false);
+    }
   }
 
   async function runQuickRhymes(w: string) {
@@ -304,13 +347,54 @@ export function RhymeLookup({
 
             {/* Results Grid */}
             <div className="flex-1 overflow-auto space-y-2 pr-1 min-h-[220px]">
-              {doppelResults.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-48 text-center text-muted-foreground text-xs space-y-1">
+              {doppelLoading ? (
+                <div className="flex flex-col items-center justify-center h-48 text-center text-muted-foreground text-xs space-y-2">
+                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  <p className="font-medium text-foreground">Searching multi-syllabic Doppelreim rhymes…</p>
+                  <p className="text-[11px] opacity-70">Analyzing cadence patterns and vowel resonances</p>
+                </div>
+              ) : doppelResults.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-48 text-center text-muted-foreground text-xs space-y-2">
                   <Activity className="h-8 w-8 text-muted-foreground/40 mb-1" />
-                  <p>Type a word above to explore multi-syllabic Doppelreim rhymes.</p>
-                  <p className="text-[11px] opacity-70">
-                    Supports English cadence, Romanized Kanglish, and Hinglish rap vocabulary.
-                  </p>
+                  {word.trim() ? (
+                    <>
+                      <p className="font-semibold text-foreground">No exact Doppelreim matches for &quot;{word.trim()}&quot;</p>
+                      <p className="text-[11px] opacity-70 max-w-sm">
+                        Try generating multi-syllables with the AI engine, or view phonetic near-rhymes.
+                      </p>
+                      <div className="flex items-center gap-2 pt-2">
+                        <Button
+                          size="sm"
+                          variant="secondary"
+                          className="text-xs gap-1.5 text-purple-400 hover:text-purple-300"
+                          onClick={() => {
+                            setActiveTab("ai");
+                            runAiRhymes(word);
+                          }}
+                        >
+                          <Sparkles className="h-3 w-3" /> Ask AI Rhymes
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="text-xs"
+                          onClick={() => {
+                            setActiveTab("quick");
+                            runQuickRhymes(word);
+                          }}
+                        >
+                          Quick Rhymes
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <p>Type a word above to explore multi-syllabic Doppelreim rhymes.</p>
+                      <p className="text-[11px] opacity-70">
+                        Supports English cadence, Romanized Kanglish, and Hinglish rap vocabulary.
+                      </p>
+                    </>
+                  )}
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
