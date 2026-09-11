@@ -332,7 +332,7 @@ npm run build
 ## 🕸️ Knowledge Graph (Graphify)
 
 The entire codebase is indexed into a persistent, queryable knowledge graph powered by **Graphify**:
-- **Interactive Visualization**: Open `graphify-out/graph.html` in your browser for an interactive D3 graph of all 1,060 nodes and 2,885 cross-module edges across 49 communities.
+- **Interactive Visualization**: Open `graphify-out/graph.html` in your browser for an interactive D3 graph of all 1,108 nodes and 3,073 cross-module edges across 55 communities.
 - **Architectural Report**: See [`graphify-out/GRAPH_REPORT.md`](graphify-out/GRAPH_REPORT.md) for community detection breakdowns, cohesion metrics, and god nodes.
 - **Fast AST Update**: Rebuild the graph anytime in ~6s using:
   ```powershell
