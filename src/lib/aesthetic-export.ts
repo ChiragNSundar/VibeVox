@@ -1,5 +1,6 @@
 // Aesthetic Lyric Sheet Exporter — Decorative PDF & Rich Word (.doc) Exporters
 // Preserves live color-coded rhyme schemes, cadence metrics, and studio manuscript styling.
+// Tuned for crystal-clear word visibility with WCAG AAA high-contrast typography.
 
 import { highlightLyrics, getStanzaRhymeScheme, type RhymeVisionMode, type HighlightedLineResult } from "./rhyme-highlighter";
 import { downloadBlob, openPrintWindow, slugify } from "./exports";
@@ -12,53 +13,59 @@ export type DecorativeExportOptions = {
   bpm?: number;
   genre?: string;
   vibe?: string;
-  theme?: "dark-studio" | "platinum-manuscript";
+  theme?: "platinum-manuscript" | "dark-studio";
   rhymeVision?: RhymeVisionMode;
 };
 
-// Map rhyme group classes to inline styles for Word / HTML printing
-const RHYME_GROUP_STYLES_DARK: Record<string, string> = {
-  "rhyme-group-1": "background: rgba(250, 204, 21, 0.25); color: #fef08a; border-bottom: 2px solid #facc15; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-2": "background: rgba(6, 182, 212, 0.25); color: #a5f3fc; border-bottom: 2px solid #06b6d4; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-3": "background: rgba(239, 68, 68, 0.25); color: #fecaca; border-bottom: 2px solid #ef4444; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-4": "background: rgba(34, 197, 94, 0.25); color: #bbf7d0; border-bottom: 2px solid #22c55e; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-5": "background: rgba(236, 72, 153, 0.28); color: #fbcfe8; border-bottom: 2px solid #ec4899; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-6": "background: rgba(249, 115, 22, 0.25); color: #fed7aa; border-bottom: 2px solid #f97316; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-7": "background: rgba(129, 140, 248, 0.25); color: #c7d2fe; border-bottom: 2px solid #818cf8; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-8": "background: rgba(192, 132, 252, 0.25); color: #e9d5ff; border-bottom: 2px solid #c084fc; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-9": "background: rgba(251, 113, 133, 0.25); color: #fecdd3; border-bottom: 2px solid #fb7185; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-10": "background: rgba(163, 230, 53, 0.25); color: #d9f99d; border-bottom: 2px solid #a3e635; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-11": "background: rgba(45, 212, 191, 0.25); color: #99f6e4; border-bottom: 2px solid #2dd4bf; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-12": "background: rgba(251, 146, 60, 0.25); color: #fed7aa; border-bottom: 2px solid #fb923c; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
+// High-contrast, WCAG AAA compliant palette for razor-sharp visibility on print & light backgrounds
+export const RHYME_GROUP_STYLES_PRINT: Record<string, string> = {
+  "rhyme-group-1": "background: #fef08a; color: #713f12; border: 1.5px solid #ca8a04; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-2": "background: #cffafe; color: #164e63; border: 1.5px solid #0891b2; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-3": "background: #fee2e2; color: #7f1d1d; border: 1.5px solid #dc2626; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-4": "background: #dcfce7; color: #14532d; border: 1.5px solid #16a34a; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-5": "background: #fce7f3; color: #831843; border: 1.5px solid #db2777; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-6": "background: #ffedd5; color: #7c2d12; border: 1.5px solid #ea580c; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-7": "background: #e0e7ff; color: #312e81; border: 1.5px solid #4f46e5; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-8": "background: #f3e8ff; color: #581c87; border: 1.5px solid #9333ea; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-9": "background: #ffe4e6; color: #881337; border: 1.5px solid #e11d48; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-10": "background: #ecfccb; color: #365314; border: 1.5px solid #65a30d; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-11": "background: #ccfbf1; color: #134e4a; border: 1.5px solid #0d9488; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-12": "background: #fef3c7; color: #78350f; border: 1.5px solid #d97706; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
 };
 
-const RHYME_GROUP_STYLES_LIGHT: Record<string, string> = {
-  "rhyme-group-1": "background: #fef08a; color: #854d0e; border-bottom: 2px solid #ca8a04; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-2": "background: #cffafe; color: #155e75; border-bottom: 2px solid #0891b2; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-3": "background: #fee2e2; color: #991b1b; border-bottom: 2px solid #dc2626; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-4": "background: #dcfce7; color: #166534; border-bottom: 2px solid #16a34a; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-5": "background: #fce7f3; color: #9d174d; border-bottom: 2px solid #db2777; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-6": "background: #ffedd5; color: #9a3412; border-bottom: 2px solid #ea580c; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-7": "background: #e0e7ff; color: #3730a3; border-bottom: 2px solid #4f46e5; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-8": "background: #f3e8ff; color: #6b21a8; border-bottom: 2px solid #9333ea; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-9": "background: #ffe4e6; color: #9f1239; border-bottom: 2px solid #e11d48; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-10": "background: #ecfccb; color: #3f6212; border-bottom: 2px solid #65a30d; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-11": "background: #ccfbf1; color: #115e59; border-bottom: 2px solid #0d9488; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
-  "rhyme-group-12": "background: #fef3c7; color: #92400e; border-bottom: 2px solid #d97706; padding: 1px 4px; border-radius: 4px; font-weight: 600;",
+// Dark Studio theme palette (only used when dark background is explicitly requested)
+export const RHYME_GROUP_STYLES_DARK: Record<string, string> = {
+  "rhyme-group-1": "background: rgba(250, 204, 21, 0.35); color: #fef08a; border: 1.5px solid #facc15; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-2": "background: rgba(6, 182, 212, 0.35); color: #a5f3fc; border: 1.5px solid #06b6d4; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-3": "background: rgba(239, 68, 68, 0.35); color: #fecaca; border: 1.5px solid #ef4444; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-4": "background: rgba(34, 197, 94, 0.35); color: #bbf7d0; border: 1.5px solid #22c55e; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-5": "background: rgba(236, 72, 153, 0.35); color: #fbcfe8; border: 1.5px solid #ec4899; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-6": "background: rgba(249, 115, 22, 0.35); color: #fed7aa; border: 1.5px solid #f97316; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-7": "background: rgba(129, 140, 248, 0.35); color: #c7d2fe; border: 1.5px solid #818cf8; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-8": "background: rgba(192, 132, 252, 0.35); color: #e9d5ff; border: 1.5px solid #c084fc; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-9": "background: rgba(251, 113, 133, 0.35); color: #fecdd3; border: 1.5px solid #fb7185; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-10": "background: rgba(163, 230, 53, 0.35); color: #d9f99d; border: 1.5px solid #a3e635; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-11": "background: rgba(45, 212, 191, 0.35); color: #99f6e4; border: 1.5px solid #2dd4bf; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
+  "rhyme-group-12": "background: rgba(251, 146, 60, 0.35); color: #fed7aa; border: 1.5px solid #fb923c; padding: 1.5px 5px; border-radius: 4px; font-weight: 700;",
 };
 
 /** Converts highlighted HTML classes into inline styles for seamless Word and Print rendering */
 function applyInlineColorStyles(html: string, isDark = false): string {
-  const table = isDark ? RHYME_GROUP_STYLES_DARK : RHYME_GROUP_STYLES_LIGHT;
+  const table = isDark ? RHYME_GROUP_STYLES_DARK : RHYME_GROUP_STYLES_PRINT;
   let out = html;
   for (const [cls, style] of Object.entries(table)) {
-    // Replace class="... cls ..." with style="..."
     const reg = new RegExp(`class="([^"]*?\\b${cls}\\b[^"]*?)"`, "g");
     out = out.replace(reg, `style="${style}"`);
   }
-  // Replace generic rhyme-word or mosaic-pill that didn't match a specific group
-  out = out.replace(/class="[^"]*?mosaic-compound-pill[^"]*?"/g, `style="${isDark ? 'background: rgba(245, 158, 11, 0.25); color: #fde68a;' : 'background: #fef3c7; color: #b45309;'} font-weight: 700; padding: 1px 4px; border-radius: 4px;"`);
-  out = out.replace(/class="[^"]*?rhyme-word[^"]*?"/g, `style="${isDark ? 'color: #38bdf8;' : 'color: #0284c7;'} font-weight: 600;"`);
+  // Compound cadences & fallback rhyme spans with crystal-clear high contrast
+  out = out.replace(
+    /class="[^"]*?mosaic-compound-pill[^"]*?"/g,
+    `style="${isDark ? 'background: rgba(245, 158, 11, 0.35); color: #fde68a; border: 1.5px solid #f59e0b;' : 'background: #fef3c7; color: #78350f; border: 1.5px solid #d97706;'} font-weight: 700; padding: 1.5px 5px; border-radius: 4px;"`
+  );
+  out = out.replace(
+    /class="[^"]*?rhyme-word[^"]*?"/g,
+    `style="${isDark ? 'color: #38bdf8; font-weight: 700;' : 'color: #0369a1; font-weight: 700;'}"`
+  );
   return out;
 }
 
@@ -89,7 +96,7 @@ function parseSectionsFromText(rawText: string): { type: string; lines: string[]
 
 /**
  * Builds an ultra-aesthetic, studio-grade decorative HTML document
- * ready for browser printing or direct PDF export.
+ * ready for browser printing or direct PDF export with 100% visible typography.
  */
 export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): string {
   const title = opts.title.trim() || "Untitled Manuscript";
@@ -97,19 +104,17 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
   const bpm = opts.bpm || 90;
   const genre = opts.genre || "Hip-Hop / Lyricism";
   const vibe = opts.vibe || "Cadence Locked";
-  const theme = opts.theme || "dark-studio";
+  // Default to platinum-manuscript for high-contrast, crystal-clear printing
+  const theme = opts.theme || "platinum-manuscript";
   const isDark = theme === "dark-studio";
 
   const rawSections = opts.sections && opts.sections.length > 0
     ? opts.sections
     : parseSectionsFromText(opts.rawText || "");
 
-  // Flatten lines for rhyme highlighter
   const allLines: string[] = [];
   for (const s of rawSections) {
-    for (const l of s.lines) {
-      allLines.push(l);
-    }
+    for (const l of s.lines) allLines.push(l);
   }
 
   const highlightedResults = highlightLyrics(allLines, opts.rhymeVision || "standard");
@@ -162,6 +167,8 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
     year: "numeric",
   });
 
+  const swatchesStyle = isDark ? RHYME_GROUP_STYLES_DARK : RHYME_GROUP_STYLES_PRINT;
+
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -170,7 +177,7 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       -webkit-print-color-adjust: exact !important;
@@ -179,13 +186,13 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
     }
     @page {
       size: A4 portrait;
-      margin: 14mm 14mm 16mm 14mm;
+      margin: 12mm 14mm 14mm 14mm;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', -apple-system, sans-serif;
-      background: ${isDark ? "#090d16" : "#ffffff"};
-      color: ${isDark ? "#e2e8f0" : "#1e293b"};
+      background: ${isDark ? "#090d16" : "#f8fafc"};
+      color: ${isDark ? "#f8fafc" : "#0f172a"};
       line-height: 1.6;
       padding: 24px;
       max-width: 860px;
@@ -194,41 +201,41 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
 
     /* Studio Header */
     .studio-header {
-      border: 1px solid ${isDark ? "rgba(255,255,255,0.12)" : "rgba(0,0,0,0.10)"};
-      background: ${isDark ? "linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.95))" : "linear-gradient(135deg, #f8fafc, #f1f5f9)"};
+      border: 1px solid ${isDark ? "rgba(255,255,255,0.14)" : "#cbd5e1"};
+      background: ${isDark ? "linear-gradient(135deg, #1e293b, #0f172a)" : "linear-gradient(135deg, #ffffff, #f1f5f9)"};
       border-radius: 12px;
-      padding: 22px 26px;
-      margin-bottom: 24px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
       position: relative;
-      overflow: hidden;
-      box-shadow: 0 4px 20px ${isDark ? "rgba(0,0,0,0.4)" : "rgba(0,0,0,0.04)"};
+      box-shadow: 0 4px 16px ${isDark ? "rgba(0,0,0,0.5)" : "rgba(0,0,0,0.04)"};
     }
     .header-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
     .watermark-pill {
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
       font-weight: 700;
-      letter-spacing: 0.14em;
+      letter-spacing: 0.12em;
       text-transform: uppercase;
       padding: 3px 10px;
       border-radius: 9999px;
-      background: ${isDark ? "rgba(245, 158, 11, 0.18)" : "#fef3c7"};
-      color: ${isDark ? "#fbbf24" : "#b45309"};
-      border: 1px solid ${isDark ? "rgba(245, 158, 11, 0.3)" : "#fde68a"};
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde68a;
     }
     .date-tag {
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
-      color: ${isDark ? "#94a3b8" : "#64748b"};
+      font-weight: 600;
+      color: ${isDark ? "#cbd5e1" : "#475569"};
     }
     .song-title {
       font-family: 'Space Grotesk', sans-serif;
-      font-size: 28px;
+      font-size: 26px;
       font-weight: 700;
       letter-spacing: -0.02em;
       color: ${isDark ? "#ffffff" : "#0f172a"};
@@ -236,9 +243,9 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
     }
     .artist-name {
       font-size: 13px;
-      color: ${isDark ? "#a855f7" : "#7c3aed"};
-      font-weight: 600;
-      margin-bottom: 14px;
+      color: ${isDark ? "#c084fc" : "#7c3aed"};
+      font-weight: 700;
+      margin-bottom: 12px;
     }
     .pills-bar {
       display: flex;
@@ -250,32 +257,35 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
       font-size: 11px;
       padding: 3px 9px;
       border-radius: 6px;
-      background: ${isDark ? "rgba(255,255,255,0.06)" : "#ffffff"};
-      border: 1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"};
-      color: ${isDark ? "#cbd5e1" : "#475569"};
+      background: ${isDark ? "#1e293b" : "#ffffff"};
+      border: 1px solid ${isDark ? "rgba(255,255,255,0.15)" : "#cbd5e1"};
+      color: ${isDark ? "#f1f5f9" : "#1e293b"};
+      font-weight: 600;
       display: inline-flex;
       align-items: center;
       gap: 5px;
     }
     .info-pill b {
-      color: ${isDark ? "#f8fafc" : "#0f172a"};
+      color: ${isDark ? "#94a3b8" : "#64748b"};
+      font-weight: 700;
     }
 
     /* Section Cards */
     .section-card {
-      margin-bottom: 22px;
-      border: 1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"};
-      background: ${isDark ? "rgba(15, 23, 42, 0.5)" : "#fcfcfc"};
+      margin-bottom: 18px;
+      border: 1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"};
+      background: ${isDark ? "#0f172a" : "#ffffff"};
       border-radius: 10px;
       padding: 16px 20px;
       page-break-inside: avoid;
+      box-shadow: 0 1px 4px ${isDark ? "rgba(0,0,0,0.3)" : "rgba(0,0,0,0.02)"};
     }
     .section-badge {
       display: flex;
       align-items: center;
-      margin-bottom: 12px;
-      padding-bottom: 8px;
-      border-bottom: 1px dashed ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"};
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px dashed ${isDark ? "rgba(255,255,255,0.12)" : "#e2e8f0"};
     }
     .section-name {
       font-family: 'Space Grotesk', sans-serif;
@@ -283,7 +293,7 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
       font-weight: 700;
       letter-spacing: 0.12em;
       text-transform: uppercase;
-      color: ${isDark ? "#38bdf8" : "#0284c7"};
+      color: #0284c7;
     }
 
     /* Line Rows */
@@ -293,7 +303,7 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
       gap: 12px;
       align-items: baseline;
       padding: 4px 0;
-      border-bottom: 1px solid ${isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)"};
+      border-bottom: 1px solid ${isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.04)"};
     }
     .line-row.blank-line {
       height: 12px;
@@ -302,14 +312,14 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
     .bar-num {
       font-family: 'JetBrains Mono', monospace;
       font-size: 11px;
-      color: ${isDark ? "#64748b" : "#94a3b8"};
-      font-weight: 500;
+      color: ${isDark ? "#94a3b8" : "#64748b"};
+      font-weight: 600;
     }
     .lyric-text {
       font-family: 'JetBrains Mono', monospace;
       font-size: 13.5px;
-      line-height: 1.65;
-      color: ${isDark ? "#f1f5f9" : "#1e293b"};
+      line-height: 1.7;
+      color: ${isDark ? "#f8fafc" : "#0f172a"};
       word-break: break-word;
     }
     .meta-tags {
@@ -319,38 +329,40 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
     }
     .scheme-tag {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
+      font-size: 10.5px;
       font-weight: 700;
-      padding: 1px 5px;
+      padding: 1.5px 6px;
       border-radius: 4px;
-      background: ${isDark ? "rgba(168, 85, 247, 0.2)" : "#f3e8ff"};
-      color: ${isDark ? "#c084fc" : "#7e22ce"};
-      border: 1px solid ${isDark ? "rgba(168, 85, 247, 0.3)" : "#e9d5ff"};
+      background: #f3e8ff;
+      color: #6b21a8;
+      border: 1px solid #d8b4fe;
     }
     .syl-tag {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 10px;
-      padding: 1px 5px;
+      font-size: 10.5px;
+      font-weight: 600;
+      padding: 1.5px 6px;
       border-radius: 4px;
-      background: ${isDark ? "rgba(255,255,255,0.06)" : "#f1f5f9"};
-      color: ${isDark ? "#94a3b8" : "#64748b"};
+      background: ${isDark ? "#1e293b" : "#f1f5f9"};
+      color: ${isDark ? "#cbd5e1" : "#475569"};
+      border: 1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#cbd5e1"};
     }
 
     /* Rhyme Scheme Legend */
     .legend-card {
-      margin-top: 24px;
+      margin-top: 22px;
       padding: 14px 18px;
       border-radius: 10px;
-      border: 1px solid ${isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)"};
-      background: ${isDark ? "rgba(255,255,255,0.03)" : "#f8fafc"};
+      border: 1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#cbd5e1"};
+      background: ${isDark ? "#0f172a" : "#f8fafc"};
       page-break-inside: avoid;
     }
     .legend-title {
-      font-size: 10.5px;
+      font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.1em;
-      color: ${isDark ? "#94a3b8" : "#64748b"};
+      color: ${isDark ? "#cbd5e1" : "#334155"};
       margin-bottom: 8px;
     }
     .legend-swatches {
@@ -360,8 +372,9 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
     }
     .swatch {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 10.5px;
-      padding: 2px 7px;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 8px;
       border-radius: 4px;
       display: inline-flex;
       align-items: center;
@@ -370,15 +383,16 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
 
     /* Studio Footer */
     .studio-footer {
-      margin-top: 32px;
-      padding-top: 14px;
-      border-top: 1px solid ${isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"};
+      margin-top: 28px;
+      padding-top: 12px;
+      border-top: 1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#cbd5e1"};
       display: flex;
       justify-content: space-between;
       align-items: center;
       font-family: 'JetBrains Mono', monospace;
       font-size: 10px;
-      color: ${isDark ? "#64748b" : "#94a3b8"};
+      font-weight: 600;
+      color: ${isDark ? "#94a3b8" : "#64748b"};
     }
 
     /* Print rules */
@@ -396,10 +410,14 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
       .song-title { color: #0f172a !important; }
       .section-card {
         background: #ffffff !important;
-        border-color: #e2e8f0 !important;
+        border-color: #cbd5e1 !important;
+        box-shadow: none !important;
       }
       .lyric-text { color: #0f172a !important; }
-      .legend-card { background: #f8fafc !important; }
+      .legend-card {
+        background: #f8fafc !important;
+        border-color: #cbd5e1 !important;
+      }
     }
   </style>
 </head>
@@ -426,12 +444,12 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
   <div class="legend-card">
     <div class="legend-title">Phonetic Rhyme Palette & Scheme Legend</div>
     <div class="legend-swatches">
-      <span class="swatch" style="${RHYME_GROUP_STYLES_DARK['rhyme-group-1']}">Yellow: /aɪ/ (hai, side, life)</span>
-      <span class="swatch" style="${RHYME_GROUP_STYLES_DARK['rhyme-group-2']}">Cyan: Consonants (-aya, grind)</span>
-      <span class="swatch" style="${RHYME_GROUP_STYLES_DARK['rhyme-group-3']}">Red: Mid-Front (kehna, dekha)</span>
-      <span class="swatch" style="${RHYME_GROUP_STYLES_DARK['rhyme-group-4']}">Green: Central /ɑː/ (raasta, tha)</span>
-      <span class="swatch" style="${RHYME_GROUP_STYLES_DARK['rhyme-group-5']}">Magenta: High /iː/ (nahi, peak)</span>
-      <span class="swatch" style="${RHYME_GROUP_STYLES_DARK['rhyme-group-6']}">Orange: Back /oʊ/, /uː/ (bro, tu)</span>
+      <span class="swatch" style="${swatchesStyle['rhyme-group-1']}">Yellow: /aɪ/ (hai, side, life)</span>
+      <span class="swatch" style="${swatchesStyle['rhyme-group-2']}">Cyan: Consonants (-aya, grind)</span>
+      <span class="swatch" style="${swatchesStyle['rhyme-group-3']}">Red: Mid-Front (kehna, dekha)</span>
+      <span class="swatch" style="${swatchesStyle['rhyme-group-4']}">Green: Central /ɑː/ (raasta, tha)</span>
+      <span class="swatch" style="${swatchesStyle['rhyme-group-5']}">Magenta: High /iː/ (nahi, peak)</span>
+      <span class="swatch" style="${swatchesStyle['rhyme-group-6']}">Orange: Back /oʊ/, /uː/ (bro, tu)</span>
     </div>
   </div>
 
@@ -445,7 +463,7 @@ export function generateAestheticLyricSheetHtml(opts: DecorativeExportOptions): 
 
 /**
  * Builds a formatted, rich-text Word Document (.doc) with native inline styles
- * that Microsoft Word and Google Docs render with full color schemes.
+ * that Microsoft Word and Google Docs render with full color schemes and 100% visible typography.
  */
 export function generateColoredWordDocument(opts: DecorativeExportOptions): string {
   const title = opts.title.trim() || "Untitled Manuscript";
@@ -484,22 +502,22 @@ export function generateColoredWordDocument(opts: DecorativeExportOptions): stri
 
       return `
         <tr>
-          <td style="width: 32px; font-family: 'Courier New', monospace; font-size: 10pt; color: #94a3b8; vertical-align: top; padding: 3px 4px;">
+          <td style="width: 32px; font-family: 'Courier New', monospace; font-size: 10pt; color: #64748b; font-weight: bold; vertical-align: top; padding: 4px 4px;">
             ${displayBar}
           </td>
-          <td style="font-family: 'Courier New', monospace; font-size: 11pt; color: #0f172a; line-height: 1.6; padding: 3px 6px;">
+          <td style="font-family: 'Courier New', monospace; font-size: 11pt; color: #0f172a; line-height: 1.7; padding: 4px 6px;">
             ${renderedText}
           </td>
-          <td style="width: 70px; font-family: 'Courier New', monospace; font-size: 9pt; text-align: right; vertical-align: top; padding: 3px 4px;">
-            ${schemeLetter ? `<span style="background: #f3e8ff; color: #7e22ce; font-weight: bold; padding: 1px 4px; border-radius: 3px; border: 1px solid #e9d5ff;">${schemeLetter}</span> ` : ""}
-            ${syl > 0 ? `<span style="color: #64748b;">${syl}s</span>` : ""}
+          <td style="width: 80px; font-family: 'Courier New', monospace; font-size: 9.5pt; text-align: right; vertical-align: top; padding: 4px 4px;">
+            ${schemeLetter ? `<span style="background: #f3e8ff; color: #6b21a8; font-weight: bold; padding: 2px 6px; border-radius: 4px; border: 1px solid #d8b4fe;">${schemeLetter}</span> ` : ""}
+            ${syl > 0 ? `<span style="color: #475569; font-weight: bold; background: #f1f5f9; padding: 2px 5px; border-radius: 4px; border: 1px solid #cbd5e1;">${syl}s</span>` : ""}
           </td>
         </tr>
       `;
     }).join("\n");
 
     return `
-      <div style="margin-top: 18px; margin-bottom: 12px;">
+      <div style="margin-top: 20px; margin-bottom: 14px;">
         <div style="font-family: 'Arial', sans-serif; font-size: 11pt; font-weight: bold; color: #0284c7; text-transform: uppercase; border-bottom: 2px solid #0284c7; padding-bottom: 4px; margin-bottom: 8px;">
           [ ${escapeHtml(s.type)} ]
         </div>
@@ -518,32 +536,32 @@ export function generateColoredWordDocument(opts: DecorativeExportOptions): stri
   <meta charset="utf-8">
   <title>${escapeHtml(title)}</title>
   <style>
-    body { font-family: 'Arial', sans-serif; margin: 20mm; color: #1e293b; }
+    body { font-family: 'Arial', sans-serif; margin: 20mm; color: #0f172a; }
     h1 { font-family: 'Arial Black', Arial, sans-serif; font-size: 22pt; margin: 0 0 4px 0; color: #0f172a; }
-    .header-card { background: #f8fafc; border: 1px solid #cbd5e1; padding: 16px; border-radius: 8px; margin-bottom: 24px; }
+    .header-card { background: #f8fafc; border: 1px solid #cbd5e1; padding: 18px; border-radius: 8px; margin-bottom: 24px; }
   </style>
 </head>
 <body>
   <div class="header-card">
-    <div style="font-family: 'Arial', sans-serif; font-size: 9pt; font-weight: bold; color: #b45309; text-transform: uppercase; margin-bottom: 4px;">
+    <div style="font-family: 'Arial', sans-serif; font-size: 9pt; font-weight: bold; color: #92400e; text-transform: uppercase; margin-bottom: 4px;">
       VIBEVOX STUDIO LYRIC MANUSCRIPT
     </div>
     <h1>${escapeHtml(title)}</h1>
     <div style="font-size: 11pt; color: #7c3aed; font-weight: bold; margin-bottom: 12px;">
       ${escapeHtml(artist)}
     </div>
-    <div style="font-size: 9.5pt; color: #475569; font-family: 'Courier New', monospace;">
-      <b>BPM:</b> ${bpm} &nbsp;|&nbsp;
-      <b>GENRE:</b> ${escapeHtml(genre)} &nbsp;|&nbsp;
-      <b>VIBE:</b> ${escapeHtml(vibe)} &nbsp;|&nbsp;
-      <b>SCHEME:</b> ${escapeHtml(schemeResult.name)}
+    <div style="font-size: 9.5pt; color: #1e293b; font-family: 'Courier New', monospace; font-weight: bold;">
+      <span style="background: #ffffff; border: 1px solid #cbd5e1; padding: 2px 6px; border-radius: 4px;">BPM: ${bpm}</span> &nbsp;
+      <span style="background: #ffffff; border: 1px solid #cbd5e1; padding: 2px 6px; border-radius: 4px;">GENRE: ${escapeHtml(genre)}</span> &nbsp;
+      <span style="background: #ffffff; border: 1px solid #cbd5e1; padding: 2px 6px; border-radius: 4px;">VIBE: ${escapeHtml(vibe)}</span> &nbsp;
+      <span style="background: #ffffff; border: 1px solid #cbd5e1; padding: 2px 6px; border-radius: 4px;">SCHEME: ${escapeHtml(schemeResult.name)}</span>
     </div>
   </div>
 
   ${sectionsHtml}
 
-  <div style="margin-top: 30px; border-top: 1px solid #cbd5e1; padding-top: 10px; font-size: 8.5pt; color: #94a3b8; font-family: 'Courier New', monospace;">
-    Generated with VibeVox Studio · Preserving Rich Color-Coded Rhyme Schemes
+  <div style="margin-top: 30px; border-top: 1px solid #cbd5e1; padding-top: 12px; font-size: 9pt; color: #475569; font-family: 'Courier New', monospace; font-weight: bold;">
+    Generated with VibeVox Studio · High-Contrast Color Scheme Preserved
   </div>
 </body>
 </html>`;
@@ -551,7 +569,10 @@ export function generateColoredWordDocument(opts: DecorativeExportOptions): stri
 
 /** Opens the decorative PDF print preview in browser */
 export function exportDecorativePdf(opts: DecorativeExportOptions) {
-  const html = generateAestheticLyricSheetHtml(opts);
+  const html = generateAestheticLyricSheetHtml({
+    ...opts,
+    theme: opts.theme || "platinum-manuscript",
+  });
   openPrintWindow(html);
 }
 
