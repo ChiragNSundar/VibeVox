@@ -82,7 +82,8 @@ export const proxyChatFn = createServerFn({ method: "POST" })
 
     const json = (await res.json()) as { choices?: { message?: { content?: string; reasoning_content?: string } }[] };
     const msg = json.choices?.[0]?.message;
-    return msg?.content || msg?.reasoning_content || "";
+    const raw = msg?.content || "";
+    return raw.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
   });
 
 const CatalogInput = z.object({

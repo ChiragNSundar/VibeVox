@@ -1,7 +1,7 @@
 // Central chat client for OpenAI-compatible LLMs.
 // Automatically routes through local proxy relay when direct browser fetch
 // fails (e.g. CORS block from Unsloth Studio, vLLM, or local servers).
-// Handles reasoning_content from thinking models (Qwen, DeepSeek, etc.).
+// Safely strips reasoning monologue and <think> tokens from reasoning models.
 
 import { loadLlmConfig, chatTarget, type LlmConfig } from "./llm-config";
 import { resolveTarget, applyBodyCompat, type TargetInput } from "./providers";
@@ -20,6 +20,13 @@ export type ChatClientOptions = {
   top_p?: number;
   repeat_penalty?: number;
 };
+
+export function cleanModelOutput(raw: string): string {
+  if (!raw) return "";
+  let cleaned = raw.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  cleaned = cleaned.replace(/^We need (?:to )?answer user's request[\s\S]*?:\s*/i, "").trim();
+  return cleaned;
+}
 
 export async function callChatLlm(opts: ChatClientOptions): Promise<string> {
   const config = opts.config ?? loadLlmConfig();
@@ -57,7 +64,8 @@ export async function callChatLlm(opts: ChatClientOptions): Promise<string> {
         choices?: { message?: { content?: string; reasoning_content?: string } }[];
       };
       const msg = json.choices?.[0]?.message;
-      return msg?.content || msg?.reasoning_content || "";
+      const raw = msg?.content || "";
+      return cleanModelOutput(raw);
     }
   } catch (err) {
     // If target is localhost / 127.0.0.1, fallback to server-side relay
@@ -69,7 +77,7 @@ export async function callChatLlm(opts: ChatClientOptions): Promise<string> {
   // 2. Local relay fallback (bypasses browser CORS for Unsloth, Ollama, vLLM)
   if (/localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]/.test(target.baseUrl)) {
     const { proxyChatFn } = await import("./llm.functions");
-    return await proxyChatFn({
+    const raw = await proxyChatFn({
       data: {
         baseUrl: target.baseUrl,
         model: target.model,
@@ -77,6 +85,7 @@ export async function callChatLlm(opts: ChatClientOptions): Promise<string> {
         body: compatBody,
       },
     });
+    return cleanModelOutput(raw);
   }
 
   throw new Error("Failed to communicate with LLM.");
