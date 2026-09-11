@@ -59,7 +59,10 @@ While cloud-based tools rely on remote APIs and monthly credits, **VibeVox** bri
 ### 2. ⚡ VibeLyrics Studio & Flagship Polish Enhancements
 - **Scribble-to-Song Synthesizer**: Paste fragments, ideas, or half-baked punchlines. Select a structure mode (*Full Song*, *16-Bar Verse*, *Hook Anthem*, *Rhyme Couplets*) with toggle-to-deselect support to instantly generate structured song blueprints.
 - **Dual-Pane Cursor Tracking & Cadence Deltas**: Typing or clicking in the notepad dynamically highlights the corresponding bar in the phonetic inspector, smoothly auto-scrolls it into view, and displays syllable delta badges (`+2 syl`, `-1 syl`) relative to previous bars.
-- **Inline Non-Blocking Rhyme Dock**: Zero-latency rhyme suggestions positioned directly beneath the notepad, filtering across *All*, *Perfect*, *Near*, and *Multi-syllable* rhymes with 1-click word insertion and deep-linking into RhymeWave.
+- **Inline Non-Blocking Rhyme Dock**: Zero-latency rhyme suggestions positioned directly beneath the notepad, filtering across *All*, *AI*, *Perfect*, *Near*, and *Multi-syllable* rhymes with 1-click word insertion and deep-linking into RhymeWave.
+- **AI Ghostwrite Next Bar Dock**: 1-click continuation bar recommendations tailored to active rhyme families with instant `+ Insert` controls.
+- **Decorative Dark PDF & Word (.doc) Export**: Export print-ready studio manuscripts locked in high-contrast dark aesthetic with native 6-channel phonetic rhyme scheme preservation and color legends.
+- **Zero-GPU Health Checks & In-Memory Deduplication**: Universal OpenAI `GET /models` pinging with 60-second module deduplication to eliminate spurious in-flight inference queueing on reloads.
 - **Flow Metronome Bar**: Hover over the BPM box to adjust tempo with your mouse wheel (±1 step, Shift ±5, safely clamped 40–240 BPM). Includes Web Audio tick synthesis, 4-beat visual LED meter, tap tempo, and mute toggling.
 - **Seamless "Use in Track Studio"**: 1-click conversion from synthesized scribbles into persistent `LocalTrack` and `LocalBar[]` records in IndexedDB, navigating directly to `/track/:id`.
 - **6-Channel Phonetic Rhyme Vision**: Real-time phoneme clustering coloring assonance, consonants, and compound family rhymes directly as you type.
@@ -147,7 +150,7 @@ flowchart TD
     subgraph StorageLayer["100% Local Persistence"]
         IndexedDB[("💾 IndexedDB (voxscript-local)\nTracks, Bars, Style Memory, Journal")]
         OPFS[("📂 OPFS Storage\nVocal Audio Takes")]
-        GraphifyKG[("🕸️ Graphify Knowledge Graph\n1075 Nodes · 2938 Edges · 53 Communities")]
+        GraphifyKG[("🕸️ Graphify Knowledge Graph\n1108 Nodes · 3073 Edges · 55 Communities")]
     end
 
     LiveStudio --> OPFS
