@@ -15,7 +15,20 @@ import {
   Layers,
   Flame,
   BookOpen,
+  Download,
+  Printer,
+  FileText,
+  Plus,
+  Loader2,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import {
   makeSenseOfScribble,
   syncScribbleToBrain,
@@ -23,6 +36,8 @@ import {
   type ScribbleResult,
 } from "@/lib/scribble-synthesizer";
 import { highlightLyrics, getStanzaRhymeScheme, detectFlowInsight, type RhymeVisionMode } from "@/lib/rhyme-highlighter";
+import { generateGhostwriteNextBars } from "@/lib/ai-rhymes";
+import { exportDecorativePdf, exportColoredWordDoc } from "@/lib/aesthetic-export";
 import { RhymeLookup } from "@/components/RhymeLookup";
 import { ComplexityGauge, SemanticDriftBar } from "@/components/track";
 import {
@@ -249,6 +264,79 @@ function ScribblePage() {
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     toast.success("Lyrics copied to clipboard");
+  }
+
+  const [ghostwriteLoading, setGhostwriteLoading] = useState(false);
+  const [ghostwriteOptions, setGhostwriteOptions] = useState<string[]>([]);
+
+  async function handleGhostwrite() {
+    if (!scribbleText.trim()) {
+      toast.error("Write at least one bar to ghostwrite from!");
+      return;
+    }
+    setGhostwriteLoading(true);
+    try {
+      const bars = await generateGhostwriteNextBars(scribbleText, { count: 2 });
+      if (bars.length > 0) {
+        setGhostwriteOptions(bars);
+        toast.success("Generated candidate follow-up bars!");
+      } else {
+        toast.error("Could not generate follow-up bars. Try again.");
+      }
+    } catch (err) {
+      toast.error("Ghostwriting failed. Check connection to local AI model.");
+    } finally {
+      setGhostwriteLoading(false);
+    }
+  }
+
+  function handleInsertGhostwrittenBar(bar: string) {
+    const lines = scribbleText.split("\n");
+    lines.push(bar);
+    const newText = lines.join("\n");
+    handleTextChange(newText);
+    toast.success("Bar added to notepad!");
+    setGhostwriteOptions((prev) => prev.filter((b) => b !== bar));
+    setTimeout(() => {
+      if (textareaRef.current) {
+        textareaRef.current.focus();
+        updateCursorLine();
+      }
+    }, 40);
+  }
+
+  function handleExportDecorativePdf() {
+    if (!scribbleText.trim()) {
+      toast.error("Write some lyrics first to export!");
+      return;
+    }
+    const songTitle = result?.title || (activeLineEnding ? `Manuscript: ${activeLineEnding}` : "Studio Lyric Sheet");
+    exportDecorativePdf({
+      title: songTitle,
+      rawText: scribbleText,
+      bpm,
+      genre: result?.analysis?.genre || "Hip-Hop / Lyricism",
+      vibe: result?.analysis?.vibe || "Cadence Locked",
+      rhymeVision,
+    });
+    toast.success("Opening decorative lyric sheet print preview…");
+  }
+
+  function handleExportColoredWord() {
+    if (!scribbleText.trim()) {
+      toast.error("Write some lyrics first to export!");
+      return;
+    }
+    const songTitle = result?.title || (activeLineEnding ? `Manuscript: ${activeLineEnding}` : "Studio Lyric Sheet");
+    exportColoredWordDoc({
+      title: songTitle,
+      rawText: scribbleText,
+      bpm,
+      genre: result?.analysis?.genre || "Hip-Hop / Lyricism",
+      vibe: result?.analysis?.vibe || "Cadence Locked",
+      rhymeVision,
+    });
+    toast.success("Downloaded Word document preserving color scheme!");
   }
 
   async function handleSendToStudio() {
