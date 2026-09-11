@@ -68,7 +68,8 @@ in `src/lib/exports.ts`) roundtrip songs to portable formats.
 - **MultiSelect Combobox** → `src/components/ui/multi-select.tsx` (accessible popover with live search, chip badges, `+N more` tooltip folding, and keyboard navigation).
 - **Flow Metronome Bar** → `src/components/scribble/FlowMetronomeBar.tsx` (Web Audio synthesized click, hover-and-mouse-wheel BPM control clamped 40–240 BPM with `preventDefault()`, visual 4-LED meter, tap tempo).
 - **Inline Rhyme Dock** → `src/components/scribble/InlineRhymeDock.tsx` (zero-latency phonetic rhyme lookup beneath notepad with categorized tabs and 1-click word insertion).
-- **VibeLyrics Studio** → `src/routes/_app/scribble.tsx` (dual-pane cursor tracking, auto-scrolling phonetic inspector, cadence delta indicators, toggle-deselect structure modes, and seamless conversion to Track Studio projects).
+- **VibeLyrics Studio** → `src/routes/_app/scribble.tsx` (dual-pane cursor tracking, auto-scrolling phonetic inspector, cadence delta indicators, toggle-deselect structure modes, AI Ghostwrite Next Bar dock, and seamless conversion to Track Studio projects).
+- **Aesthetic Lyric Sheet Export** → `src/lib/aesthetic-export.ts` (Zero-LLM dark-only PDF print manuscript and color-preserved Word `.doc` generation with 6-channel phonetic scheme legends).
 
 ## LLM Providers
 
@@ -81,6 +82,9 @@ provider differences live only here:
   fetch call sites (`rawChat` in `local-pipeline.ts`, `pingLlm` in
   `llm-config.ts`, `callLocal` in `embeddings.ts`) all go through it. Add new
   call sites the same way rather than reading config fields directly.
+- `pingLlm(config)` checks availability via lightweight, zero-inference `GET /models`
+  with 60-second module-level promise deduplication. Never queue chat completions
+  during health checks, preventing GPU slot lockouts on local servers (Unsloth, Ollama, LM Studio).
 - `applyBodyCompat(body, target)` strips Ollama's nested `options` for
   providers that reject unknown params, and renames `max_tokens` →
   `max_completion_tokens` for o-series/gpt-5.
@@ -122,6 +126,7 @@ provider + endpoint + word, so second lookups are instant and offline-safe.
 - `src/routes/_app/*` — authenticated app surface (studio, library, live, scribble).
 - `src/components/ui/multi-select.tsx` — reusable multi-select combobox with keyboard navigation.
 - `src/components/scribble/*` — VibeLyrics studio instruments (FlowMetronomeBar, InlineRhymeDock, ScribbleResultView).
+- `src/lib/aesthetic-export.ts` — dark-mode decorative PDF and Word (.doc) sheet export engine.
 - `src/lib/exports.ts` — single and multi-track batch export helpers (JSON, PDF, MD, TXT).
 - `src/lib/*.functions.ts` — TanStack `createServerFn` RPC handlers.
 - `src/lib/*.server.ts` — server-only helpers; never imported from client code.
