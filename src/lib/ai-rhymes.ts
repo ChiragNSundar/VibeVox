@@ -1,7 +1,7 @@
 // AI Rhyme, Doppelreim & Wordplay Engine
 // Uses active LLM (Unsloth, Ollama, LM Studio, or hosted) to generate
 // creative multi-syllable rhymes, slant assonances, street slang, and rhyming bars.
-// Optimized for lightning-fast token generation and zero-hang progressive fallbacks.
+// Optimized with <think> tag skipping and clean output filtering.
 
 import { callChatLlm } from "./chat-client";
 import { cacheGet, cacheSet, hashInputs } from "./cache";
@@ -49,32 +49,37 @@ async function buildLocalFastRhymeFallback(targetWord: string): Promise<AiRhymeR
     hits = [];
   }
 
+  const cleanWordStr = (raw: string) => raw.replace(/\s*\(.*?\)/g, "").trim();
+
   const multi = hits
     .filter((h) => (h.syllables || countSyllables(h.word)) >= 2 && h.word.toLowerCase() !== clean)
     .slice(0, 6)
     .map((h) => ({
-      word: h.word,
+      word: cleanWordStr(h.word),
       syllables: h.syllables || countSyllables(h.word),
       type: "multi" as const,
-    }));
+    }))
+    .filter((h) => h.word.length > 0);
 
   const slant = hits
     .filter((h) => h.kind === "near" || h.kind === "sound-like")
     .slice(0, 6)
     .map((h) => ({
-      word: h.word,
+      word: cleanWordStr(h.word),
       syllables: h.syllables || countSyllables(h.word),
       type: "slant" as const,
-    }));
+    }))
+    .filter((h) => h.word.length > 0);
 
   const slang = hits
     .filter((h) => h.kind === "related")
     .slice(0, 4)
     .map((h) => ({
-      word: h.word,
+      word: cleanWordStr(h.word),
       meaning: "Related vibe / cadence",
       type: "slang" as const,
-    }));
+    }))
+    .filter((h) => h.word.length > 0);
 
   const topRhyme = multi[0]?.word || slant[0]?.word || clean;
   const bars = [
@@ -118,7 +123,6 @@ export async function generateAiRhymes(
   const prompt = FAST_PROMPT_TEMPLATE.replace("{WORD}", cleanWord).replace("{CONTEXT}", contextStr);
 
   try {
-    // 12-second timeout to prevent UI freeze on slow local models
     const timeoutPromise = new Promise<string>((_, reject) =>
       setTimeout(() => reject(new Error("LLM response timed out")), 12000)
     );
@@ -128,12 +132,15 @@ export async function generateAiRhymes(
       messages: [
         { role: "system", content: "You are an ultra-fast hip-hop rhyming dictionary. Respond ONLY with compact JSON without any thinking or preamble." },
         { role: "user", content: prompt },
+        { role: "assistant", content: "<think>\n</think>\n{" },
       ],
       temperature: 0.7,
       max_tokens: 300,
     });
 
-    const raw = await Promise.race([callPromise, timeoutPromise]);
+    let raw = await Promise.race([callPromise, timeoutPromise]);
+    // Ensure leading brace if assistant prefill didn't include it
+    if (!raw.trim().startsWith("{")) raw = "{" + raw;
 
     let parsed: any = null;
     try {
@@ -150,19 +157,21 @@ export async function generateAiRhymes(
       return arr
         .map((item) => {
           if (typeof item === "string") {
-            return { word: item, syllables: countSyllables(item), type };
+            const clean = item.replace(/\s*\(.*?\)/g, "").trim();
+            return { word: clean, syllables: countSyllables(clean), type };
           }
           if (item && typeof item === "object") {
+            const clean = String(item.word || "").replace(/\s*\(.*?\)/g, "").trim();
             return {
-              word: String(item.word || "").trim(),
-              syllables: Number(item.syllables) || countSyllables(String(item.word || "")),
+              word: clean,
+              syllables: Number(item.syllables) || countSyllables(clean),
               type,
               meaning: item.meaning ? String(item.meaning) : undefined,
             };
           }
           return null;
         })
-        .filter((i): i is AiRhymeItem => Boolean(i && i.word));
+        .filter((i): i is AiRhymeItem => Boolean(i && i.word && i.word.length > 0));
     };
 
     const multiItems = formatItems(parsed?.multi, "multi");
@@ -232,8 +241,8 @@ export async function generateGhostwriteNextBars(
 """
 ${contextLines}
 """
-Write exactly ${count} new punchy bars continuing the flow and rhyming with the last bar ("${lastLine}").
-Output only the ${count} lines. No intro, no numbering, no thinking, no quotes.`;
+Write exactly ${count} new punchy rap bars continuing the flow and rhyming with the last bar ("${lastLine}").
+Output only the new lyric lines.`;
 
   try {
     const timeoutPromise = new Promise<string>((_, reject) =>
@@ -243,19 +252,30 @@ Output only the ${count} lines. No intro, no numbering, no thinking, no quotes.`
     const callPromise = callChatLlm({
       config,
       messages: [
-        { role: "system", content: "You are an elite hip-hop ghostwriter. Output only the requested lyric lines." },
+        { role: "system", content: "You are an elite hip-hop ghostwriter. Output ONLY the new lyric bars. No thinking, no commentary." },
         { role: "user", content: prompt },
+        { role: "assistant", content: "<think>\n</think>\n" },
       ],
-      temperature: 0.8,
-      max_tokens: 180,
+      temperature: 0.75,
+      max_tokens: 220,
     });
 
     const raw = await Promise.race([callPromise, timeoutPromise]);
 
     const resultLines = raw
+      .replace(/<think>[\s\S]*?<\/think>/gi, "")
       .split("\n")
       .map((l) => l.trim().replace(/^[-*#\d.]+\s*/, "").replace(/^["']|["']$/g, ""))
-      .filter((l) => l.length > 3 && !/^(here are|verse|hook|bar \d|<think>)/i.test(l))
+      .filter((l) => {
+        const lower = l.toLowerCase();
+        return (
+          l.length > 5 &&
+          !/^(here are|verse|hook|bar \d|<think>|we need|need to|need ensure|output only)/i.test(lower) &&
+          !lower.includes("user's request") &&
+          !lower.includes("rhyme with") &&
+          !lower.endsWith(":")
+        );
+      })
       .slice(0, count);
 
     if (resultLines.length > 0) return resultLines;
@@ -263,12 +283,14 @@ Output only the ${count} lines. No intro, no numbering, no thinking, no quotes.`
     console.warn("Ghostwrite fallback:", e);
   }
 
-  // Fallback: cadence-locked algorithmic bar continuation
+  // Fallback: cadence-locked clean algorithmic bar continuation (no dictionary parentheticals)
   const lastWord = lastLine.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
   const rhymes = await lookupRhymes(lastWord).catch(() => []);
-  const rhymeWord = rhymes[0]?.word || "grind";
+  const rawRhymeWord = rhymes[0]?.word || "grind";
+  const cleanRhymeWord = rawRhymeWord.replace(/\s*\(.*?\)/g, "").trim() || "grind";
+
   return [
     `Locked into the cadence till the whole design align`,
-    `Standing in the pressure turning static into ${rhymeWord}`,
+    `Standing in the pressure turning static into ${cleanRhymeWord}`,
   ].slice(0, count);
 }
