@@ -657,6 +657,17 @@ export type PipelineOptions = {
   onProgress?: (e: ProgressEvent) => void;
 };
 
+export function resolveProfile(config: LlmConfig): LocalProfile {
+  const p = profileFor(config.model);
+  if (config.familyOverride) {
+    p.family = config.familyOverride as any;
+  }
+  if (config.tierOverride) {
+    p.tier = config.tierOverride;
+  }
+  return p;
+}
+
 /**
  * Full end-to-end local generation pipeline:
  *   transcript -> cadence -> recall -> write -> [critic -> refine]* -> harvest -> lyrics
