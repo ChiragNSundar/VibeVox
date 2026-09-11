@@ -7,6 +7,7 @@ import { loadLlmConfig, chatTarget } from "./llm-config";
 import { resolveTarget, applyBodyCompat } from "./providers";
 import { countSyllables } from "./lyrics-analysis";
 import { synthesizeMetaphors } from "./metaphor-synthesizer";
+import { callChatLlm } from "./chat-client";
 
 export interface GeneratedHook {
   title: string;
@@ -105,40 +106,27 @@ Rules:
 3. Keep syllables tight and matching across parallel lines.
 4. Output JSON only, no markdown, no fences.`;
 
-      const body = applyBodyCompat(
-        {
-          model: target.model,
-          messages: [
-            { role: "system", content: "You output valid JSON arrays of hooks only." },
-            { role: "user", content: prompt },
-          ],
-          temperature: 0.8,
-          max_tokens: 1536,
-        },
-        target
-      );
-
-      const res = await fetch(`${target.baseUrl.replace(/\/+$/, "")}/chat/completions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...target.headers },
-        body: JSON.stringify(body),
+      const raw = await callChatLlm({
+        config,
+        messages: [
+          { role: "system", content: "You output valid JSON arrays of hooks only." },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.8,
+        max_tokens: 1536,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const raw = data.choices?.[0]?.message?.content || "";
-        const jsonMatch = raw.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const hooks: GeneratedHook[] = parsed.map((h: any) => ({
-              title: h.title || "Hook",
-              vibe: h.vibe || mood,
-              lines: (h.lines || []).map((l: string) => String(l).trim()).filter(Boolean),
-              syllablesPerLine: (h.lines || []).map((l: string) => countSyllables(String(l))),
-            }));
-            return { hooks, source: "ai" };
-          }
+      const jsonMatch = raw.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const hooks: GeneratedHook[] = parsed.map((h: any) => ({
+            title: h.title || "Hook",
+            vibe: h.vibe || mood,
+            lines: (h.lines || []).map((l: string) => String(l).trim()).filter(Boolean),
+            syllablesPerLine: (h.lines || []).map((l: string) => countSyllables(String(l))),
+          }));
+          return { hooks, source: "ai" };
         }
       }
     }

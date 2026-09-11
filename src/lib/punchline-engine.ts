@@ -9,6 +9,7 @@ import { resolveTarget, applyBodyCompat } from "./providers";
 import { countSyllables, endRhymeKey } from "./lyrics-analysis";
 import { synthesizeMetaphors } from "./metaphor-synthesizer";
 import { findRhymes } from "./cmudict-rhymes";
+import { callChatLlm } from "./chat-client";
 
 export interface ScoredPunchline {
   line: string;
@@ -186,43 +187,30 @@ Rules:
 3. Use witty double entendres, homophones, wordplay, or cinematic contrasts.
 4. Output no markdown, no fences, JSON array only.`;
 
-      const body = applyBodyCompat(
-        {
-          model: target.model,
-          messages: [
-            { role: "system", content: "You output valid JSON arrays only." },
-            { role: "user", content: prompt },
-          ],
-          temperature: 0.85,
-          max_tokens: 1024,
-        },
-        target
-      );
-
-      const res = await fetch(`${target.baseUrl.replace(/\/+$/, "")}/chat/completions`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...target.headers },
-        body: JSON.stringify(body),
+      const raw = await callChatLlm({
+        config,
+        messages: [
+          { role: "system", content: "You output valid JSON arrays only." },
+          { role: "user", content: prompt },
+        ],
+        temperature: 0.85,
+        max_tokens: 1024,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        const raw = data.choices?.[0]?.message?.content || "";
-        const jsonMatch = raw.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const punchlines: ScoredPunchline[] = parsed.map((item: any) => {
-              const scored = scorePunchline(item.line || "");
-              return {
-                line: item.line || "",
-                score: Math.max(scored.score, item.score || 75),
-                techniques: item.technique ? [item.technique, ...scored.techniques] : scored.techniques,
-                explanation: item.explanation,
-              };
-            });
-            return { punchlines, source: "ai" };
-          }
+      const jsonMatch = raw.match(/\[[\s\S]*\]/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const punchlines: ScoredPunchline[] = parsed.map((item: any) => {
+            const scored = scorePunchline(item.line || "");
+            return {
+              line: item.line || "",
+              score: Math.max(scored.score, item.score || 75),
+              techniques: item.technique ? [item.technique, ...scored.techniques] : scored.techniques,
+              explanation: item.explanation,
+            };
+          });
+          return { punchlines, source: "ai" };
         }
       }
     }
