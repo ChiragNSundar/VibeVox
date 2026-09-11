@@ -52,7 +52,7 @@ export async function transcribeLocal(audio: Blob, filename: string, config: Loc
     try {
       text = await transcribeInBrowser(audio, { model: "whisper-tiny", language: config.language });
     } catch {
-      text = "yeah riding through the city with the bass down low";
+      text = "";
     }
   }
 

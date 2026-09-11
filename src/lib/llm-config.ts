@@ -220,7 +220,14 @@ export function isOfflineReady(config: LlmConfig): boolean {
 // Connection test
 // ---------------------------------------------------------------------------
 
-export async function pingLlm(config: LlmConfig): Promise<{ ok: boolean; message: string }> {
+let pingCache: { key: string; time: number; result: { ok: boolean; message: string } } | null = null;
+let pingInFlight: Promise<{ ok: boolean; message: string }> | null = null;
+const PING_CACHE_TTL_MS = 60_000;
+
+export async function pingLlm(
+  config: LlmConfig,
+  options?: { force?: boolean },
+): Promise<{ ok: boolean; message: string }> {
   if (config.baseUrl === "offline" || config.baseUrl === "none") {
     return { ok: true, message: "Zero-LLM RAG Engine active (Cadence segmentation + Local Brain)." };
   }
@@ -240,26 +247,39 @@ export async function pingLlm(config: LlmConfig): Promise<{ ok: boolean; message
   }
   if (!target.baseUrl) return { ok: false, message: "No endpoint URL set." };
 
-  try {
-    const res = await fetch(`${target.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: target.headers,
-      body: JSON.stringify({
-        model: target.model,
-        messages: [{ role: "user", content: "Reply with just OK" }],
-        max_tokens: 8,
-      }),
-    });
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      return { ok: false, message: `${res.status} ${res.statusText} — ${txt.slice(0, 200)}` };
+  const cacheKey = `${target.baseUrl}::${target.model}::${target.apiKey ?? ""}`;
+
+  if (!options?.force) {
+    const now = Date.now();
+    if (pingCache && pingCache.key === cacheKey && now - pingCache.time < PING_CACHE_TTL_MS) {
+      return pingCache.result;
     }
-    const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-    const content = json.choices?.[0]?.message?.content ?? "";
-    return { ok: true, message: `Connected to ${provider.label}. Response: "${content.trim().slice(0, 80)}"` };
-  } catch (e) {
-    // If direct browser fetch failed (e.g. CORS block from Unsloth / local server)
-    // and the target is on localhost/127.0.0.1, try the server-side relay!
+    if (pingInFlight) {
+      return pingInFlight;
+    }
+  }
+
+  const doPing = async (): Promise<{ ok: boolean; message: string }> => {
+    const cleanBase = target.baseUrl.replace(/\/+$/, "");
+
+    // 1. First attempt: Zero-GPU / zero-inference GET /models
+    // Standard across Unsloth, Ollama, LM Studio, vLLM, OpenAI, OpenRouter, Groq
+    try {
+      const modelsUrl = cleanBase.endsWith("/v1") ? `${cleanBase}/models` : `${cleanBase}/v1/models`;
+      const res = await fetch(modelsUrl, {
+        method: "GET",
+        headers: target.headers,
+        signal: AbortSignal.timeout(5000),
+      });
+
+      if (res.ok) {
+        return { ok: true, message: `Connected to ${provider.label} (${target.model || "Ready"}).` };
+      }
+    } catch {
+      // Direct browser fetch failed (e.g. CORS block from Unsloth / local server on 127.0.0.1)
+    }
+
+    // 2. If direct browser fetch failed and target is local, use server-side relay
     if (/localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1\]/.test(target.baseUrl)) {
       try {
         const { proxyPingFn } = await import("./llm.functions");
@@ -268,13 +288,35 @@ export async function pingLlm(config: LlmConfig): Promise<{ ok: boolean; message
         });
         if (relayRes.ok) return relayRes;
       } catch {
-        /* fall through to error message below */
+        /* fall through */
       }
     }
-    const msg = e instanceof Error ? e.message : String(e);
+
+    // 3. Fallback: try root models without /v1
+    try {
+      const altUrl = `${cleanBase}/models`;
+      const res = await fetch(altUrl, { method: "GET", headers: target.headers, signal: AbortSignal.timeout(4000) });
+      if (res.ok) {
+        return { ok: true, message: `Connected to ${provider.label}.` };
+      }
+    } catch {
+      /* fall through */
+    }
+
     const hint = isLocalProvider(config.providerId)
       ? ". If you're using Ollama, run: OLLAMA_ORIGINS='*' ollama serve"
       : ". Check the key and that your network allows this host.";
-    return { ok: false, message: `${msg}${hint}` };
-  }
+    return { ok: false, message: `Could not reach ${target.baseUrl}${hint}` };
+  };
+
+  pingInFlight = doPing()
+    .then((result) => {
+      pingCache = { key: cacheKey, time: Date.now(), result };
+      return result;
+    })
+    .finally(() => {
+      pingInFlight = null;
+    });
+
+  return pingInFlight;
 }

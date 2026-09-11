@@ -37,26 +37,16 @@ export const proxyPingFn = createServerFn({ method: "POST" })
         return { ok: true, message: `Connected via local relay. Server is ready.` };
       }
 
-      // 2. Fallback only if /models is not supported by backend
-      const res = await fetch(`${cleanBase}/chat/completions`, {
-        method: "POST",
+      // 2. Fallback check for /v1/models if cleanBase doesn't have /v1
+      const v1Res = await fetch(`${cleanBase}/v1/models`, {
+        method: "GET",
         headers,
-        body: JSON.stringify({
-          model: data.model,
-          messages: [
-            { role: "user", content: "Reply with OK" },
-            { role: "assistant", content: "<think>\n</think>\nOK" },
-          ],
-          max_tokens: 4,
-        }),
       });
-
-      if (!res.ok) {
-        const txt = await res.text().catch(() => "");
-        return { ok: false, message: `${res.status} ${res.statusText} — ${txt.slice(0, 200)}` };
+      if (v1Res.ok) {
+        return { ok: true, message: `Connected via local relay. Server is ready.` };
       }
 
-      return { ok: true, message: `Connected via local relay.` };
+      return { ok: false, message: `Server returned status ${modelsRes.status}` };
     } catch (e) {
       return { ok: false, message: e instanceof Error ? e.message : String(e) };
     }

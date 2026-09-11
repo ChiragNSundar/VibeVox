@@ -75,7 +75,10 @@ export function LocalStatusPill() {
     }
 
     check();
-    const t = setInterval(check, 30_000);
+    const t = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      check();
+    }, 120_000);
     return () => {
       cancelled = true;
       clearInterval(t);

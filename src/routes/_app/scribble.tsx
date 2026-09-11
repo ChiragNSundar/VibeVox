@@ -806,49 +806,20 @@ because i got quite cries"
 
           {/* Primary Studio Action Bar */}
           <div className="space-y-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {/* 1. Ghostwrite Next Bar (Primary AI Flow) */}
-              <Button
-                size="lg"
-                className="text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md shadow-purple-950/30 cursor-pointer h-10"
-                onClick={handleGhostwrite}
-                disabled={ghostwriteLoading || !scribbleText.trim()}
-              >
-                {ghostwriteLoading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin text-purple-200" />
-                ) : (
-                  <Sparkles className="h-4 w-4 mr-2 text-purple-200" />
-                )}
-                {ghostwriteLoading ? "Ghostwriting Next Bar…" : "✨ AI Write Next Bar"}
-              </Button>
-
-              {/* 2. Export Decorative Sheet (PDF / Word) */}
-              <div className="flex gap-1.5">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="flex-1 text-xs font-medium border-border/80 hover:border-purple-500/50 text-foreground gap-1.5 h-10 cursor-pointer"
-                  onClick={handleExportDecorativePdf}
-                  disabled={!scribbleText.trim()}
-                  title="Export decorative studio manuscript PDF with color-coded rhyme scheme"
-                >
-                  <Printer className="h-3.5 w-3.5 text-purple-400" />
-                  <span>Export PDF</span>
-                </Button>
-
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="flex-1 text-xs font-medium border-border/80 hover:border-blue-500/50 text-foreground gap-1.5 h-10 cursor-pointer"
-                  onClick={handleExportColoredWord}
-                  disabled={!scribbleText.trim()}
-                  title="Download formatted Word document (.doc) preserving color scheme"
-                >
-                  <FileText className="h-3.5 w-3.5 text-blue-400" />
-                  <span>Word (.doc)</span>
-                </Button>
-              </div>
-            </div>
+            {/* 1. Ghostwrite Next Bar (Primary AI Flow) */}
+            <Button
+              size="lg"
+              className="w-full text-xs font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-md shadow-purple-950/30 cursor-pointer h-10"
+              onClick={handleGhostwrite}
+              disabled={ghostwriteLoading || !scribbleText.trim()}
+            >
+              {ghostwriteLoading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin text-purple-200" />
+              ) : (
+                <Sparkles className="h-4 w-4 mr-2 text-purple-200" />
+              )}
+              {ghostwriteLoading ? "Ghostwriting Next Bar…" : "✨ AI Write Next Bar"}
+            </Button>
 
             {/* Secondary Structuring Action (Zero canned lyrics) */}
             <div className="pt-1 flex items-center justify-between text-xs text-muted-foreground px-1">

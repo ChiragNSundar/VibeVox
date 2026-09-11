@@ -233,7 +233,7 @@ function NewTrack() {
           backend: config.whisperBackend,
           model: config.whisperModel,
           language: config.whisperLanguage || undefined,
-        }).catch(() => "yeah riding through the city with the bass down low");
+        }).catch(() => "");
         const result = await runLocalPipeline(config, transcript, brief);
         await saveLocalTrack(file, result, transcript);
         toast.success(`Local track saved · ${result.quality.drakeScore.toFixed(1)}/10`);
