@@ -10,7 +10,7 @@ is a route. Do **not** create `src/pages/` or `app/layout.tsx` — those are Nex
 | `index.tsx` | `/` | Hero landing page & product overview |
 | `_app.tsx` | `/_app` | Main application shell with sticky header, live connection pill, and primary navigation |
 | `_app/library.tsx` | `/library` | Track Library: sessions, track search, multi-track batch export (JSON, PDF, Markdown, Text), bulk deletion, and multi-status filter |
-| `_app/scribble.tsx` | `/scribble` | **VibeLyrics Studio**: Scribble synthesis, dual-pane cursor tracking, inline rhyme dock, flow metronome with hover-scroll BPM, and track studio export |
+| `_app/scribble.tsx` | `/scribble` | **VibeLyrics Studio**: Scribble synthesis, dual-pane cursor tracking, inline rhyme dock, AI Ghostwrite Next Bar dock, decorative dark PDF & Word (.doc) exports, flow metronome with hover-scroll BPM, and track studio export |
 | `_app/journal.tsx` | `/journal` | **Writer's Headspace**: Private local-first journal with mood tagging, search, and emotional state RAG ingestion |
 | `_app/stats.tsx` | `/stats` | **Lyrical Evolution & Stats**: Recharts analytics for cadence pocket distribution, session volume, vocabulary diversity %, and streaks |
 | `_app/brain.tsx` | `/brain` | Local Style Memory, Unified Vector Indexer, and Style Example explorer |
