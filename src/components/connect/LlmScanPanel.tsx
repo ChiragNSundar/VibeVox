@@ -108,20 +108,59 @@ export function LlmScanPanel({
                   id="baseUrl"
                   value={config.baseUrl}
                   onChange={(e) => onUpdateConfig({ baseUrl: e.target.value })}
-                  placeholder={provider.baseUrl || "http://localhost:1234/v1"}
+                  placeholder={provider.baseUrl || "http://localhost:8000/v1"}
                 />
               </div>
             )}
-            <div>
+            {config.providerId === "custom" && (
+              <div>
+                <Label htmlFor="apiKey">API key (optional)</Label>
+                <Input
+                  id="apiKey"
+                  type="password"
+                  autoComplete="off"
+                  value={keyFor(config)}
+                  onChange={(e) => onKeyChange(e.target.value)}
+                  placeholder="Bearer token (if required)"
+                />
+              </div>
+            )}
+            <div className={config.providerId === "custom" ? "sm:col-span-2" : ""}>
               <Label htmlFor="model">Model ID</Label>
               <Input
                 id="model"
                 value={config.model}
                 onChange={(e) => onUpdateConfig({ model: e.target.value })}
-                placeholder={provider.defaultModel || "qwen2.5:14b"}
+                placeholder={provider.defaultModel || "my-unsloth-model"}
               />
             </div>
           </div>
+
+          {provider.hint && (
+            <p className="text-xs text-muted-foreground">{provider.hint}</p>
+          )}
+
+          {(config.providerId === "custom" || config.providerId === "local") && (
+            <div className="rounded-md border border-primary/20 bg-primary/5 p-3 text-xs space-y-1.5 text-muted-foreground">
+              <span className="font-semibold text-foreground flex items-center gap-1.5">
+                <Cpu className="h-3.5 w-3.5 text-primary" /> Unsloth &amp; vLLM quick-connect:
+              </span>
+              <p>
+                1. Serve fine-tuned weights via vLLM with CORS enabled:
+                <br />
+                <code className="bg-background px-1.5 py-0.5 rounded text-[11px] font-mono text-foreground select-all">
+                  vllm serve ./my-unsloth-model --port 8000 --allowed-origins &apos;*&apos;
+                </code>
+              </p>
+              <p>
+                2. Or export to GGUF and serve with Ollama:
+                <br />
+                <code className="bg-background px-1.5 py-0.5 rounded text-[11px] font-mono text-foreground select-all">
+                  OLLAMA_ORIGINS=&apos;*&apos; ollama serve
+                </code>
+              </p>
+            </div>
+          )}
 
           <div className="flex items-center gap-2 flex-wrap pt-1">
             <Button size="sm" onClick={onTestLlm} disabled={testing === "llm" || needsKey}>

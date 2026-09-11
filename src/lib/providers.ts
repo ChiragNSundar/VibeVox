@@ -71,7 +71,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
     defaultModel: "local-model",
     defaultEmbedModel: "nomic-embed-text",
     keyPlaceholder: "ollama / lm-studio",
-    hint: "Ollama, LM Studio, llama.cpp or vLLM on your machine. Fully offline.",
+    hint: "Ollama, LM Studio, llama.cpp, or vLLM / Unsloth on your machine. Fully offline.",
   },
   openrouter: {
     id: "openrouter",
@@ -212,7 +212,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
     transcription: false,
     defaultModel: "",
     keyPlaceholder: "optional",
-    hint: "Any OpenAI-compatible server. Enter the full /v1 root.",
+    hint: "Any OpenAI-compatible server (vLLM, Unsloth, Ollama, Colab ngrok, RunPod). Enter the full /v1 root.",
   },
 };
 

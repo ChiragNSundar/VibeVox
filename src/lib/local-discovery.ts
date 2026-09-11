@@ -210,6 +210,8 @@ export function corsHint(backend: LlmBackend | "whisper"): string {
       return "Restart Ollama with: OLLAMA_ORIGINS='*' ollama serve  (or set the env var permanently in your OS)";
     case "lm-studio":
       return "In LM Studio: Local Server tab → enable 'CORS' → restart server.";
+    case "vllm":
+      return "Start vLLM with: vllm serve <model> --port 8000 --allowed-origins '*'";
     case "llama.cpp":
       return "Start with: ./server --host 0.0.0.0 --port 8080 --api-key '' (CORS is on by default).";
     case "whisper":
